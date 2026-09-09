@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>小学５年生４月～７月 漢字テスト</title>
+<!-- confetti.js library for celebration effects -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+:root{--bg:#0f1219;--panel:#181d28;--panel-light:#222836;--border:#323b4e;--text:#f5f7fa;--sub:#9da6b5;--accent:#657dff;--success:#4cd964;--danger:#ff3b30}
+html,body{width:100%;margin:0;padding:0;background:var(--bg);scroll-behavior:smooth}
+body{min-height:100vh;background:radial-gradient(circle at 50% -10%,rgba(101,125,255,.15),transparent 50%),var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP","Yu Gothic",sans-serif;display:flex;justify-content:center;overflow-x:hidden}
+button{font:inherit;outline:none}
+.app{width:min(720px,100%);padding:16px}
+header{text-align:center;margin-bottom:16px}
+.title{margin:0;font-size:clamp(22px,5vw,32px);font-weight:900;letter-spacing:.04em;background:linear-gradient(135deg,#fff,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{margin-top:4px;color:var(--sub);font-size:13px}
+.section-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:16px}
+.section-card{background:var(--panel-light);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;cursor:pointer;transition:.2s}
+.section-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.section-card:active{transform:scale(.98)}
+.section-card-title{font-size:16px;font-weight:800;margin-bottom:4px}
+.section-card-sub{font-size:12px;color:var(--sub)}
+.card{background:rgba(24,29,40,.95);border:1px solid var(--border);border-radius:20px;padding:clamp(16px,3.5vw,24px);box-shadow:0 20px 50px rgba(0,0,0,.4)}
+.hidden{display:none!important}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px}
+.progress{color:var(--sub);font-size:14px}.progress strong{color:var(--accent);font-size:20px}
+.badge-group{display:flex;gap:8px}.badge{color:var(--sub);font-size:12px;background:var(--panel-light);border:1px solid var(--border);padding:4px 10px;border-radius:20px}
+.question-label{color:var(--accent);font-size:11px;font-weight:800;letter-spacing:.15em;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.audio-btn,.tool-btn{background:var(--panel-light);border:1px solid var(--border);color:var(--text);border-radius:10px;cursor:pointer}
+.audio-btn{padding:4px 10px;font-size:12px}.tool-btn{padding:8px 14px;font-size:13px;font-weight:600}
+.question{text-align:center;font-size:clamp(20px,4.5vw,28px);line-height:1.8;font-weight:700;min-height:80px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;padding:12px 16px;background:rgba(15,18,25,.5);border-radius:12px;border:1px solid rgba(255,255,255,.05)}
+.reading{color:#a5b4fc;font-weight:700;white-space:nowrap}
+.question-note{text-align:center;color:var(--sub);font-size:12px;margin-top:8px}
+.section-title{margin:20px 0 10px;color:var(--sub);font-size:12px;font-weight:700;letter-spacing:.05em;text-align:center}
+
+/* 手書きエリアとスクロール用右サイドバーのコンテナ */
+.writing-container {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  justify-content: center;
+  width: 100%;
+}
+
+/* スマホでも大きく書けるように手書き枠を「縦並び (column)」に変更 */
+.writing-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+  width: 100%;
+}
+
+/* スマホ用右サイドのスクロール可能ゾーン */
+.scroll-sidebar {
+  width: 44px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px;
+  color: var(--sub);
+  font-size: 11px;
+  text-align: center;
+  writing-mode: vertical-rl;
+  letter-spacing: 0.15em;
+  pointer-events: auto; /* タッチスクロールを受け付ける */
+  touch-action: pan-y;  /* 縦スクロールを明示的に許可 */
+  flex-shrink: 0;
+}
+.scroll-sidebar span {
+  margin: 4px 0;
+  opacity: 0.7;
+}
+
+.writing-box {
+  position: relative;
+  width: min(80vw, 270px);
+  aspect-ratio: 1;
+  background: #fff;
+  border: 3px solid #3b4558;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, .3);
+  touch-action: none;
+}
+.box-number {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #3b4558;
+  pointer-events: none;
+  z-index: 3;
+  background: rgba(230, 235, 245, .95);
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(59, 69, 88, 0.2);
+}
+.writing-box:before, .writing-box:after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+}
+.writing-box:before {
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 1px dashed rgba(100, 110, 130, .35);
+}
+.writing-box:after {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  border-left: 1px dashed rgba(100, 110, 130, .35);
+}
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 2;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.canvas-tools{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.buttons{display:grid;gap:10px;margin-top:16px}
+.btn{width:100%;min-height:50px;border:0;border-radius:12px;padding:10px 16px;color:#fff;font-size:16px;font-weight:800;cursor:pointer;transition:.1s;display:flex;justify-content:center;align-items:center;gap:8px}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-check{background:linear-gradient(135deg,#5b6eff,#8b5cf6);box-shadow:0 4px 15px rgba(91,110,255,.3)}
+.btn-next{background:linear-gradient(135deg,#2563eb,#3b82f6)}
+.btn-finish{background:transparent;border:1px solid #3b4351;color:#aeb7c5;min-height:42px;font-size:14px}
+.answer-section{margin-top:20px}.answer-box{min-height:70px;background:#10141b;border:1px solid var(--border);border-radius:12px;display:flex;justify-content:center;align-items:center;padding:12px}
+.answer-placeholder{color:#657080;font-size:13px;text-align:center}.answer{display:none;color:#fff;font-family:"Noto Serif JP","Yu Mincho",serif;font-size:clamp(32px,7vw,44px);font-weight:700;letter-spacing:.2em}
+.answer.show{display:block}
+.self-grading{display:none;margin-top:12px;grid-template-columns:1fr 1fr;gap:10px}.self-grading.show{display:grid}
+.btn-correct{background:rgba(94,214,160,.15);border:2px solid var(--success);color:var(--success)}
+.btn-incorrect{background:rgba(255,59,48,.15);border:2px solid var(--danger);color:var(--danger)}
+.btn-correct.selected{background:var(--success);color:#000}.btn-incorrect.selected{background:var(--danger);color:#fff}
+.result{display:none;text-align:center;padding:30px 10px}.result.show{display:block}
+.result-icon{font-size:54px}.result-score{font-size:42px;font-weight:900;color:var(--accent);margin:10px 0}.result-title{font-size:26px;font-weight:900}.result-message{margin-top:10px;color:var(--sub);line-height:1.8;font-size:14px}
+.footer{text-align:center;color:#525b69;font-size:11px;margin-top:16px}
+@media(max-width:480px){
+  .app{padding:10px}
+  .card{padding:14px;border-radius:16px}
+  .writing-box{width:min(82vw, 250px)}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header><h1 class="title">小学５年生４月～７月</h1><div class="subtitle" id="headerSubtitle">学習するコースを選んでください</div></header>
+
+<div id="sectionSelectArea"><div class="section-grid" id="sectionGrid"></div></div>
+
+<main class="card hidden" id="mainCard">
+<div class="topbar">
+<div class="progress"><strong id="currentNumber">1</strong> / <span id="totalNumber">10</span> 問</div>
+<div class="badge-group"><div class="badge">正解: <span id="correctCount">0</span></div><div class="badge" id="questionType">1文字</div></div>
+</div>
+
+<section id="testArea">
+<div class="question-label"><span id="sectionLabelText">QUESTION</span><button class="audio-btn" id="audioBtn">🔊 読み上げ</button></div>
+<div class="question" id="question"></div>
+<div class="question-note">（読み仮名）の漢字を下の枠内に書いてください</div>
+<div class="section-title">あなたの答え（手書き）</div>
+
+<!-- 手書き枠（縦並び）＋スクロールエリアのコンテナ -->
+<div class="writing-container">
+  <div class="writing-area" id="writingArea"></div>
+  <div class="scroll-sidebar" title="指で上下になぞってスクロール">
+    <span>👆</span>
+    <span>スクロール余白</span>
+    <span>👇</span>
+  </div>
+</div>
+
+<div class="canvas-tools">
+<button class="tool-btn" id="undoBtn">↩ 1画戻す</button>
+<button class="tool-btn" id="clearBtn">↺ 全て消す</button>
+</div>
+<div class="buttons"><button class="btn btn-check" id="checkBtn">✓ 答え合わせ</button></div>
+
+<div class="answer-section">
+<div class="section-title">正解</div>
+<div class="answer-box"><span class="answer-placeholder" id="answerPlaceholder">「答え合わせ」を押すと正解が表示されます</span><div class="answer" id="answer"></div></div>
+<div class="self-grading" id="selfGrading">
+<button class="btn btn-correct" id="correctBtn">⭕ 合ってた！</button>
+<button class="btn btn-incorrect" id="incorrectBtn">❌ 違ってた</button>
+</div>
+</div>
+
+<div class="buttons" style="margin-top:20px">
+<button class="btn btn-next" id="nextBtn" disabled>▶ 次の問題へ</button>
+<button class="btn btn-finish" id="finishBtn">コース選択へ戻る</button>
+</div>
+</section>
+
+<section class="result" id="resultArea">
+<div class="result-icon">🎉</div><div class="result-title">おつかれさまでした！</div>
+<div class="result-score" id="finalScore">0 / 0</div>
+<div class="result-message" id="resultMessage"></div>
+<button class="btn btn-next" id="restartBtn" style="margin-top:24px">↻ もう一度挑戦する</button>
+<button class="btn btn-finish" id="backToMenuBtn" style="margin-top:8px">コース選択に戻る</button>
+</section>
+</main>
+<div class="footer">漢字テスト・手書き練習アプリ</div>
+</div>
+
+<script>
+const allQuestions=[
+{type:2,words:[{kanji:"許",reading:"きょ"},{kanji:"可",reading:"か"}],sentence:"{0}{1}を 得る。"},
+{type:2,words:[{kanji:"貿",reading:"ぼう"},{kanji:"易",reading:"えき"}],sentence:"{0}{1}が さかんだ。"},
+{type:2,words:[{kanji:"技",reading:"ぎ"},{kanji:"術",reading:"じゅつ"}],sentence:"{0}{1}を 身につける。"},
+{type:2,words:[{kanji:"準",reading:"じゅん"},{kanji:"備",reading:"び"}],sentence:"{0}{1}を 整える。"},
+{type:2,words:[{kanji:"賞",reading:"しょう"},{kanji:"状",reading:"じょう"}],sentence:"{0}{1}を もらう。"},
+{type:2,words:[{kanji:"銅",reading:"どう"},{kanji:"像",reading:"ぞう"}],sentence:"{0}{1}を たてる。"},
+{type:2,words:[{kanji:"情",reading:"じょう"},{kanji:"報",reading:"ほう"}],sentence:"{0}{1}を 集める。"},
+{type:2,words:[{kanji:"確",reading:"かく"},{kanji:"認",reading:"にん"}],sentence:"内容を {0}{1}する。"},
+{type:2,words:[{kanji:"知",reading:"ち"},{kanji:"識",reading:"しき"}],sentence:"新しい {0}{1}を 身につける。"},
+{type:2,words:[{kanji:"原",reading:"げん"},{kanji:"因",reading:"いん"}],sentence:"事故の {0}{1}を 調べる。"},
+{type:2,words:[{kanji:"製",reading:"せい"},{kanji:"造",reading:"ぞう"}],sentence:"工場で 品物を {0}{1}する。"},
+{type:2,words:[{kanji:"現",reading:"げん"},{kanji:"在",reading:"ざい"}],sentence:"{0}{1}の 状況を 調べる。"},
+/* 要望2の訂正: 「せっ」から「せつ」へ修正 */
+{type:2,words:[{kanji:"接",reading:"せつ"},{kanji:"続",reading:"ぞく"}],sentence:"話を {0}{1}する。"},
+{type:2,words:[{kanji:"反",reading:"はん"},{kanji:"応",reading:"のう"}],sentence:"相手の {0}{1}を見る。"},
+/* 要望3の訂正: 「台風のせくりょくが強い」に例文変更 */
+{type:2,words:[{kanji:"勢",reading:"せい"},{kanji:"力",reading:"りょく"}],sentence:"台風の {0}{1}が 強い。"},
+{type:2,words:[{kanji:"河",reading:"か"},{kanji:"川",reading:"せん"}],sentence:"{0}{1}の 水を 調べる。"},
+{type:2,words:[{kanji:"歴",reading:"れき"},{kanji:"史",reading:"し"}],sentence:"日本の {0}{1}を 学ぶ。"},
+{type:2,words:[{kanji:"幹",reading:"かん"},{kanji:"部",reading:"ぶ"}],sentence:"会社の {0}{1}が 集まる。"},
+{type:2,words:[{kanji:"招",reading:"しょう"},{kanji:"待",reading:"たい"}],sentence:"友達を {0}{1}する。"},
+{type:2,words:[{kanji:"常",reading:"じょう"},{kanji:"識",reading:"しき"}],sentence:"それは 社会の {0}{1}だ。"},
+{type:2,words:[{kanji:"序",reading:"じょ"},{kanji:"章",reading:"しょう"}],sentence:"本の {0}{1}を 読む。"},
+{type:2,words:[{kanji:"武",reading:"ぶ"},{kanji:"士",reading:"し"}],sentence:"昔の {0}{1}について 学ぶ。"},
+{type:2,words:[{kanji:"資",reading:"し"},{kanji:"料",reading:"りょう"}],sentence:"必要な {0}{1}を 集める。"},
+{type:2,words:[{kanji:"調",reading:"ちょう"},{kanji:"査",reading:"さ"}],sentence:"原因を {0}{1}する。"},
+{type:2,words:[{kanji:"性",reading:"せい"},{kanji:"質",reading:"しつ"}],sentence:"物の {0}{1}を 調べる。"},
+{type:2,words:[{kanji:"非",reading:"ひ"},{kanji:"常",reading:"じょう"}],sentence:"{0}{1}に 大きな 音がした。"},
+{type:2,words:[{kanji:"総",reading:"そう"},{kanji:"合",reading:"ごう"}],sentence:"{0}{1}的に 判断する。"},
+{type:2,words:[{kanji:"測",reading:"そく"},{kanji:"定",reading:"てい"}],sentence:"長さを {0}{1}する。"},
+{type:2,words:[{kanji:"往",reading:"おう"},{kanji:"復",reading:"ふく"}],sentence:"駅まで {0}{1}する。"},
+{type:2,words:[{kanji:"演",reading:"えん"},{kanji:"奏",reading:"そう"}],sentence:"音楽を {0}{1}する。"},
+{type:2,words:[{kanji:"刊",reading:"かん"},{kanji:"行",reading:"こう"}],sentence:"雑誌を {0}{1}する。"},
+{type:2,words:[{kanji:"肥",reading:"ひ"},{kanji:"料",reading:"りょう"}],sentence:"畑に {0}{1}を まく。"},
+{type:2,words:[{kanji:"謝",reading:"しゃ"},{kanji:"罪",reading:"ざい"}],sentence:"自分の {0}{1}を 反省する。"},
+{type:2,words:[{kanji:"防",reading:"ぼう"},{kanji:"災",reading:"さい"}],sentence:"{0}{1}の 準備をする。"},
+{type:2,words:[{kanji:"鉱",reading:"こう"},{kanji:"山",reading:"ざん"}],sentence:"昔の {0}{1}を 見学する。"},
+{type:2,words:[{kanji:"成",reading:"せい"},{kanji:"績",reading:"せき"}],sentence:"テストの {0}{1}が よかった。"},
+{type:2,words:[{kanji:"航",reading:"こう"},{kanji:"海",reading:"かい"}],sentence:"船で {0}{1}する。"},
+{type:2,words:[{kanji:"編",reading:"へん"},{kanji:"集",reading:"しゅう"}],sentence:"作文を {0}{1}する。"},
+{type:2,words:[{kanji:"危",reading:"き"},{kanji:"険",reading:"けん"}],sentence:"{0}{1}な 場所には 近づかない。"},
+{type:2,words:[{kanji:"判",reading:"はん"},{kanji:"断",reading:"だん"}],sentence:"自分で {0}{1}する。"},
+{type:2,words:[{kanji:"圧",reading:"あつ"},{kanji:"力",reading:"りょく"}],sentence:"強い {0}{1}が かかる。"},
+{type:2,words:[{kanji:"境",reading:"きょう"},{kanji:"界",reading:"かい"}],sentence:"二つの 国の {0}{1}を 越える。"},
+{type:2,words:[{kanji:"逆",reading:"ぎゃく"},{kanji:"転",reading:"てん"}],sentence:"形勢が {0}{1}する。"},
+{type:2,words:[{kanji:"夢",reading:"む"},{kanji:"中",reading:"ちゅう"}],sentence:"仕事に {0}{1}になる。"},
+{type:2,words:[{kanji:"質",reading:"しつ"},{kanji:"問",reading:"もん"}],sentence:"先生に {0}{1}する。"},
+{type:2,words:[{kanji:"報",reading:"ほう"},{kanji:"告",reading:"こく"}],sentence:"結果を {0}{1}する。"},
+{type:2,words:[{kanji:"所",reading:"しょ"},{kanji:"属",reading:"ぞく"}],sentence:"自分の {0}{1}する 部署。"},
+{type:2,words:[{kanji:"造",reading:"ぞう"},{kanji:"形",reading:"けい"}],sentence:"粘土で {0}{1}を 作る。"},
+{type:2,words:[{kanji:"留",reading:"りゅう"},{kanji:"学",reading:"がく"}],sentence:"海外へ {0}{1}する。"},
+{type:2,words:[{kanji:"幹",reading:"かん"},{kanji:"線",reading:"せん"}],sentence:"大きな 道路の {0}{1}を 走る。"},
+{type:2,words:[{kanji:"招",reading:"しょう"},{kanji:"集",reading:"しゅう"}],sentence:"参加者を {0}{1}する。"},
+{type:2,words:[{kanji:"句",reading:"く"},{kanji:"読",reading:"とう"}],sentence:"文章の {0}{1}点に 気をつける。"},
+{type:2,words:[{kanji:"武",reading:"ぶ"},{kanji:"道",reading:"どう"}],sentence:"{0}{1}を 習う。"},
+{type:2,words:[{kanji:"調",reading:"ちょう"},{kanji:"査",reading:"さ"}],sentence:"現地で {0}{1}を 行う。"},
+{type:2,words:[{kanji:"総",reading:"そう"},{kanji:"合",reading:"ごう"}],sentence:"{0}{1}点を 計算する。"},
+{type:2,words:[{kanji:"肥",reading:"ひ"},{kanji:"満",reading:"まん"}],sentence:"食べすぎによる {0}{1}に 気をつける。"},
+{type:2,words:[{kanji:"製",reading:"せい"},{kanji:"品",reading:"ひん"}],sentence:"新しい {0}{1}を 手に取る。"},
+{type:2,words:[{kanji:"暴",reading:"ぼう"},{kanji:"風",reading:"ふう"}],sentence:"{0}{1}に 備える。"},
+{type:2,words:[{kanji:"防",reading:"ぼう"},{kanji:"止",reading:"し"}],sentence:"事故を {0}{1}する。"},
+{type:2,words:[{kanji:"志",reading:"し"},{kanji:"望",reading:"ぼう"}],sentence:"将来の {0}{1}を 書く。"},
+{type:2,words:[{kanji:"航",reading:"こう"},{kanji:"空",reading:"くう"}],sentence:"{0}{1}機が 飛ぶ。"},
+{type:2,words:[{kanji:"険",reading:"けん"},{kanji:"悪",reading:"あく"}],sentence:"険しい 道の {0}{1}を 予想する。"},
+{type:2,words:[{kanji:"態",reading:"たい"},{kanji:"度",reading:"ど"}],sentence:"相手への {0}{1}を 改める。"},
+{type:1,words:[{kanji:"経",reading:"へ"}],sentence:"時間を {0}る。"},
+{type:1,words:[{kanji:"情",reading:"なさ"}],sentence:"{0}けが 深い。"},
+{type:1,words:[{kanji:"象",reading:"ぞう"}],sentence:"大きな {0}を 見る。"},
+{type:1,words:[{kanji:"絶",reading:"た"}],sentence:"{0}えまなく ながれる。"},
+{type:1,words:[{kanji:"厚",reading:"あつ"}],sentence:"本が {0}い。"},
+{type:1,words:[{kanji:"似",reading:"に"}],sentence:"よく {0}ている。"},
+{type:1,words:[{kanji:"限",reading:"かぎ"}],sentence:"{0}りがある。"},
+{type:1,words:[{kanji:"喜",reading:"よろこ"}],sentence:"とても {0}ぶ。"},
+{type:1,words:[{kanji:"解",reading:"と"}],sentence:"問題を {0}く。"},
+{type:1,words:[{kanji:"容",reading:"よう"}],sentence:"内{0}を 確認する。"},
+{type:1,words:[{kanji:"適",reading:"てき"}],sentence:"{0}した 服を 選ぶ。"},
+{type:1,words:[{kanji:"複",reading:"ふく"}],sentence:"{0}すうの 人数。"},
+{type:1,words:[{kanji:"構",reading:"かま"}],sentence:"{0}わずに 進む。"},
+{type:1,words:[{kanji:"桜",reading:"さくら"}],sentence:"{0}の 花が 咲く。"},
+{type:1,words:[{kanji:"破",reading:"やぶ"}],sentence:"紙を {0}る。"},
+{type:1,words:[{kanji:"修",reading:"おさ"}],sentence:"学問を {0}める。"},
+{type:1,words:[{kanji:"眼",reading:"がん"}],sentence:"{0}科へ 行く。"},
+{type:1,words:[{kanji:"停",reading:"てい"}],sentence:"バスが {0}しする。"},
+{type:1,words:[{kanji:"祖",reading:"そ"}],sentence:"{0}父と 遊ぶ。"},
+{type:1,words:[{kanji:"際",reading:"さい"}],sentence:"国{0}的な イベント。"},
+{type:1,words:[{kanji:"潔",reading:"けつ"}],sentence:"清{0}に 保つ。"},
+{type:1,words:[{kanji:"告",reading:"つ"}],sentence:"先生に 知らせを {0}げる。"},
+{type:1,words:[{kanji:"属",reading:"ぞく"}],sentence:"どの グループに {0}するか 考える。"},
+{type:1,words:[{kanji:"識",reading:"しき"}],sentence:"正しい {0}を 身につける。"},
+{type:1,words:[{kanji:"因",reading:"いん"}],sentence:"事故の {0}を 調べる。"},
+{type:1,words:[{kanji:"留",reading:"と"}],sentence:"心に {0}めておく。"},
+{type:1,words:[{kanji:"現",reading:"あらわ"}],sentence:"気持ちを {0}す。"},
+{type:1,words:[{kanji:"接",reading:"せつ"}],sentence:"人に {0}する。"},
+{type:1,words:[{kanji:"応",reading:"こた"}],sentence:"質問に {0}える。"},
+{type:1,words:[{kanji:"勢",reading:"いきお"}],sentence:"すごい {0}いで 走る。"},
+{type:1,words:[{kanji:"河",reading:"かわ"}],sentence:"大きな {0}を 渡る。"},
+{type:1,words:[{kanji:"史",reading:"し"}],sentence:"日本の {0}を 学ぶ。"},
+{type:1,words:[{kanji:"招",reading:"まね"}],sentence:"友達を {0}く。"},
+{type:1,words:[{kanji:"句",reading:"く"}],sentence:"好きな {0}を 書く。"},
+{type:1,words:[{kanji:"序",reading:"じょ"}],sentence:"文章の {0}を 考える。"},
+{type:1,words:[{kanji:"士",reading:"し"}],sentence:"武{0}が 活躍する。"},
+{type:1,words:[{kanji:"資",reading:"し"}],sentence:"大切な {0}料を 集める。"},
+{type:1,words:[{kanji:"査",reading:"さ"}],sentence:"原因を 調{0}する。"},
+{type:1,words:[{kanji:"非",reading:"ひ"}],sentence:"{0}常に 大切な 問題だ。"},
+{type:1,words:[{kanji:"舎",reading:"しゃ"}],sentence:"校{0}で 生活する。"},
+{type:1,words:[{kanji:"刊",reading:"かん"}],sentence:"週{0}の 雑誌を 読む。"},
+{type:1,words:[{kanji:"謝",reading:"あやま"}],sentence:"失敗を {0}る。"},
+{type:1,words:[{kanji:"罪",reading:"つみ"}],sentence:"自分の {0}を 認める。"},
+{type:1,words:[{kanji:"暴",reading:"あば"}],sentence:"強風が {0}れる。"},
+{type:1,words:[{kanji:"鉱",reading:"こう"}],sentence:"地下から {0}物を 掘り出す。"},
+{type:1,words:[{kanji:"績",reading:"せき"}],sentence:"努力の {0}が 表れる。"},
+{type:1,words:[{kanji:"志",reading:"こころざし"}],sentence:"高い {0}を 持つ。"},
+{type:1,words:[{kanji:"夢",reading:"ゆめ"}],sentence:"大きな {0}を かなえる。"},
+{type:1,words:[{kanji:"編",reading:"へん"}],sentence:"文章を {0}む。"},
+{type:1,words:[{kanji:"断",reading:"ことわ"}],sentence:"誘いを {0}る。"},
+{type:1,words:[{kanji:"境",reading:"さかい"}],sentence:"県の {0}を 越える。"},
+{type:1,words:[{kanji:"態",reading:"たい"}],sentence:"今の 状{0}を 確認する。"},
+{type:1,words:[{kanji:"逆",reading:"さか"}],sentence:"道を {0}さに 進む。"},
+{type:1,words:[{kanji:"判",reading:"はん"}],sentence:"正しいと {0}断する。"},
+{type:1,words:[{kanji:"圧",reading:"あつ"}],sentence:"強い {0}が かかる。"},
+{type:1,words:[{kanji:"質",reading:"しつ"}],sentence:"大切な {0}を 保つ。"},
+{type:1,words:[{kanji:"報",reading:"ほう"}],sentence:"正しい 情{0}を 伝える。"},
+{type:1,words:[{kanji:"確",reading:"たし"}],sentence:"もう一度 {0}かめる。"},
+{type:1,words:[{kanji:"造",reading:"つく"}],sentence:"作品を {0}る。"},
+{type:1,words:[{kanji:"歴",reading:"れき"}],sentence:"これまでの {0}を 振り返る。"},
+{type:1,words:[{kanji:"幹",reading:"みき"}],sentence:"木の {0}が 太い。"},
+{type:1,words:[{kanji:"常",reading:"つね"}],sentence:"{0}に 準備しておく。"},
+{type:1,words:[{kanji:"武",reading:"ぶ"}],sentence:"{0}力を 使わない。"},
+{type:1,words:[{kanji:"性",reading:"せい"}],sentence:"物の 特{0}を 調べる。"},
+{type:1,words:[{kanji:"総",reading:"そう"}],sentence:"{0}人数を 数える。"},
+{type:1,words:[{kanji:"測",reading:"はか"}],sentence:"長さを {0}る。"},
+{type:1,words:[{kanji:"舎",reading:"しゃ"}],sentence:"校{0}の 前に 集まる。"},
+{type:1,words:[{kanji:"往",reading:"おう"}],sentence:"{0}復切符を 買う。"},
+{type:1,words:[{kanji:"演",reading:"えん"}],sentence:"劇を {0}じる。"},
+{type:1,words:[{kanji:"肥",reading:"こ"}],sentence:"土地を {0}やす。"},
+{type:1,words:[{kanji:"製",reading:"せい"}],sentence:"日本{0}の 商品。"},
+{type:1,words:[{kanji:"防",reading:"ふせ"}],sentence:"事故を {0}ぐ。"},
+{type:1,words:[{kanji:"鉱",reading:"こう"}],sentence:"{0}石を 調べる。"},
+{type:1,words:[{kanji:"航",reading:"こう"}],sentence:"{0}空機が 飛ぶ。"}
+];
+
+let questions=[],currentSectionIndex=0,currentIndex=0,answered=false,correctCount=0,userGraded=false;
+let canvases=[],ctxs=[],strokes=[],currentStroke=null,currentCanvasIndex=-1,drawing=false;
+
+const $=id=>document.getElementById(id);
+const sectionSelectArea=$("sectionSelectArea"),sectionGrid=$("sectionGrid"),mainCard=$("mainCard"),headerSubtitle=$("headerSubtitle"),sectionLabelText=$("sectionLabelText");
+const questionEl=$("question"),currentNumberEl=$("currentNumber"),totalNumberEl=$("totalNumber"),questionTypeEl=$("questionType"),correctCountEl=$("correctCount"),writingArea=$("writingArea");
+const clearBtn=$("clearBtn"),undoBtn=$("undoBtn"),checkBtn=$("checkBtn"),nextBtn=$("nextBtn"),finishBtn=$("finishBtn"),audioBtn=$("audioBtn");
+const answer=$("answer"),answerPlaceholder=$("answerPlaceholder"),selfGrading=$("selfGrading"),correctBtn=$("correctBtn"),incorrectBtn=$("incorrectBtn");
+const testArea=$("testArea"),resultArea=$("resultArea"),restartBtn=$("restartBtn"),backToMenuBtn=$("backToMenuBtn"),finalScore=$("finalScore");
+
+let audioCtx = null;
+function initAudio() {
+  if(!audioCtx) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if(AudioContextClass) audioCtx = new AudioContextClass();
+  }
+  if(audioCtx && audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
+}
+
+// 画面最上部にスクロール（iFrame対応）
+function scrollToTop() {
+  try {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch(e){}
+}
+
+// 音声再生（正解時の音声を華やかなファンファーレ＆歓声風へアップグレード）
+function playSound(type){
+ try {
+    initAudio();
+    if(!audioCtx) return;
+    const now = audioCtx.currentTime;
+
+    if(type==="tap"){
+      const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
+      osc.connect(gain);gain.connect(audioCtx.destination);
+      osc.frequency.setValueAtTime(600,now);
+      gain.gain.setValueAtTime(.05,now);
+      gain.gain.exponentialRampToValueAtTime(.01,now+.05);
+      osc.start(now);osc.stop(now+.05);
+    }else if(type==="correct"){
+      // 1. かわいい歓声声「わーい！」の再現（複数音階のポップなピッチスウィープ）
+      const voices = [
+        { startF: 520,  endF: 1050, delay: 0.00, dur: 0.55 },
+        { startF: 660,  endF: 1320, delay: 0.04, dur: 0.50 },
+        { startF: 780,  endF: 1560, delay: 0.08, dur: 0.52 },
+        { startF: 880,  endF: 1760, delay: 0.12, dur: 0.48 }
+      ];
+
+      voices.forEach(v => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        
+        const t = now + v.delay;
+        osc.frequency.setValueAtTime(v.startF, t);
+        osc.frequency.exponentialRampToValueAtTime(v.endF, t + 0.18);
+        osc.frequency.linearRampToValueAtTime(v.endF * 0.95, t + v.dur);
+
+        gain.gain.setValueAtTime(0.001, t);
+        gain.gain.linearRampToValueAtTime(0.12, t + 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + v.dur);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(t);
+        osc.stop(t + v.dur);
+      });
+
+      // 2. ポップで明るい軽快な跳ねるチャイム（ド・ミ・ソ・ド・ミ♪）
+      const arpeggio = [
+        { f: 523.25, t: 0.00 }, // C5
+        { f: 659.25, t: 0.07 }, // E5
+        { f: 783.99, t: 0.14 }, // G5
+        { f: 1046.50, t: 0.21 }, // C6
+        { f: 1318.51, t: 0.28 }  // E6
+      ];
+
+      arpeggio.forEach(n => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(n.f, now + n.t);
+        
+        gain.gain.setValueAtTime(0.18, now + n.t);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + n.t + 0.35);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now + n.t);
+        osc.stop(now + n.t + 0.35);
+      });
+
+      // 3. にぎやかなキラキラポップ効果音
+      const sparkles = [1567.98, 1760.00, 2093.00, 2349.32, 2637.02];
+      sparkles.forEach((freq, idx) => {
+        const t = now + 0.22 + idx * 0.04;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, t);
+        gain.gain.setValueAtTime(0.08, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(t);
+        osc.stop(t + 0.15);
+      });
+    }else{
+      // 不正解音「ブブー」
+      const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
+      osc.connect(gain);gain.connect(audioCtx.destination);
+      osc.type="sawtooth";
+      osc.frequency.setValueAtTime(220,now);
+      osc.frequency.setValueAtTime(180,now+.15);
+      gain.gain.setValueAtTime(.1,now);
+      gain.gain.exponentialRampToValueAtTime(.01,now+.3);
+      osc.start(now);osc.stop(now+.3);
+    }
+ } catch(e) {}
+}
+
+function triggerConfetti(){
+ try {
+    if(typeof confetti==="function") confetti({particleCount:100,spread:80,origin:{y:.6}});
+ } catch(e) {}
+}
+
+function initSectionMenu(){
+ sectionGrid.innerHTML="";const size=10,total=Math.ceil(allQuestions.length/size);
+ for(let i=0;i<total;i++){
+  const start=i*size+1,end=Math.min((i+1)*size,allQuestions.length);
+  const card=document.createElement("div");card.className="section-card";
+  card.innerHTML=`<div class="section-card-title">第 ${i+1} 章</div><div class="section-card-sub">問 ${start} 〜 問 ${end} （${end-start+1}問）</div>`;
+  card.addEventListener("click",()=>startSection(i));sectionGrid.appendChild(card);
+ }
+}
+
+function startSection(i){
+ playSound("tap");currentSectionIndex=i;const size=10,start=i*size,end=Math.min((i+1)*size,allQuestions.length);
+ questions=allQuestions.slice(start,end);sectionSelectArea.classList.add("hidden");mainCard.classList.remove("hidden");testArea.classList.remove("hidden");resultArea.classList.remove("show");
+ headerSubtitle.textContent=`第 ${i+1} 章 （問 ${start+1} 〜 問 ${end}）`;sectionLabelText.textContent=`第 ${i+1} 章 - QUESTION`;
+ currentIndex=0;correctCount=0;correctCountEl.textContent=0;showQuestion();
+ scrollToTop();
+}
+
+function showMenu(){
+ playSound("tap");
+ mainCard.classList.add("hidden");
+ sectionSelectArea.classList.remove("hidden");
+ headerSubtitle.textContent="学習するコースを選んでください";
+ scrollToTop();
+}
+
+function setupCanvas(cvs,ctx,index){
+ const rect=cvs.getBoundingClientRect(),ratio=window.devicePixelRatio||1;
+ cvs.width=rect.width*ratio;cvs.height=rect.height*ratio;
+ ctx.setTransform(ratio,0,0,ratio,0,0);
+ ctx.lineCap="round";ctx.lineJoin="round";
+ ctx.lineWidth=Math.max(4,rect.width/30);
+ ctx.strokeStyle="#1a1a1a";
+ 
+ cvs.onpointerdown=e=>startDrawing(e,index);
+ cvs.onpointermove=e=>draw(e,index);
+ cvs.onpointerup=e=>stopDrawing(e,index);
+ cvs.onpointercancel=e=>stopDrawing(e,index);
+}
+
+// 要望4: 枠を縦並び(column)にして生成（スマートフォンでも大きく書ける）
+function buildWritingBoxes(count){
+ writingArea.innerHTML="";canvases=[];ctxs=[];strokes=[];
+ for(let i=0;i<count;i++){
+  const box=document.createElement("div");box.className="writing-box";
+  if(count>1){
+    const label=document.createElement("div");
+    label.className="box-number";
+    label.textContent=`${i+1}文字目`;
+    box.appendChild(label);
+  }
+  const cvs=document.createElement("canvas");
+  box.appendChild(cvs);
+  writingArea.appendChild(box);
+  const ctx=cvs.getContext("2d");
+  canvases.push(cvs);
+  ctxs.push(ctx);
+  setTimeout(()=>setupCanvas(cvs,ctx,i), 30);
+ }
+}
+
+function redrawAll(){
+ canvases.forEach((cvs,idx)=>{
+  const ctx=ctxs[idx],rect=cvs.getBoundingClientRect();
+  ctx.clearRect(0,0,rect.width,rect.height);
+  strokes.filter(s=>s.canvasIndex===idx).forEach(s=>{
+    if(!s.points.length)return;
+    ctx.beginPath();
+    ctx.moveTo(s.points[0].x,s.points[0].y);
+    for(let i=1;i<s.points.length;i++)ctx.lineTo(s.points[i].x,s.points[i].y);
+    ctx.stroke();
+  });
+ });
+}
+
+function getPoint(e,cvs){const r=cvs.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
+
+function startDrawing(e,i){
+ initAudio();
+ const cvs=canvases[i];
+ try { cvs.setPointerCapture(e.pointerId); } catch(_){}
+ drawing=true;currentCanvasIndex=i;currentStroke={canvasIndex:i,points:[getPoint(e,cvs)]};
+ strokes.push(currentStroke);redrawAll();
+}
+
+function draw(e,i){if(!drawing||currentCanvasIndex!==i)return;currentStroke.points.push(getPoint(e,canvases[i]));redrawAll()}
+
+function stopDrawing(e,i){
+ if(!drawing||currentCanvasIndex!==i)return;
+ drawing=false;
+ try{canvases[i].releasePointerCapture(e.pointerId)}catch(_){}
+ currentCanvasIndex=-1;
+}
+
+function clearCanvas(){strokes=[];redrawAll()}
+function undoLastStroke(){if(strokes.length){strokes.pop();redrawAll();playSound("tap")}}
+
+function createQuestionHTML(item){let text=item.sentence;item.words.forEach((w,i)=>text=text.replace(`{${i}}`,`<span class="reading">（${w.reading||""}）</span>`));return text}
+
+function speakQuestion(){
+ if(!("speechSynthesis"in window))return;
+ try {
+    window.speechSynthesis.cancel();
+    const item=questions[currentIndex];let t=item.sentence;
+    item.words.forEach((w,i)=>t=t.replace(`{${i}}`,w.reading||""));
+    const u=new SpeechSynthesisUtterance(t);u.lang="ja-JP";u.rate=.9;
+    window.speechSynthesis.speak(u);
+ } catch(e){}
+}
+
+function showQuestion(){
+ const item=questions[currentIndex];currentNumberEl.textContent=currentIndex+1;totalNumberEl.textContent=questions.length;questionTypeEl.textContent=item.type===1?"1文字":"2文字";questionEl.innerHTML=createQuestionHTML(item);
+ answered=false;userGraded=false;buildWritingBoxes(item.words.length);answer.textContent="";answer.classList.remove("show");answerPlaceholder.style.display="block";selfGrading.classList.remove("show");selfGrading.style.display="none";correctBtn.classList.remove("selected");incorrectBtn.classList.remove("selected");checkBtn.disabled=false;nextBtn.disabled=true;
+}
+
+function checkAnswer(){if(answered)return;playSound("tap");const item=questions[currentIndex];answer.textContent=item.words.map(w=>w.kanji).join(" ");answer.classList.add("show");answerPlaceholder.style.display="none";selfGrading.style.display="grid";answered=true;checkBtn.disabled=true;nextBtn.disabled=false}
+
+function gradeAnswer(ok){
+ playSound(ok?"correct":"incorrect");
+ if(ok) triggerConfetti();
+ if(!userGraded&&ok)correctCount++;else if(userGraded&&!ok&&correctCount>0)correctCount--;correctCountEl.textContent=correctCount;userGraded=true;
+ if(ok){correctBtn.classList.add("selected");incorrectBtn.classList.remove("selected")}else{incorrectBtn.classList.add("selected");correctBtn.classList.remove("selected")}
+ nextBtn.disabled=false;
+}
+
+function nextQuestion(){
+ playSound("tap");
+ currentIndex++;
+ if(currentIndex>=questions.length){
+   showResult();
+   return;
+ }
+ showQuestion();
+ scrollToTop();
+}
+
+function showResult(){
+ testArea.classList.add("hidden");resultArea.classList.add("show");finalScore.textContent=`${correctCount} / ${questions.length}`;
+ const ratio=correctCount/questions.length;let msg="よくがんばりました！";if(ratio===1){msg="素晴らしい！パーフェクト達成です！🎉";triggerConfetti()}else if(ratio>=.8)msg="高得点です！あと少しで満点！";else if(ratio>=.5)msg="ナイスファイト！繰り返し練習しよう！";$("resultMessage").innerHTML=msg;
+ scrollToTop();
+}
+
+function restart(){
+ startSection(currentSectionIndex);
+}
+
+clearBtn.onclick=()=>{playSound("tap");clearCanvas()};
+undoBtn.onclick=undoLastStroke;
+checkBtn.onclick=checkAnswer;
+nextBtn.onclick=nextQuestion;
+finishBtn.onclick=showMenu;
+backToMenuBtn.onclick=showMenu;
+restartBtn.onclick=restart;
+audioBtn.onclick=speakQuestion;
+correctBtn.onclick=()=>gradeAnswer(true);
+incorrectBtn.onclick=()=>gradeAnswer(false);
+
+window.addEventListener("resize",()=>{
+ if(!mainCard.classList.contains("hidden")){
+  canvases.forEach((c,i)=>setupCanvas(c,ctxs[i],i));
+  redrawAll();
+ }
+});
+
+window.onload=initSectionMenu;
+</script>
+</body>
+</html>
