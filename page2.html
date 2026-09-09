@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>計算トレーニング</title>
+<!-- confetti.js for celebration effects -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script> 
+<style> 
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; } 
+body { 
+  margin: 0; min-height: 100vh; font-family: "Segoe UI", "Noto Sans JP", -apple-system, sans-serif; 
+  background: #10131a; color: #f2f4f8; display: flex; justify-content: center; align-items: center; 
+  padding: 16px; touch-action: manipulation; user-select: none;
+} 
+.app { 
+  width: min(680px, 100%); background: #191e27; border: 1px solid #2d3442; border-radius: 24px; 
+  padding: 24px; box-shadow: 0 18px 50px rgba(0,0,0,.4); position: relative; overflow: hidden;
+} 
+h1 { margin: 0 0 8px; text-align: center; font-size: clamp(24px, 5vw, 32px); letter-spacing: .04em; } 
+.subtitle { text-align: center; color: #9da6b6; margin-bottom: 20px; font-size: 14px; } 
+
+.progress-wrap { margin-bottom: 18px; } 
+.progress-info { display: flex; justify-content: space-between; color: #aeb7c6; font-size: 14px; margin-bottom: 8px; font-weight: 600; } 
+.bar { height: 10px; background: #292f3a; border-radius: 99px; overflow: hidden; } 
+.bar span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #657dff, #8b5cf6); transition: width .3s ease; } 
+.category { 
+  display: inline-block; padding: 6px 14px; border-radius: 999px; background: #252c39; 
+  color: #b9c2ff; font-size: 13px; font-weight: 700; margin-bottom: 14px; border: 1px solid rgba(185,194,255,0.15);
+} 
+.question { 
+  text-align: center; font-size: clamp(38px, 9vw, 64px); font-weight: 800; 
+  letter-spacing: .06em; margin: 4px 0 16px; color: #ffffff; text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+} 
+
+.answer { 
+  width: 100%; max-width: 380px; margin: 0 auto 14px; padding: 12px 18px; min-height: 76px; 
+  font-size: 48px; font-weight: 800; text-align: right; color: #fff; background: #10131a; 
+  border: 2px solid #3a4352; border-radius: 16px; outline: none; 
+  font-variant-numeric: tabular-nums; display: flex; align-items: center; justify-content: flex-end; 
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.5);
+} 
+.keypad { width: 100%; max-width: 380px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; } 
+.key { 
+  min-height: 60px; border: 1px solid #394252; border-radius: 14px; background: #252c37; 
+  color: #f5f7fb; font-size: 24px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 0 #151820; 
+  transition: all .1s ease;
+} 
+.key:active { transform: translateY(3px); box-shadow: 0 1px 0 #151820; } 
+.key.action { background: #303846; font-size: 18px; color: #d0d7e5; } 
+.key.zero { grid-column: span 2; } 
+.decide { 
+  display: block; width: 100%; max-width: 380px; margin: 14px auto 0; padding: 15px; border: 0; 
+  border-radius: 14px; background: linear-gradient(135deg, #657dff, #5b6eff); color: #fff; font-size: 20px; font-weight: 800; 
+  cursor: pointer; box-shadow: 0 4px 15px rgba(101,125,255,0.35); transition: filter .15s;
+} 
+.decide:hover { filter: brightness(1.1); } 
+.decide:active { transform: translateY(2px); } 
+.decide:disabled, .key:disabled { opacity: .4; cursor: default; transform: none; box-shadow: none; } 
+.feedback { min-height: 48px; text-align: center; margin-top: 14px; font-size: 18px; font-weight: 800; } 
+.correct { color: #5ed6a0; } .wrong { color: #ff7b7b; } 
+
+.start, .result { text-align: center; padding: 10px 0; } 
+.start p, .result p { color: #adb5c4; line-height: 1.7; font-size: 15px; } 
+.start button, .result button { 
+  display: block; width: 100%; max-width: 380px; margin: 14px auto 0; padding: 16px; border: 0; 
+  border-radius: 14px; font-size: 19px; font-weight: 800; cursor: pointer; transition: filter .15s;
+} 
+.btn-primary { background: linear-gradient(135deg, #657dff, #5b6eff); color: #fff; box-shadow: 0 4px 15px rgba(101,125,255,0.3); }
+.btn-primary:hover { filter: brightness(1.1); }
+.btn-secondary { background: #2e3646; color: #d0d7e5; border: 1px solid #414b5d !important; }
+.btn-secondary:hover { background: #384255; }
+.score { font-size: 58px; font-weight: 900; color: #657dff; margin: 12px 0; } 
+
+/* モーダルスタイル */ 
+.modal-overlay { 
+  position: fixed; inset: 0; background: rgba(0,0,0,.78); display: flex; align-items: center; 
+  justify-content: center; padding: 20px; z-index: 1000; backdrop-filter: blur(6px); 
+} 
+.modal { 
+  width: min(460px, 100%); background: #1b212c; border: 1px solid #414b5d; border-radius: 24px; 
+  padding: 28px 22px; text-align: center; box-shadow: 0 25px 80px rgba(0,0,0,.6); 
+  animation: modalIn .22s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+} 
+@keyframes modalIn { from { opacity: 0; transform: scale(.88) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } } 
+.modal-title { font-size: 26px; font-weight: 800; color: #ff7b7b; margin-bottom: 8px; } 
+.modal-title.celebrate { color: #ffd15c; }
+.modal-question { font-size: 24px; color: #c0c7d3; margin: 12px 0; font-weight: 700; } 
+.modal-label { font-size: 14px; color: #8f99aa; margin-top: 12px; } 
+.modal-answer { 
+  font-size: clamp(52px, 14vw, 76px); font-weight: 900; line-height: 1.1; 
+  color: #fff; margin: 6px 0 20px; letter-spacing: .04em; 
+} 
+.modal-button { 
+  width: 100%; padding: 15px; border: 0; border-radius: 14px; background: linear-gradient(135deg, #657dff, #5b6eff); color: #fff; 
+  font-size: 18px; font-weight: 800; cursor: pointer; margin-top: 8px; box-shadow: 0 4px 15px rgba(101,125,255,0.3);
+} 
+.modal-button.sub { background: #2e3646; color: #d0d7e5; border: 1px solid #414b5d; box-shadow: none; }
+
+@media(max-width:480px){ 
+  body { padding: 10px; } .app { padding: 18px 14px; border-radius: 20px; } 
+  .key { min-height: 54px; font-size: 22px; } .question { margin-bottom: 12px; } .answer { font-size: 42px; min-height: 68px; } 
+  .modal { padding: 24px 18px; } 
+} 
+</style> 
+</head> 
+<body> 
+<div class="app"><div id="screen"></div></div> 
+
+<script> 
+let audioCtx = null;
+
+function initAudio() {
+  if (!audioCtx) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) audioCtx = new AudioContextClass();
+  }
+  if (audioCtx && audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
+}
+
+// にぎやかでかわいい正解効果音（トイピアノ風ファンファーレ：C5 -> E5 -> G5 -> C6+E6和音）
+function playCorrectSound() {
+  try {
+    initAudio();
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+
+    // 音符データ：[周波数, 開始オフセット(秒), 伸ばし時間(秒), 音量]
+    const notes = [
+      [523.25, 0.00, 0.12, 0.22], // C5  (パ)
+      [659.25, 0.08, 0.12, 0.22], // E5  (パ)
+      [783.99, 0.16, 0.14, 0.25], // G5  (パ)
+      [1046.50, 0.26, 0.50, 0.30], // C6  (パーン！ 和音低音)
+      [1318.51, 0.26, 0.50, 0.20]  // E6  (パーン！ 和音高音)
+    ];
+
+    notes.forEach(([freq, startOffset, duration, vol]) => {
+      const startTime = now + startOffset;
+      const stopTime = startTime + duration;
+
+      // 丸みのある主音 (サイン波)
+      const osc1 = audioCtx.createOscillator();
+      const gain1 = audioCtx.createGain();
+      osc1.type = "sine";
+      osc1.frequency.setValueAtTime(freq, startTime);
+      gain1.gain.setValueAtTime(vol, startTime);
+      gain1.gain.exponentialRampToValueAtTime(0.001, stopTime);
+      osc1.connect(gain1);
+      gain1.connect(audioCtx.destination);
+      osc1.start(startTime);
+      osc1.stop(stopTime);
+
+      // ポコッとした温かみを足す副音 (三角波)
+      const osc2 = audioCtx.createOscillator();
+      const gain2 = audioCtx.createGain();
+      osc2.type = "triangle";
+      osc2.frequency.setValueAtTime(freq, startTime);
+      gain2.gain.setValueAtTime(vol * 0.4, startTime);
+      gain2.gain.exponentialRampToValueAtTime(0.001, stopTime);
+      osc2.connect(gain2);
+      gain2.connect(audioCtx.destination);
+      osc2.start(startTime);
+      osc2.stop(stopTime);
+    });
+  } catch (e) {}
+}
+
+const TOTAL = 18; 
+let questions = [], current = 0, score = 0, answered = false; 
+let keyListener = null; 
+let modalKeyListener = null; 
+
+function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; } 
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function makeQuestions() { 
+  const q = []; 
+
+  // 1. 1桁同士の足し算・引き算（5問）
+  const b1 = [];
+  while(b1.length < 5) {
+    const isPlus = Math.random() < 0.5;
+    if(isPlus) {
+      const a = rand(1, 9), b = rand(1, 9);
+      b1.push({ text: `${a} ＋ ${b} ＝`, answer: a + b, type: "１桁 ＋ １桁" });
+    } else {
+      const a = rand(3, 9);
+      const b = rand(1, a - 2);
+      b1.push({ text: `${a} − ${b} ＝`, answer: a - b, type: "１桁 − １桁" });
+    }
+  }
+  q.push(...shuffle(b1));
+
+  // 2. 掛け算（5問）
+  const b2 = [];
+  for(let i = 0; i < 5; i++) {
+    const a = rand(2, 9), b = rand(2, 9);
+    b2.push({ text: `${a} × ${b} ＝`, answer: a * b, type: "１桁 × １桁" });
+  }
+  q.push(...shuffle(b2));
+
+  // 3. 2桁と1桁の足し算・引き算（5問）
+  const b3 = [];
+  while(b3.length < 5) {
+    const isPlus = Math.random() < 0.5;
+    if(isPlus) {
+      const a = rand(10, 99), b = rand(1, 9);
+      b3.push({ text: `${a} ＋ ${b} ＝`, answer: a + b, type: "２桁 ＋ １桁" });
+    } else {
+      const a = rand(10, 99), b = rand(1, 9);
+      if (a - b === 1) continue;
+      b3.push({ text: `${a} − ${b} ＝`, answer: a - b, type: "２桁 − １桁" });
+    }
+  }
+  q.push(...shuffle(b3));
+
+  // 4. 2桁同士の足し算・引き算（3問）
+  const b4 = [];
+  while(b4.length < 3) {
+    const isPlus = Math.random() < 0.5;
+    if(isPlus) {
+      const a = rand(10, 99), b = rand(10, 99);
+      b4.push({ text: `${a} ＋ ${b} ＝`, answer: a + b, type: "２桁 ＋ ２桁" });
+    } else {
+      const a = rand(10, 99), b = rand(10, a);
+      if (a - b === 1) continue;
+      b4.push({ text: `${a} − ${b} ＝`, answer: a - b, type: "２桁 − ２桁" });
+    }
+  }
+  q.push(...shuffle(b4));
+
+  return q; 
+} 
+
+function showStart() { 
+  removeKeyListener(); 
+  document.getElementById("screen").innerHTML = ` 
+    <div class="start"> 
+      <h1>計算トレーニング</h1> 
+      <div class="subtitle">全部で ${TOTAL} 問に挑戦！</div> 
+      <p>段階的に難易度が上がります：<br>
+      1. 1桁の足し算・引き算 (5問)<br>
+      2. 掛け算 (5問)<br>
+      3. 2桁と1桁の計算 (5問)<br>
+      4. 2桁同士の計算 (3問)</p> 
+      <button id="btn-start" class="btn-primary">スタート</button> 
+    </div>`; 
+  document.getElementById("btn-start").addEventListener("click", () => {
+    initAudio();
+    startGame();
+  }); 
+} 
+
+function startGame() { 
+  questions = makeQuestions(); 
+  current = 0; 
+  score = 0; 
+  answered = false; 
+  renderQuestion(); 
+} 
+
+function removeKeyListener() { 
+  if (keyListener) { 
+    window.removeEventListener("keydown", keyListener); 
+    keyListener = null; 
+  } 
+  if (modalKeyListener) { 
+    window.removeEventListener("keydown", modalKeyListener); 
+    modalKeyListener = null; 
+  } 
+} 
+
+function renderQuestion() { 
+  removeKeyListener(); 
+  const q = questions[current]; 
+  document.getElementById("screen").innerHTML = ` 
+    <h1>計算トレーニング</h1> 
+    <div class="progress-wrap"> 
+      <div class="progress-info"><span>第 ${current+1} 問 / ${TOTAL} 問</span><span>正解 ${score} 問</span></div> 
+      <div class="bar"><span style="width:${(current/TOTAL)*100}%"></span></div> 
+    </div> 
+    <div class="category">${q.type}</div> 
+    <div class="question">${q.text}</div> 
+    <div id="answer" class="answer" aria-label="答え">0</div> 
+    <div class="keypad" id="keypad"> 
+      <button class="key" data-key="1">1</button><button class="key" data-key="2">2</button><button class="key" data-key="3">3</button> 
+      <button class="key" data-key="4">4</button><button class="key" data-key="5">5</button><button class="key" data-key="6">6</button> 
+      <button class="key" data-key="7">7</button><button class="key" data-key="8">8</button><button class="key" data-key="9">9</button> 
+      <button class="key action zero" data-key="0">0</button><button class="key action" data-key="back">⌫</button> 
+    </div> 
+    <button class="decide" id="submit">決定</button> 
+    <div id="feedback" class="feedback"></div>`; 
+
+  let value = ""; 
+  const display = document.getElementById("answer"); 
+  const keys = document.querySelectorAll(".key"); 
+  const btn = document.getElementById("submit"); 
+
+  const inputKey = k => { 
+    initAudio();
+    if (answered) return; 
+    if (k === "back") value = value.slice(0, -1); 
+    else { 
+      if (value.length >= 4) return; 
+      if (value === "0") value = ""; 
+      value += k; 
+    } 
+    display.textContent = value === "" ? "0" : value; 
+  }; 
+
+  keys.forEach(key => key.addEventListener("click", () => inputKey(key.dataset.key))); 
+
+  keyListener = e => { 
+    if (answered) return; 
+    if (e.key >= "0" && e.key <= "9") inputKey(e.key); 
+    else if (e.key === "Backspace") inputKey("back"); 
+    else if (e.key === "Enter") checkAnswer(value, display, keys, btn); 
+  }; 
+  window.addEventListener("keydown", keyListener); 
+  btn.addEventListener("click", () => {
+    initAudio();
+    checkAnswer(value, display, keys, btn);
+  }); 
+} 
+
+function celebrate(isLarge = false) { 
+  if (typeof confetti === "function") { 
+    try { 
+      const count = isLarge ? 160 : 100;
+      confetti({ particleCount: count, spread: 80, startVelocity: 35, origin: { y: .65 } }); 
+      setTimeout(() => confetti({ particleCount: Math.round(count * 0.7), spread: 120, startVelocity: 28, origin: { x: .15, y: .7 } }), 120); 
+      setTimeout(() => confetti({ particleCount: Math.round(count * 0.7), spread: 120, startVelocity: 28, origin: { x: .85, y: .7 } }), 220); 
+    } catch(e) {} 
+  } 
+} 
+
+function checkAnswer(value, display, keys, btn) { 
+  if (answered) return; 
+  const feedback = document.getElementById("feedback"); 
+  if (value === "") { 
+    feedback.innerHTML = "答えを入力してください。"; 
+    feedback.className = "feedback wrong"; 
+    return; 
+  } 
+  answered = true; 
+  keys.forEach(k => k.disabled = true); 
+  btn.disabled = true; 
+
+  if (Number(value) === questions[current].answer) { 
+    score++; 
+    feedback.innerHTML = "🎉 正解！すごい！"; 
+    feedback.className = "feedback correct"; 
+    
+    playCorrectSound(); 
+    celebrate(false); 
+    
+    setTimeout(nextQuestion, 1300); 
+  } else { 
+    feedback.innerHTML = "不正解"; 
+    feedback.className = "feedback wrong"; 
+    showWrongModal(value); 
+  } 
+} 
+
+function showWrongModal(userAnswer) { 
+  removeKeyListener(); 
+  const q = questions[current]; 
+  const overlay = document.createElement("div"); 
+  overlay.className = "modal-overlay"; 
+  overlay.innerHTML = ` 
+    <div class="modal" role="dialog" aria-modal="true"> 
+      <div class="modal-title">❌ 不正解</div> 
+      <div class="modal-question">${q.text}</div> 
+      <div class="modal-label">正しい答え</div> 
+      <div class="modal-answer">${q.answer}</div> 
+      <button class="modal-button" id="modal-next">次の問題へ (Enter)</button> 
+    </div>`; 
+  document.body.appendChild(overlay); 
+
+  const closeModal = () => { 
+    removeKeyListener(); 
+    overlay.remove(); 
+    nextQuestion(); 
+  }; 
+
+  const nextBtn = overlay.querySelector("#modal-next"); 
+  nextBtn.addEventListener("click", closeModal); 
+
+  modalKeyListener = e => { 
+    if (e.key === "Enter" || e.key === " ") { 
+      e.preventDefault(); 
+      closeModal(); 
+    } 
+  }; 
+  window.addEventListener("keydown", modalKeyListener); 
+
+  try { nextBtn.focus(); } catch(e) {} 
+} 
+
+function showCompletionModal() {
+  removeKeyListener(); 
+  const overlay = document.createElement("div"); 
+  overlay.className = "modal-overlay"; 
+  overlay.innerHTML = ` 
+    <div class="modal" role="dialog" aria-modal="true"> 
+      <div class="modal-title celebrate">🎉 がんばったね！</div> 
+      <div style="font-size:22px; font-weight:800; color:#f2f4f8; margin:14px 0 8px;">おつかれさまでした！</div> 
+      <div style="color:#adb5c4; font-size:15px; line-height:1.6; margin-bottom:20px;">
+        全 ${TOTAL} 問のトレーニングを完走しました！<br>
+        最終結果: <strong style="color:#657dff; font-size:24px;">${score} / ${TOTAL}</strong> 問正解
+      </div> 
+      <button class="modal-button" id="modal-result-btn">結果を見る (Enter)</button> 
+    </div>`; 
+  document.body.appendChild(overlay); 
+
+  playCorrectSound();
+  celebrate(true);
+
+  const resultBtn = overlay.querySelector("#modal-result-btn"); 
+  const closeModal = () => { 
+    removeKeyListener(); 
+    overlay.remove(); 
+    showResult(); 
+  }; 
+
+  resultBtn.addEventListener("click", closeModal); 
+
+  modalKeyListener = e => { 
+    if (e.key === "Enter" || e.key === " ") { 
+      e.preventDefault(); 
+      closeModal(); 
+    } 
+  }; 
+  window.addEventListener("keydown", modalKeyListener); 
+  try { resultBtn.focus(); } catch(e) {}
+}
+
+function nextQuestion() { 
+  current++; 
+  if (current >= TOTAL) {
+    showCompletionModal();
+  } else { 
+    answered = false; 
+    renderQuestion(); 
+  } 
+} 
+
+function showResult() { 
+  removeKeyListener(); 
+  const totalPlayed = Math.min(current, TOTAL);
+  const percent = Math.round((score / totalPlayed) * 100); 
+  const message = percent === 100 ? "🏆 パーフェクト！すばらしい！" : percent >= 80 ? "🌟 よくできました！すごい！" : percent >= 60 ? "👏 がんばったね！" : "💪 もう一度チャレンジしてみよう！"; 
+  
+  document.getElementById("screen").innerHTML = ` 
+    <div class="result"> 
+      <h1>トレーニング終了！</h1>
+      <div class="score">${score} / ${totalPlayed}</div> 
+      <div class="subtitle">正解率 ${percent}%</div>
+      <p>${message}</p> 
+      <button id="btn-restart" class="btn-primary">もう一度挑戦</button> 
+      <button id="btn-end" class="btn-secondary">最初にもどる</button> 
+    </div>`; 
+
+  document.getElementById("btn-restart").addEventListener("click", () => {
+    initAudio();
+    startGame();
+  }); 
+  document.getElementById("btn-end").addEventListener("click", () => {
+    initAudio();
+    showStart();
+  }); 
+  
+  if (score === totalPlayed && totalPlayed > 0) {
+    playCorrectSound();
+    celebrate(true); 
+  }
+} 
+
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", showStart); 
+else showStart(); 
+</script> 
+</body> 
+</html>
