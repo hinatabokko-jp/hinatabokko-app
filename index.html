@@ -35,39 +35,30 @@ header{text-align:center;margin-bottom:16px}
 .question-note{text-align:center;color:var(--sub);font-size:12px;margin-top:8px}
 .section-title{margin:20px 0 10px;color:var(--sub);font-size:12px;font-weight:700;letter-spacing:.05em;text-align:center}
 
+/* 手書きエリアとスクロールゾーンのコンテナ */
 .writing-container {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
   justify-content: center;
   width: 100%;
 }
 
-/* モバイル（標準）: 縦並び (column) */
+/* どんな画面幅・iframe内でも確実に横並び（row）を保持 */
 .writing-area {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
   justify-content: center;
-  gap: 16px;
+  align-items: center;
+  gap: 12px;
   flex: 1;
   width: 100%;
 }
 
-/* PCブラウザ・タブレット等（幅520px以上）: 横並び (row) へ変更 */
-@media (min-width: 520px) {
-  .writing-area {
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: nowrap;
-    gap: 20px;
-  }
-}
-
 /* スクロール補助用サイドバー */
 .scroll-sidebar {
-  width: 40px;
+  width: 36px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px dashed rgba(255, 255, 255, 0.15);
   border-radius: 12px;
@@ -75,7 +66,7 @@ header{text-align:center;margin-bottom:16px}
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 8px 4px;
+  padding: 8px 2px;
   color: var(--sub);
   font-size: 11px;
   text-align: center;
@@ -86,14 +77,15 @@ header{text-align:center;margin-bottom:16px}
   flex-shrink: 0;
 }
 .scroll-sidebar span {
-  margin: 4px 0;
+  margin: 2px 0;
   opacity: 0.7;
 }
 
-/* 手書き用の四角枠 */
+/* 手書き用の四角枠：2文字の時に横並びで必ず画面内に収まる可変幅設定 */
 .writing-box {
   position: relative;
-  width: min(72vw, 210px);
+  width: min(200px, 44%);
+  max-width: 200px;
   aspect-ratio: 1;
   background: #fff;
   border: 3px solid #3b4558;
@@ -101,14 +93,12 @@ header{text-align:center;margin-bottom:16px}
   overflow: hidden;
   box-shadow: 0 10px 25px rgba(0, 0, 0, .3);
   touch-action: none;
-  flex-shrink: 0;
+  flex-shrink: 1;
 }
 
-/* PC画面の横並び時に大きさを自動最適化 */
-@media (min-width: 520px) {
-  .writing-box {
-    width: min(35vw, 210px);
-  }
+/* 1文字問題の時は大きめに表示 */
+.writing-box.single-box {
+  width: min(220px, 70%);
 }
 
 .box-number {
@@ -174,7 +164,7 @@ canvas {
 </head>
 <body>
 <div class="app">
-<header><h1 class="title">小学５年生 漢字（１）</h1><div class="subtitle" id="headerSubtitle">第１章 〜 第１0章（問１〜問１００）</div></header>
+<header><h1 class="title">小学５年生 漢字（１）</h1><div class="subtitle" id="headerSubtitle">第１章 〜 第１０章（問１〜問１００）</div></header>
 
 <div id="sectionSelectArea"><div class="section-grid" id="sectionGrid"></div></div>
 
@@ -230,6 +220,7 @@ canvas {
 </div>
 
 <script>
+// 小学５年生 漢字（１）: 第1章〜第10章（問1〜問100）
 const allQuestions=[
 {type:2,words:[{kanji:"許",reading:"きょ"},{kanji:"可",reading:"か"}],sentence:"{0}{1}を 得る。"},
 {type:2,words:[{kanji:"貿",reading:"ぼう"},{kanji:"易",reading:"えき"}],sentence:"{0}{1}が さかんだ。"},
@@ -499,7 +490,8 @@ function setupCanvas(cvs,ctx,index){
 function buildWritingBoxes(count){
  writingArea.innerHTML="";canvases=[];ctxs=[];strokes=[];
  for(let i=0;i<count;i++){
-  const box=document.createElement("div");box.className="writing-box";
+  const box=document.createElement("div");
+  box.className = count === 1 ? "writing-box single-box" : "writing-box";
   if(count>1){
     const label=document.createElement("div");
     label.className="box-number";
