@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ja" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スマート フラッシュライト</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fffbe1',
+                            400: '#facc15',
+                            500: '#eab308',
+                            600: '#ca8a04',
+                        }
+                    },
+                    boxShadow: {
+                        'glow-yellow': '0 0 50px -5px rgba(234, 179, 8, 0.6), 0 0 20px -10px rgba(234, 179, 8, 0.8)',
+                        'glow-white': '0 0 60px 10px rgba(255, 255, 255, 0.8)',
+                        'glow-red': '0 0 50px -5px rgba(239, 68, 68, 0.6)'
+                    },
+                    animation: {
+                        'pulse-fast': 'pulse 0.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* タッチスクロール防止（アプリのような操作感） */
+        body {
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        /* スライダーの見た目カスタマイズ */
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #facc15;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(250, 204, 21, 0.8);
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col justify-between overflow-hidden relative selection:bg-yellow-500 selection:text-black">
+
+    <!-- フルスクリーン用スクリーンライト（バックライト代替） -->
+    <div id="screenLightOverlay" class="fixed inset-0 z-50 hidden flex flex-col justify-between p-6 transition-colors duration-200">
+        <div class="flex justify-between items-center">
+            <span class="text-sm font-semibold opacity-75 mix-blend-difference text-white">スクリーンライト点灯中</span>
+            <button id="closeScreenLightBtn" class="bg-black/40 text-white rounded-full p-3 w-12 h-12 flex items-center justify-center backdrop-blur-md active:scale-95 transition">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+        <div class="text-center mix-blend-difference text-white opacity-60 text-xs">
+            画面をタップして色を選択・操作バーを表示
+        </div>
+    </div>
+
+    <!-- ヘッダーバー -->
+    <header class="p-4 flex justify-between items-center z-10 border-b border-slate-800/60 bg-slate-900/40 backdrop-blur-md">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-yellow-500/20 border border-yellow-500/40 flex items-center justify-center text-yellow-400">
+                <i class="fa-solid fa-bolt text-lg"></i>
+            </div>
+            <h1 class="text-lg font-bold tracking-wide bg-gradient-to-r from-yellow-200 to-yellow-500 bg-clip-text text-transparent">
+                FlashLight Web
+            </h1>
+        </div>
+        <div id="batteryStatus" class="flex items-center gap-2 text-xs text-slate-400 bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700">
+            <i id="batteryIcon" class="fa-solid fa-battery-three-quarters text-slate-300"></i>
+            <span id="batteryLevel">--%</span>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="flex-1 flex flex-col items-center justify-center p-6 z-10 max-w-md mx-auto w-full">
+        
+        <!-- ステータス表示メッセージ -->
+        <div class="mb-8 text-center">
+            <div id="statusBadge" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700 transition-all duration-300">
+                <span id="statusDot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+                <span id="statusText">消灯中</span>
+            </div>
+            <p id="torchSupportMessage" class="text-xs text-slate-500 mt-2 h-4">
+                ボタンを押すとライトが点灯します
+            </p>
+        </div>
+
+        <!-- メイン電源ボタン -->
+        <div class="relative my-4 flex items-center justify-center">
+            <!-- 外側の光るリングエフェクト -->
+            <div id="glowRing" class="absolute w-56 h-56 rounded-full transition-all duration-500 opacity-0 scale-95 pointer-events-none"></div>
+
+            <!-- 電源ボタン本体 -->
+            <button id="powerBtn" class="relative z-10 w-48 h-48 rounded-full bg-gradient-to-b from-slate-800 to-slate-900 border-4 border-slate-700 shadow-2xl flex flex-col items-center justify-center gap-3 transition-all duration-200 active:scale-95 group hover:border-slate-600 focus:outline-none">
+                <div id="powerIconContainer" class="w-20 h-20 rounded-full bg-slate-800/80 border border-slate-700 flex items-center justify-center text-slate-500 transition-all duration-300 group-hover:text-slate-400">
+                    <i class="fa-solid fa-power-off text-4xl"></i>
+                </div>
+                <span id="powerBtnText" class="text-sm font-bold text-slate-400 tracking-wider uppercase">TOUCH TO START</span>
+            </button>
+        </div>
+
+        <!-- モード切替タブ -->
+        <div class="w-full mt-8 bg-slate-900/80 border border-slate-800 p-1.5 rounded-2xl flex gap-1 backdrop-blur-md">
+            <button id="modeTorchBtn" class="flex-1 py-2.5 px-3 rounded-xl text-xs font-medium transition flex items-center justify-center gap-2 bg-yellow-500 text-slate-950 font-bold shadow">
+                <i class="fa-solid fa-lightbulb"></i>
+                <span>カメラLED</span>
+            </button>
+            <button id="modeStrobeBtn" class="flex-1 py-2.5 px-3 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-burst"></i>
+                <span>点滅/SOS</span>
+            </button>
+            <button id="modeScreenBtn" class="flex-1 py-2.5 px-3 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-mobile-screen-button"></i>
+                <span>画面ライト</span>
+            </button>
+        </div>
+
+        <!-- サブパネル：点滅・SOS設定 (初期は非表示) -->
+        <div id="strobePanel" class="w-full mt-4 bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 hidden space-y-4">
+            <div>
+                <div class="flex justify-between text-xs text-slate-300 mb-2">
+                    <span>点滅スピード (Strobe)</span>
+                    <span id="strobeSpeedVal" class="font-mono text-yellow-400">OFF</span>
+                </div>
+                <input id="strobeRange" type="range" min="0" max="10" value="0" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer">
+            </div>
+            <div class="flex gap-2">
+                <button id="sosBtn" class="flex-1 py-2 rounded-xl border border-red-500/40 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>SOS 信号モード</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- サブパネル：画面ライト色設定 (初期は非表示) -->
+        <div id="screenPanel" class="w-full mt-4 bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 hidden space-y-3">
+            <span class="text-xs text-slate-300 block mb-1">スクリーンカラーを選択</span>
+            <div class="flex justify-between items-center gap-2">
+                <button data-color="#ffffff" class="color-picker-btn w-9 h-9 rounded-full bg-white border-2 border-yellow-400 scale-110 shadow-md transition"></button>
+                <button data-color="#ffefaa" class="color-picker-btn w-9 h-9 rounded-full bg-[#ffefaa] border-2 border-transparent hover:scale-105 transition"></button>
+                <button data-color="#ff4444" class="color-picker-btn w-9 h-9 rounded-full bg-[#ff4444] border-2 border-transparent hover:scale-105 transition"></button>
+                <button data-color="#44ff44" class="color-picker-btn w-9 h-9 rounded-full bg-[#44ff44] border-2 border-transparent hover:scale-105 transition"></button>
+                <button data-color="#4488ff" class="color-picker-btn w-9 h-9 rounded-full bg-[#4488ff] border-2 border-transparent hover:scale-105 transition"></button>
+                <button data-color="#ff00ff" class="color-picker-btn w-9 h-9 rounded-full bg-[#ff00ff] border-2 border-transparent hover:scale-105 transition"></button>
+            </div>
+        </div>
+
+        <!-- タイマー機能 -->
+        <div class="w-full mt-4 flex items-center justify-between px-2">
+            <span class="text-xs text-slate-400">消灯タイマー</span>
+            <select id="timerSelect" class="bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-yellow-500">
+                <option value="0">オフ</option>
+                <option value="1">1分後</option>
+                <option value="3">3分後</option>
+                <option value="5">5分後</option>
+                <option value="10">10分後</option>
+            </select>
+        </div>
+
+    </main>
+
+    <!-- 通知トースト -->
+    <div id="toast" class="fixed bottom-16 left-1/2 transform -translate-x-1/2 bg-slate-800/90 text-slate-200 border border-slate-700 px-4 py-2 rounded-full text-xs opacity-0 pointer-events-none transition-all duration-300 z-40 backdrop-blur-md shadow-lg flex items-center gap-2">
+        <i id="toastIcon" class="fa-solid fa-circle-info text-yellow-400"></i>
+        <span id="toastMsg">通知メッセージ</span>
+    </div>
+
+    <!-- フッター -->
+    <footer class="p-3 text-center text-[10px] text-slate-600 border-t border-slate-900">
+        Web MediaTrack Torch API Powered • モバイルブラウザ推奨
+    </footer>
+
+    <script>
+        // アプリケーションの状態状態管理
+        const state = {
+            isOn: false,
+            mode: 'torch', // 'torch' | 'strobe' | 'screen'
+            strobeSpeed: 0, // 0 = OFF, 1~10
+            isSOS: false,
+            screenColor: '#ffffff',
+            timerMinutes: 0,
+            timerId: null,
+            strobeIntervalId: null,
+            mediaStream: null,
+            track: null,
+            torchSupported: false
+        };
+
+        // DOM要素の参照
+        const powerBtn = document.getElementById('powerBtn');
+        const powerIconContainer = document.getElementById('powerIconContainer');
+        const powerBtnText = document.getElementById('powerBtnText');
+        const glowRing = document.getElementById('glowRing');
+        const statusBadge = document.getElementById('statusBadge');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const torchSupportMessage = document.getElementById('torchSupportMessage');
+
+        const modeTorchBtn = document.getElementById('modeTorchBtn');
+        const modeStrobeBtn = document.getElementById('modeStrobeBtn');
+        const modeScreenBtn = document.getElementById('modeScreenBtn');
+
+        const strobePanel = document.getElementById('strobePanel');
+        const screenPanel = document.getElementById('screenPanel');
+        const strobeRange = document.getElementById('strobeRange');
+        const strobeSpeedVal = document.getElementById('strobeSpeedVal');
+        const sosBtn = document.getElementById('sosBtn');
+        const colorPickerBtns = document.querySelectorAll('.color-picker-btn');
+
+        const screenLightOverlay = document.getElementById('screenLightOverlay');
+        const closeScreenLightBtn = document.getElementById('closeScreenLightBtn');
+        const timerSelect = document.getElementById('timerSelect');
+
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toastMsg');
+        const toastIcon = document.getElementById('toastIcon');
+
+        // トースト表示関数
+        function showToast(message, iconClass = "fa-solid fa-circle-info text-yellow-400") {
+            toastMsg.textContent = message;
+            toastIcon.className = iconClass;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+        // 触覚フィードバック（バイブレーション）
+        function triggerVibration(pattern = 40) {
+            if ('vibrate' in navigator) {
+                try {
+                    navigator.vibrate(pattern);
+                } catch (e) {
+                    // 一部環境で制限あり
+                }
+            }
+        }
+
+        // バッテリー残量APIの初期化
+        async function initBattery() {
+            if ('getBattery' in navigator) {
+                try {
+                    const battery = await navigator.getBattery();
+                    const updateBattery = () => {
+                        const level = Math.round(battery.level * 100);
+                        document.getElementById('batteryLevel').textContent = `${level}%`;
+                        const icon = document.getElementById('batteryIcon');
+                        if (battery.charging) {
+                            icon.className = "fa-solid fa-battery-charging text-green-400";
+                        } else if (level > 75) {
+                            icon.className = "fa-solid fa-battery-full text-slate-300";
+                        } else if (level > 30) {
+                            icon.className = "fa-solid fa-battery-half text-slate-300";
+                        } else {
+                            icon.className = "fa-solid fa-battery-quarter text-red-400";
+                        }
+                    };
+                    updateBattery();
+                    battery.addEventListener('levelchange', updateBattery);
+                    battery.addEventListener('chargingchange', updateBattery);
+                } catch (e) {
+                    console.log('Battery API not accessible');
+                }
+            }
+        }
+
+        // カメラのTorch機能初期化・取得
+        async function initTorchStream() {
+            if (state.track) return true;
+
+            try {
+                // リアカメラのストリームを取得
+                const constraints = {
+                    video: {
+                        facingMode: { exact: 'environment' }
+                    }
+                };
+                
+                try {
+                    state.mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+                } catch (err) {
+                    // exact指定で失敗した場合は通常の'environment'を試行
+                    state.mediaStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: 'environment' }
+                    });
+                }
+
+                state.track = state.mediaStream.getVideoTracks()[0];
+                
+                // Capabilitiesチェック
+                const capabilities = state.track.getCapabilities ? state.track.getCapabilities() : {};
+                if ('torch' in capabilities) {
+                    state.torchSupported = true;
+                    torchSupportMessage.textContent = "背面カメラフラッシュが利用可能です";
+                    return true;
+                } else {
+                    state.torchSupported = false;
+                    torchSupportMessage.textContent = "端末のカメラライト非対応のため「画面ライト」をご利用ください";
+                    return false;
+                }
+            } catch (err) {
+                console.warn('Camera access error:', err);
+                state.torchSupported = false;
+                torchSupportMessage.textContent = "カメラ権限が無効または非対応です（画面ライト可）";
+                return false;
+            }
+        }
+
+        // 物理フラッシュライト（Torch）のオン/オフ切替
+        async function setHardwareTorch(on) {
+            if (!state.track) {
+                const initialized = await initTorchStream();
+                if (!initialized) return false;
+            }
+
+            try {
+                await state.track.applyConstraints({
+                    advanced: [{ torch: on }]
+                });
+                return true;
+            } catch (err) {
+                console.error("Torch constraint error:", err);
+                return false;
+            }
+        }
+
+        // メインのオン/オフ処理
+        async function toggleLight(forceState = null) {
+            const targetState = forceState !== null ? forceState : !state.isOn;
+            triggerVibration(targetState ? [30, 50, 30] : 40);
+
+            if (targetState) {
+                // オン処理
+                if (state.mode === 'screen') {
+                    openScreenLight();
+                    state.isOn = true;
+                } else {
+                    const success = await setHardwareTorch(true);
+                    if (success) {
+                        state.isOn = true;
+                    } else {
+                        // ハードウェアライトが使えない場合画面ライトへフォールバック
+                        showToast("カメラライトが利用できないため画面ライトを起動します", "fa-solid fa-triangle-exclamation text-amber-400");
+                        switchMode('screen');
+                        openScreenLight();
+                        state.isOn = true;
+                    }
+                }
+            } else {
+                // オフ処理
+                stopStrobeAndSOS();
+                if (state.track) {
+                    await setHardwareTorch(false);
+                }
+                closeScreenLight();
+                state.isOn = false;
+            }
+
+            updateUI();
+            handleTimerSetting();
+        }
+
+        // UI表示の同期更新
+        function updateUI() {
+            if (state.isOn) {
+                // ON状態のスタイリング
+                powerBtn.classList.remove('border-slate-700');
+                powerBtn.classList.add('border-yellow-400');
+                
+                powerIconContainer.classList.remove('bg-slate-800/80', 'text-slate-500');
+                powerIconContainer.classList.add('bg-yellow-500', 'text-slate-950', 'shadow-glow-yellow');
+                
+                glowRing.classList.remove('opacity-0', 'scale-95');
+                glowRing.classList.add('opacity-100', 'scale-100', 'bg-yellow-500/20', 'shadow-glow-yellow');
+
+                powerBtnText.textContent = "LIGHT ON";
+                powerBtnText.classList.remove('text-slate-400');
+                powerBtnText.classList.add('text-yellow-400', 'font-extrabold');
+
+                statusDot.className = "w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse";
+                statusBadge.className = "inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-yellow-500/10 text-yellow-300 border border-yellow-500/30 shadow-glow-yellow";
+                
+                if (state.isSOS) {
+                    statusText.textContent = "SOS信号 発信中";
+                } else if (state.strobeSpeed > 0) {
+                    statusText.textContent = `ストロボ点滅 (${state.strobeSpeed}Hz)`;
+                } else {
+                    statusText.textContent = state.mode === 'screen' ? "スクリーンライト点灯中" : "LEDライト点灯中";
+                }
+            } else {
+                // OFF状態のスタイリング
+                powerBtn.classList.remove('border-yellow-400');
+                powerBtn.classList.add('border-slate-700');
+
+                powerIconContainer.classList.remove('bg-yellow-500', 'text-slate-950', 'shadow-glow-yellow');
+                powerIconContainer.classList.add('bg-slate-800/80', 'text-slate-500');
+
+                glowRing.classList.remove('opacity-100', 'scale-100', 'bg-yellow-500/20', 'shadow-glow-yellow');
+                glowRing.classList.add('opacity-0', 'scale-95');
+
+                powerBtnText.textContent = "TOUCH TO START";
+                powerBtnText.classList.remove('text-yellow-400', 'font-extrabold');
+                powerBtnText.classList.add('text-slate-400');
+
+                statusDot.className = "w-2.5 h-2.5 rounded-full bg-slate-500";
+                statusBadge.className = "inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700";
+                statusText.textContent = "消灯中";
+            }
+        }
+
+        // ストロボ / SOS ループ処理
+        function startStrobe(hz) {
+            stopStrobeAndSOS();
+            state.strobeSpeed = hz;
+            state.isSOS = false;
+            
+            if (hz === 0) {
+                if (state.isOn) toggleLight(true); // 常時点灯へ復帰
+                return;
+            }
+
+            let lightState = false;
+            const intervalMs = Math.max(50, 1000 / (hz * 2)); // 点滅周波数
+
+            state.strobeIntervalId = setInterval(async () => {
+                lightState = !lightState;
+                if (state.mode === 'screen') {
+                    screenLightOverlay.style.backgroundColor = lightState ? state.screenColor : '#000000';
+                } else {
+                    await setHardwareTorch(lightState);
+                }
+            }, intervalMs);
+
+            if (!state.isOn) {
+                state.isOn = true;
+                updateUI();
+            }
+        }
+
+        // SOSモールス信号パターン ( ... --- ... )
+        function startSOS() {
+            stopStrobeAndSOS();
+            state.isSOS = true;
+            state.strobeSpeed = 0;
+            strobeRange.value = 0;
+            strobeSpeedVal.textContent = "SOS";
+
+            const unit = 180; // モールス信号の1単位(ms)
+            // 点 (1unit) / 線 (3unit) / パルス間 (1unit) / 文字間 (3unit) / 語間 (7unit)
+            const pattern = [
+                1, 1, 1, 1, 1, 3, // . . .
+                3, 1, 3, 1, 3, 3, // - - -
+                1, 1, 1, 1, 1, 7  // . . .
+            ];
+
+            let step = 0;
+
+            const runSOSStep = async () => {
+                if (!state.isSOS) return;
+                
+                const isLightOn = (step % 2 === 0);
+                const durationUnits = pattern[step % pattern.length];
+
+                if (state.mode === 'screen') {
+                    screenLightOverlay.style.backgroundColor = isLightOn ? state.screenColor : '#000000';
+                } else {
+                    await setHardwareTorch(isLightOn);
+                }
+
+                step = (step + 1) % pattern.length;
+                state.strobeIntervalId = setTimeout(runSOSStep, durationUnits * unit);
+            };
+
+            if (!state.isOn) {
+                state.isOn = true;
+                updateUI();
+            }
+
+            runSOSStep();
+        }
+
+        function stopStrobeAndSOS() {
+            if (state.strobeIntervalId) {
+                clearInterval(state.strobeIntervalId);
+                clearTimeout(state.strobeIntervalId);
+                state.strobeIntervalId = null;
+            }
+            state.strobeSpeed = 0;
+            state.isSOS = false;
+            strobeSpeedVal.textContent = "OFF";
+        }
+
+        // スクリーンライトの全画面起動
+        function openScreenLight() {
+            screenLightOverlay.style.backgroundColor = state.screenColor;
+            screenLightOverlay.classList.remove('hidden');
+            // Fullscreen API試行
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            }
+        }
+
+        function closeScreenLight() {
+            screenLightOverlay.classList.add('hidden');
+            if (document.fullscreenElement) {
+                document.exitFullscreen().catch(() => {});
+            }
+        }
+
+        // モード切替処理
+        function switchMode(newMode) {
+            state.mode = newMode;
+
+            // タブのCSS更新
+            const activeClass = "bg-yellow-500 text-slate-950 font-bold shadow";
+            const inactiveClass = "text-slate-400 hover:text-slate-200";
+
+            modeTorchBtn.className = `flex-1 py-2.5 px-3 rounded-xl text-xs font-medium transition flex items-center justify-center gap-2 ${newMode === 'torch' ? activeClass : inactiveClass}`;
+            modeStrobeBtn.className = `flex-1 py-2.5 px-3 rounded-xl text-xs font-medium transition flex items-center justify-center gap-2 ${newMode === 'strobe' ? activeClass : inactiveClass}`;
+            modeScreenBtn.className = `flex-1 py-2.5 px-3 rounded-xl text-xs font-medium transition flex items-center justify-center gap-2 ${newMode === 'screen' ? activeClass : inactiveClass}`;
+
+            // パネルの表示制御
+            strobePanel.classList.toggle('hidden', newMode !== 'strobe');
+            screenPanel.classList.toggle('hidden', newMode !== 'screen');
+
+            // ライトがすでに点灯中の場合、新しいモードへ即時切替
+            if (state.isOn) {
+                if (newMode === 'screen') {
+                    setHardwareTorch(false);
+                    openScreenLight();
+                } else if (newMode === 'torch') {
+                    closeScreenLight();
+                    stopStrobeAndSOS();
+                    setHardwareTorch(true);
+                } else if (newMode === 'strobe') {
+                    closeScreenLight();
+                }
+                updateUI();
+            }
+        }
+
+        // タイマー処理
+        function handleTimerSetting() {
+            if (state.timerId) {
+                clearTimeout(state.timerId);
+                state.timerId = null;
+            }
+
+            const mins = parseInt(timerSelect.value, 10);
+            if (mins > 0 && state.isOn) {
+                showToast(`${mins}分後に自動消灯します`, "fa-solid fa-clock text-yellow-400");
+                state.timerId = setTimeout(() => {
+                    toggleLight(false);
+                    showToast("タイマーにより消灯しました", "fa-solid fa-circle-check text-green-400");
+                }, mins * 60 * 1000);
+            }
+        }
+
+        // イベントリレーの設定
+        powerBtn.addEventListener('click', () => toggleLight());
+
+        modeTorchBtn.addEventListener('click', () => switchMode('torch'));
+        modeStrobeBtn.addEventListener('click', () => switchMode('strobe'));
+        modeScreenBtn.addEventListener('click', () => switchMode('screen'));
+
+        // ストロボスライダーの操作
+        strobeRange.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value, 10);
+            if (val === 0) {
+                stopStrobeAndSOS();
+                strobeSpeedVal.textContent = "OFF";
+                if (state.isOn) setHardwareTorch(true);
+            } else {
+                strobeSpeedVal.textContent = `${val} Hz`;
+                startStrobe(val);
+            }
+        });
+
+        // SOSボタン
+        sosBtn.addEventListener('click', () => {
+            triggerVibration([50, 100, 50]);
+            startSOS();
+            showToast("SOS非常信号を出力中", "fa-solid fa-triangle-exclamation text-red-400");
+        });
+
+        // カラーピッカーボタン
+        colorPickerBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                colorPickerBtns.forEach(b => b.classList.replace('border-yellow-400', 'border-transparent'));
+                btn.classList.replace('border-transparent', 'border-yellow-400');
+                state.screenColor = btn.getAttribute('data-color');
+
+                if (state.mode === 'screen' && state.isOn) {
+                    screenLightOverlay.style.backgroundColor = state.screenColor;
+                }
+            });
+        });
+
+        // スクリーンライト閉じるボタン
+        closeScreenLightBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleLight(false);
+        });
+
+        // 画面タップでスクリーンライトを消灯できる操作感
+        screenLightOverlay.addEventListener('click', () => {
+            toggleLight(false);
+        });
+
+        timerSelect.addEventListener('change', handleTimerSetting);
+
+        // 初期ロード時カメラ権限のチェック準備
+        window.addEventListener('load', () => {
+            initBattery();
+            // 初期状態判定
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                torchSupportMessage.textContent = "お使いのブラウザはカメラLED非対応です（画面ライトのみ）";
+            }
+        });
+    </script>
+</body>
+</html>
