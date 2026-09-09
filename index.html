@@ -12,7 +12,7 @@
 html,body{width:100%;margin:0;padding:0;background:var(--bg);scroll-behavior:smooth}
 body{min-height:100vh;background:radial-gradient(circle at 50% -10%,rgba(101,125,255,.15),transparent 50%),var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP","Yu Gothic",sans-serif;display:flex;justify-content:center;overflow-x:hidden}
 button{font:inherit;outline:none}
-.app{width:min(720px,100%);padding:16px}
+.app{width:min(760px,100%);padding:16px}
 header{text-align:center;margin-bottom:16px}
 .title{margin:0;font-size:clamp(22px,5vw,32px);font-weight:900;letter-spacing:.04em;background:linear-gradient(135deg,#fff,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .subtitle{margin-top:4px;color:var(--sub);font-size:13px}
@@ -35,16 +35,15 @@ header{text-align:center;margin-bottom:16px}
 .question-note{text-align:center;color:var(--sub);font-size:12px;margin-top:8px}
 .section-title{margin:20px 0 10px;color:var(--sub);font-size:12px;font-weight:700;letter-spacing:.05em;text-align:center}
 
-/* 手書きエリアとスクロールゾーンのコンテナ */
 .writing-container {
   display: flex;
   gap: 12px;
-  align-items: stretch;
+  align-items: center;
   justify-content: center;
   width: 100%;
 }
 
-/* スマホ: 縦並び (column) / PC・タブレット: 横並び (row) */
+/* モバイル（標準）: 縦並び (column) */
 .writing-area {
   display: flex;
   flex-direction: column;
@@ -55,11 +54,14 @@ header{text-align:center;margin-bottom:16px}
   width: 100%;
 }
 
-/* 画面幅600px以上の環境（PC・タブレット等）で横並びへ変換 */
-@media (min-width: 600px) {
+/* PCブラウザ・タブレット等（幅520px以上）: 横並び (row) へ変更 */
+@media (min-width: 520px) {
   .writing-area {
     flex-direction: row;
-    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 20px;
   }
 }
 
@@ -88,9 +90,10 @@ header{text-align:center;margin-bottom:16px}
   opacity: 0.7;
 }
 
+/* 手書き用の四角枠 */
 .writing-box {
   position: relative;
-  width: min(75vw, 220px);
+  width: min(72vw, 210px);
   aspect-ratio: 1;
   background: #fff;
   border: 3px solid #3b4558;
@@ -98,7 +101,16 @@ header{text-align:center;margin-bottom:16px}
   overflow: hidden;
   box-shadow: 0 10px 25px rgba(0, 0, 0, .3);
   touch-action: none;
+  flex-shrink: 0;
 }
+
+/* PC画面の横並び時に大きさを自動最適化 */
+@media (min-width: 520px) {
+  .writing-box {
+    width: min(35vw, 210px);
+  }
+}
+
 .box-number {
   position: absolute;
   top: 6px;
@@ -157,13 +169,12 @@ canvas {
 @media(max-width:480px){
   .app{padding:10px}
   .card{padding:14px;border-radius:16px}
-  .writing-box{width:min(78vw, 220px)}
 }
 </style>
 </head>
 <body>
 <div class="app">
-<header><h1 class="title">小学５年生 漢字（１）</h1><div class="subtitle" id="headerSubtitle">第１章 〜 第１０章（問１〜問１００）</div></header>
+<header><h1 class="title">小学５年生 漢字（１）</h1><div class="subtitle" id="headerSubtitle">第１章 〜 第１0章（問１〜問１００）</div></header>
 
 <div id="sectionSelectArea"><div class="section-grid" id="sectionGrid"></div></div>
 
@@ -219,7 +230,6 @@ canvas {
 </div>
 
 <script>
-// 小学５年生 漢字（１）: 第1章〜第10章（問1〜問100）
 const allQuestions=[
 {type:2,words:[{kanji:"許",reading:"きょ"},{kanji:"可",reading:"か"}],sentence:"{0}{1}を 得る。"},
 {type:2,words:[{kanji:"貿",reading:"ぼう"},{kanji:"易",reading:"えき"}],sentence:"{0}{1}が さかんだ。"},
@@ -347,7 +357,6 @@ function initAudio() {
   }
 }
 
-// Google サイト・iframe内でも安全にスクロールするための関数
 function scrollToTop() {
   try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e){}
 }
@@ -472,7 +481,7 @@ function showMenu(){
 function setupCanvas(cvs,ctx,index){
  if(!cvs) return;
  const rect=cvs.getBoundingClientRect();
- if(rect.width === 0 || rect.height === 0) return; // iframe読み込み遅延対策
+ if(rect.width === 0 || rect.height === 0) return;
  
  const ratio=window.devicePixelRatio||1;
  cvs.width=rect.width*ratio;cvs.height=rect.height*ratio;
@@ -504,7 +513,6 @@ function buildWritingBoxes(count){
   canvases.push(cvs);
   ctxs.push(ctx);
   
-  // iframe非同期ロードやアニメーション完了を待って複数タイミングで正確にリサイズ
   setTimeout(()=>setupCanvas(cvs,ctx,i), 30);
   setTimeout(()=>setupCanvas(cvs,ctx,i), 150);
  }
@@ -605,7 +613,6 @@ audioBtn.onclick=speakQuestion;
 correctBtn.onclick=()=>gradeAnswer(true);
 incorrectBtn.onclick=()=>gradeAnswer(false);
 
-// Google サイト・レスポンシブ時のキャンバス再計算
 const resizeHandler = ()=>{
  if(!mainCard.classList.contains("hidden")){
   canvases.forEach((c,i)=>setupCanvas(c,ctxs[i],i));
@@ -614,7 +621,6 @@ const resizeHandler = ()=>{
 };
 window.addEventListener("resize", resizeHandler);
 
-// ResizeObserverで埋め込みフレームのサイズ変更を監視
 if(window.ResizeObserver){
  const ro = new ResizeObserver(()=>{ resizeHandler(); });
  ro.observe(document.body);
