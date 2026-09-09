@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>小学５年生４月～７月 漢字テスト</title>
+<title>小学５年生 漢字（１）</title>
 <!-- confetti.js library for celebration effects -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <style>
@@ -35,7 +35,7 @@ header{text-align:center;margin-bottom:16px}
 .question-note{text-align:center;color:var(--sub);font-size:12px;margin-top:8px}
 .section-title{margin:20px 0 10px;color:var(--sub);font-size:12px;font-weight:700;letter-spacing:.05em;text-align:center}
 
-/* 手書きエリアとスクロール用右サイドバーのコンテナ */
+/* 手書きエリアとスクロールゾーンのコンテナ */
 .writing-container {
   display: flex;
   gap: 12px;
@@ -44,19 +44,28 @@ header{text-align:center;margin-bottom:16px}
   width: 100%;
 }
 
-/* スマホでも大きく書けるように手書き枠を「縦並び (column)」に変更 */
+/* スマホ: 縦並び (column) / PC・タブレット: 横並び (row) */
 .writing-area {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  justify-content: center;
+  gap: 16px;
   flex: 1;
   width: 100%;
 }
 
-/* スマホ用右サイドのスクロール可能ゾーン */
+/* 画面幅600px以上の環境（PC・タブレット等）で横並びへ変換 */
+@media (min-width: 600px) {
+  .writing-area {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
+
+/* スクロール補助用サイドバー */
 .scroll-sidebar {
-  width: 44px;
+  width: 40px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px dashed rgba(255, 255, 255, 0.15);
   border-radius: 12px;
@@ -70,8 +79,8 @@ header{text-align:center;margin-bottom:16px}
   text-align: center;
   writing-mode: vertical-rl;
   letter-spacing: 0.15em;
-  pointer-events: auto; /* タッチスクロールを受け付ける */
-  touch-action: pan-y;  /* 縦スクロールを明示的に許可 */
+  pointer-events: auto;
+  touch-action: pan-y;
   flex-shrink: 0;
 }
 .scroll-sidebar span {
@@ -81,7 +90,7 @@ header{text-align:center;margin-bottom:16px}
 
 .writing-box {
   position: relative;
-  width: min(80vw, 270px);
+  width: min(75vw, 220px);
   aspect-ratio: 1;
   background: #fff;
   border: 3px solid #3b4558;
@@ -111,15 +120,11 @@ header{text-align:center;margin-bottom:16px}
   z-index: 1;
 }
 .writing-box:before {
-  left: 0;
-  right: 0;
-  top: 50%;
+  left: 0; right: 0; top: 50%;
   border-top: 1px dashed rgba(100, 110, 130, .35);
 }
 .writing-box:after {
-  top: 0;
-  bottom: 0;
-  left: 50%;
+  top: 0; bottom: 0; left: 50%;
   border-left: 1px dashed rgba(100, 110, 130, .35);
 }
 canvas {
@@ -152,13 +157,13 @@ canvas {
 @media(max-width:480px){
   .app{padding:10px}
   .card{padding:14px;border-radius:16px}
-  .writing-box{width:min(82vw, 250px)}
+  .writing-box{width:min(78vw, 220px)}
 }
 </style>
 </head>
 <body>
 <div class="app">
-<header><h1 class="title">小学５年生４月～７月</h1><div class="subtitle" id="headerSubtitle">学習するコースを選んでください</div></header>
+<header><h1 class="title">小学５年生 漢字（１）</h1><div class="subtitle" id="headerSubtitle">第１章 〜 第１０章（問１〜問１００）</div></header>
 
 <div id="sectionSelectArea"><div class="section-grid" id="sectionGrid"></div></div>
 
@@ -174,13 +179,10 @@ canvas {
 <div class="question-note">（読み仮名）の漢字を下の枠内に書いてください</div>
 <div class="section-title">あなたの答え（手書き）</div>
 
-<!-- 手書き枠（縦並び）＋スクロールエリアのコンテナ -->
 <div class="writing-container">
   <div class="writing-area" id="writingArea"></div>
   <div class="scroll-sidebar" title="指で上下になぞってスクロール">
-    <span>👆</span>
-    <span>スクロール余白</span>
-    <span>👇</span>
+    <span>👆</span><span>スクロール余白</span><span>👇</span>
   </div>
 </div>
 
@@ -213,10 +215,11 @@ canvas {
 <button class="btn btn-finish" id="backToMenuBtn" style="margin-top:8px">コース選択に戻る</button>
 </section>
 </main>
-<div class="footer">漢字テスト・手書き練習アプリ</div>
+<div class="footer">漢字テスト・手書き練習アプリ（１）</div>
 </div>
 
 <script>
+// 小学５年生 漢字（１）: 第1章〜第10章（問1〜問100）
 const allQuestions=[
 {type:2,words:[{kanji:"許",reading:"きょ"},{kanji:"可",reading:"か"}],sentence:"{0}{1}を 得る。"},
 {type:2,words:[{kanji:"貿",reading:"ぼう"},{kanji:"易",reading:"えき"}],sentence:"{0}{1}が さかんだ。"},
@@ -230,10 +233,8 @@ const allQuestions=[
 {type:2,words:[{kanji:"原",reading:"げん"},{kanji:"因",reading:"いん"}],sentence:"事故の {0}{1}を 調べる。"},
 {type:2,words:[{kanji:"製",reading:"せい"},{kanji:"造",reading:"ぞう"}],sentence:"工場で 品物を {0}{1}する。"},
 {type:2,words:[{kanji:"現",reading:"げん"},{kanji:"在",reading:"ざい"}],sentence:"{0}{1}の 状況を 調べる。"},
-/* 要望2の訂正: 「せっ」から「せつ」へ修正 */
 {type:2,words:[{kanji:"接",reading:"せつ"},{kanji:"続",reading:"ぞく"}],sentence:"話を {0}{1}する。"},
 {type:2,words:[{kanji:"反",reading:"はん"},{kanji:"応",reading:"のう"}],sentence:"相手の {0}{1}を見る。"},
-/* 要望3の訂正: 「台風のせくりょくが強い」に例文変更 */
 {type:2,words:[{kanji:"勢",reading:"せい"},{kanji:"力",reading:"りょく"}],sentence:"台風の {0}{1}が 強い。"},
 {type:2,words:[{kanji:"河",reading:"か"},{kanji:"川",reading:"せん"}],sentence:"{0}{1}の 水を 調べる。"},
 {type:2,words:[{kanji:"歴",reading:"れき"},{kanji:"史",reading:"し"}],sentence:"日本の {0}{1}を 学ぶ。"},
@@ -319,48 +320,14 @@ const allQuestions=[
 {type:1,words:[{kanji:"句",reading:"く"}],sentence:"好きな {0}を 書く。"},
 {type:1,words:[{kanji:"序",reading:"じょ"}],sentence:"文章の {0}を 考える。"},
 {type:1,words:[{kanji:"士",reading:"し"}],sentence:"武{0}が 活躍する。"},
-{type:1,words:[{kanji:"資",reading:"し"}],sentence:"大切な {0}料を 集める。"},
-{type:1,words:[{kanji:"査",reading:"さ"}],sentence:"原因を 調{0}する。"},
-{type:1,words:[{kanji:"非",reading:"ひ"}],sentence:"{0}常に 大切な 問題だ。"},
-{type:1,words:[{kanji:"舎",reading:"しゃ"}],sentence:"校{0}で 生活する。"},
-{type:1,words:[{kanji:"刊",reading:"かん"}],sentence:"週{0}の 雑誌を 読む。"},
-{type:1,words:[{kanji:"謝",reading:"あやま"}],sentence:"失敗を {0}る。"},
-{type:1,words:[{kanji:"罪",reading:"つみ"}],sentence:"自分の {0}を 認める。"},
-{type:1,words:[{kanji:"暴",reading:"あば"}],sentence:"強風が {0}れる。"},
-{type:1,words:[{kanji:"鉱",reading:"こう"}],sentence:"地下から {0}物を 掘り出す。"},
-{type:1,words:[{kanji:"績",reading:"せき"}],sentence:"努力の {0}が 表れる。"},
-{type:1,words:[{kanji:"志",reading:"こころざし"}],sentence:"高い {0}を 持つ。"},
-{type:1,words:[{kanji:"夢",reading:"ゆめ"}],sentence:"大きな {0}を かなえる。"},
-{type:1,words:[{kanji:"編",reading:"へん"}],sentence:"文章を {0}む。"},
-{type:1,words:[{kanji:"断",reading:"ことわ"}],sentence:"誘いを {0}る。"},
-{type:1,words:[{kanji:"境",reading:"さかい"}],sentence:"県の {0}を 越える。"},
-{type:1,words:[{kanji:"態",reading:"たい"}],sentence:"今の 状{0}を 確認する。"},
-{type:1,words:[{kanji:"逆",reading:"さか"}],sentence:"道を {0}さに 進む。"},
-{type:1,words:[{kanji:"判",reading:"はん"}],sentence:"正しいと {0}断する。"},
-{type:1,words:[{kanji:"圧",reading:"あつ"}],sentence:"強い {0}が かかる。"},
-{type:1,words:[{kanji:"質",reading:"しつ"}],sentence:"大切な {0}を 保つ。"},
-{type:1,words:[{kanji:"報",reading:"ほう"}],sentence:"正しい 情{0}を 伝える。"},
-{type:1,words:[{kanji:"確",reading:"たし"}],sentence:"もう一度 {0}かめる。"},
-{type:1,words:[{kanji:"造",reading:"つく"}],sentence:"作品を {0}る。"},
-{type:1,words:[{kanji:"歴",reading:"れき"}],sentence:"これまでの {0}を 振り返る。"},
-{type:1,words:[{kanji:"幹",reading:"みき"}],sentence:"木の {0}が 太い。"},
-{type:1,words:[{kanji:"常",reading:"つね"}],sentence:"{0}に 準備しておく。"},
-{type:1,words:[{kanji:"武",reading:"ぶ"}],sentence:"{0}力を 使わない。"},
-{type:1,words:[{kanji:"性",reading:"せい"}],sentence:"物の 特{0}を 調べる。"},
-{type:1,words:[{kanji:"総",reading:"そう"}],sentence:"{0}人数を 数える。"},
-{type:1,words:[{kanji:"測",reading:"はか"}],sentence:"長さを {0}る。"},
-{type:1,words:[{kanji:"舎",reading:"しゃ"}],sentence:"校{0}の 前に 集まる。"},
-{type:1,words:[{kanji:"往",reading:"おう"}],sentence:"{0}復切符を 買う。"},
-{type:1,words:[{kanji:"演",reading:"えん"}],sentence:"劇を {0}じる。"},
-{type:1,words:[{kanji:"肥",reading:"こ"}],sentence:"土地を {0}やす。"},
-{type:1,words:[{kanji:"製",reading:"せい"}],sentence:"日本{0}の 商品。"},
-{type:1,words:[{kanji:"防",reading:"ふせ"}],sentence:"事故を {0}ぐ。"},
-{type:1,words:[{kanji:"鉱",reading:"こう"}],sentence:"{0}石を 調べる。"},
-{type:1,words:[{kanji:"航",reading:"こう"}],sentence:"{0}空機が 飛ぶ。"}
+{type:1,words:[{kanji:"資",reading:"し"}],sentence:"大切な {0}料を 集める。"}
 ];
 
 let questions=[],currentSectionIndex=0,currentIndex=0,answered=false,correctCount=0,userGraded=false;
 let canvases=[],ctxs=[],strokes=[],currentStroke=null,currentCanvasIndex=-1,drawing=false;
+
+const BASE_CHAPTER = 1;
+const BASE_QUESTION = 1;
 
 const $=id=>document.getElementById(id);
 const sectionSelectArea=$("sectionSelectArea"),sectionGrid=$("sectionGrid"),mainCard=$("mainCard"),headerSubtitle=$("headerSubtitle"),sectionLabelText=$("sectionLabelText");
@@ -380,14 +347,11 @@ function initAudio() {
   }
 }
 
-// 画面最上部にスクロール（iFrame対応）
+// Google サイト・iframe内でも安全にスクロールするための関数
 function scrollToTop() {
-  try {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  } catch(e){}
+  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e){}
 }
 
-// 音声再生（正解時の音声を華やかなファンファーレ＆歓声風へアップグレード）
 function playSound(type){
  try {
     initAudio();
@@ -402,59 +366,43 @@ function playSound(type){
       gain.gain.exponentialRampToValueAtTime(.01,now+.05);
       osc.start(now);osc.stop(now+.05);
     }else if(type==="correct"){
-      // 1. かわいい歓声声「わーい！」の再現（複数音階のポップなピッチスウィープ）
       const voices = [
         { startF: 520,  endF: 1050, delay: 0.00, dur: 0.55 },
         { startF: 660,  endF: 1320, delay: 0.04, dur: 0.50 },
         { startF: 780,  endF: 1560, delay: 0.08, dur: 0.52 },
         { startF: 880,  endF: 1760, delay: 0.12, dur: 0.48 }
       ];
-
       voices.forEach(v => {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = "sine";
-        
         const t = now + v.delay;
         osc.frequency.setValueAtTime(v.startF, t);
         osc.frequency.exponentialRampToValueAtTime(v.endF, t + 0.18);
         osc.frequency.linearRampToValueAtTime(v.endF * 0.95, t + v.dur);
-
         gain.gain.setValueAtTime(0.001, t);
         gain.gain.linearRampToValueAtTime(0.12, t + 0.08);
         gain.gain.exponentialRampToValueAtTime(0.001, t + v.dur);
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(t);
-        osc.stop(t + v.dur);
+        osc.connect(gain);gain.connect(audioCtx.destination);
+        osc.start(t);osc.stop(t + v.dur);
       });
-
-      // 2. ポップで明るい軽快な跳ねるチャイム（ド・ミ・ソ・ド・ミ♪）
       const arpeggio = [
-        { f: 523.25, t: 0.00 }, // C5
-        { f: 659.25, t: 0.07 }, // E5
-        { f: 783.99, t: 0.14 }, // G5
-        { f: 1046.50, t: 0.21 }, // C6
-        { f: 1318.51, t: 0.28 }  // E6
+        { f: 523.25, t: 0.00 },
+        { f: 659.25, t: 0.07 },
+        { f: 783.99, t: 0.14 },
+        { f: 1046.50, t: 0.21 },
+        { f: 1318.51, t: 0.28 }
       ];
-
       arpeggio.forEach(n => {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = "triangle";
         osc.frequency.setValueAtTime(n.f, now + n.t);
-        
         gain.gain.setValueAtTime(0.18, now + n.t);
         gain.gain.exponentialRampToValueAtTime(0.001, now + n.t + 0.35);
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(now + n.t);
-        osc.stop(now + n.t + 0.35);
+        osc.connect(gain);gain.connect(audioCtx.destination);
+        osc.start(now + n.t);osc.stop(now + n.t + 0.35);
       });
-
-      // 3. にぎやかなキラキラポップ効果音
       const sparkles = [1567.98, 1760.00, 2093.00, 2349.32, 2637.02];
       sparkles.forEach((freq, idx) => {
         const t = now + 0.22 + idx * 0.04;
@@ -464,14 +412,10 @@ function playSound(type){
         osc.frequency.setValueAtTime(freq, t);
         gain.gain.setValueAtTime(0.08, t);
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(t);
-        osc.stop(t + 0.15);
+        osc.connect(gain);gain.connect(audioCtx.destination);
+        osc.start(t);osc.stop(t + 0.15);
       });
     }else{
-      // 不正解音「ブブー」
       const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
       osc.connect(gain);gain.connect(audioCtx.destination);
       osc.type="sawtooth";
@@ -493,9 +437,12 @@ function triggerConfetti(){
 function initSectionMenu(){
  sectionGrid.innerHTML="";const size=10,total=Math.ceil(allQuestions.length/size);
  for(let i=0;i<total;i++){
-  const start=i*size+1,end=Math.min((i+1)*size,allQuestions.length);
+  const chapterNum = BASE_CHAPTER + i;
+  const startNum = BASE_QUESTION + i*size;
+  const endNum = Math.min(BASE_QUESTION + (i+1)*size - 1, BASE_QUESTION + allQuestions.length - 1);
+  
   const card=document.createElement("div");card.className="section-card";
-  card.innerHTML=`<div class="section-card-title">第 ${i+1} 章</div><div class="section-card-sub">問 ${start} 〜 問 ${end} （${end-start+1}問）</div>`;
+  card.innerHTML=`<div class="section-card-title">第 ${chapterNum} 章</div><div class="section-card-sub">問 ${startNum} 〜 問 ${endNum} （${endNum-startNum+1}問）</div>`;
   card.addEventListener("click",()=>startSection(i));sectionGrid.appendChild(card);
  }
 }
@@ -503,7 +450,13 @@ function initSectionMenu(){
 function startSection(i){
  playSound("tap");currentSectionIndex=i;const size=10,start=i*size,end=Math.min((i+1)*size,allQuestions.length);
  questions=allQuestions.slice(start,end);sectionSelectArea.classList.add("hidden");mainCard.classList.remove("hidden");testArea.classList.remove("hidden");resultArea.classList.remove("show");
- headerSubtitle.textContent=`第 ${i+1} 章 （問 ${start+1} 〜 問 ${end}）`;sectionLabelText.textContent=`第 ${i+1} 章 - QUESTION`;
+ 
+ const chapterNum = BASE_CHAPTER + i;
+ const startNum = BASE_QUESTION + start;
+ const endNum = BASE_QUESTION + end - 1;
+
+ headerSubtitle.textContent=`第 ${chapterNum} 章 （問 ${startNum} 〜 問 ${endNum}）`;
+ sectionLabelText.textContent=`第 ${chapterNum} 章 - QUESTION`;
  currentIndex=0;correctCount=0;correctCountEl.textContent=0;showQuestion();
  scrollToTop();
 }
@@ -512,12 +465,16 @@ function showMenu(){
  playSound("tap");
  mainCard.classList.add("hidden");
  sectionSelectArea.classList.remove("hidden");
- headerSubtitle.textContent="学習するコースを選んでください";
+ headerSubtitle.textContent="第１章 〜 第１０章（問１〜問１００）";
  scrollToTop();
 }
 
 function setupCanvas(cvs,ctx,index){
- const rect=cvs.getBoundingClientRect(),ratio=window.devicePixelRatio||1;
+ if(!cvs) return;
+ const rect=cvs.getBoundingClientRect();
+ if(rect.width === 0 || rect.height === 0) return; // iframe読み込み遅延対策
+ 
+ const ratio=window.devicePixelRatio||1;
  cvs.width=rect.width*ratio;cvs.height=rect.height*ratio;
  ctx.setTransform(ratio,0,0,ratio,0,0);
  ctx.lineCap="round";ctx.lineJoin="round";
@@ -530,7 +487,6 @@ function setupCanvas(cvs,ctx,index){
  cvs.onpointercancel=e=>stopDrawing(e,index);
 }
 
-// 要望4: 枠を縦並び(column)にして生成（スマートフォンでも大きく書ける）
 function buildWritingBoxes(count){
  writingArea.innerHTML="";canvases=[];ctxs=[];strokes=[];
  for(let i=0;i<count;i++){
@@ -547,13 +503,17 @@ function buildWritingBoxes(count){
   const ctx=cvs.getContext("2d");
   canvases.push(cvs);
   ctxs.push(ctx);
+  
+  // iframe非同期ロードやアニメーション完了を待って複数タイミングで正確にリサイズ
   setTimeout(()=>setupCanvas(cvs,ctx,i), 30);
+  setTimeout(()=>setupCanvas(cvs,ctx,i), 150);
  }
 }
 
 function redrawAll(){
  canvases.forEach((cvs,idx)=>{
   const ctx=ctxs[idx],rect=cvs.getBoundingClientRect();
+  if(!ctx || rect.width === 0) return;
   ctx.clearRect(0,0,rect.width,rect.height);
   strokes.filter(s=>s.canvasIndex===idx).forEach(s=>{
     if(!s.points.length)return;
@@ -632,9 +592,7 @@ function showResult(){
  scrollToTop();
 }
 
-function restart(){
- startSection(currentSectionIndex);
-}
+function restart(){ startSection(currentSectionIndex); }
 
 clearBtn.onclick=()=>{playSound("tap");clearCanvas()};
 undoBtn.onclick=undoLastStroke;
@@ -647,12 +605,20 @@ audioBtn.onclick=speakQuestion;
 correctBtn.onclick=()=>gradeAnswer(true);
 incorrectBtn.onclick=()=>gradeAnswer(false);
 
-window.addEventListener("resize",()=>{
+// Google サイト・レスポンシブ時のキャンバス再計算
+const resizeHandler = ()=>{
  if(!mainCard.classList.contains("hidden")){
   canvases.forEach((c,i)=>setupCanvas(c,ctxs[i],i));
   redrawAll();
  }
-});
+};
+window.addEventListener("resize", resizeHandler);
+
+// ResizeObserverで埋め込みフレームのサイズ変更を監視
+if(window.ResizeObserver){
+ const ro = new ResizeObserver(()=>{ resizeHandler(); });
+ ro.observe(document.body);
+}
 
 window.onload=initSectionMenu;
 </script>
