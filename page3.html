@@ -48,13 +48,13 @@ header{text-align:center;margin-bottom:16px}
   width: 100%;
 }
 
-/* スマホ: 縦並び (column) / PC・タブレット: 横並び (row) */
+/* 手書きエリアのスタイル定義 */
 .writing-area {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 12px;
   flex: 1;
   width: 100%;
 }
@@ -63,7 +63,7 @@ header{text-align:center;margin-bottom:16px}
 @media (min-width: 600px) {
   .writing-area {
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap; /* 3文字でも折り返さず横並びを維持 */
   }
 }
 
@@ -94,7 +94,8 @@ header{text-align:center;margin-bottom:16px}
 
 .writing-box {
   position: relative;
-  width: min(75vw, 220px);
+  width: 220px;
+  max-width: 30%; /* 横並び時に枠が画面からはみ出さない調整 */
   aspect-ratio: 1;
   background: #fff;
   border: 3px solid #3b4558;
@@ -105,6 +106,7 @@ header{text-align:center;margin-bottom:16px}
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
+  flex-shrink: 0;
 }
 .box-number {
   position: absolute;
@@ -167,7 +169,7 @@ canvas {
 @media(max-width:480px){
   .app{padding:10px}
   .card{padding:14px;border-radius:16px}
-  .writing-box{width:min(78vw, 220px)}
+  .writing-box{width:min(78vw, 220px); max-width:100%;}
 }
 </style>
 </head>
@@ -508,8 +510,8 @@ function nextQuestion(){
  playSound("tap");
  currentIndex++;
  if(currentIndex>=questions.length){
-   showResult();
-   return;
+    showResult();
+    return;
  }
  showQuestion();
  scrollToTop();
