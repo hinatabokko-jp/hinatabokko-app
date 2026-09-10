@@ -230,7 +230,6 @@ canvas {
 </div>
 
 <script>
-// 新しい問題データ（11問）
 const allQuestions=[
   {type:2,words:[{kanji:"宿",reading:"しゅく"},{kanji:"舎",reading:"しゃ"}],sentence:"代表選手の{0}{1}"},
   {type:2,words:[{kanji:"往",reading:"おう"},{kanji:"路",reading:"ろ"}],sentence:"目的地までの{0}{1}"},
@@ -288,47 +287,66 @@ function playSound(type){
       gain.gain.exponentialRampToValueAtTime(.01,now+.05);
       osc.start(now);osc.stop(now+.05);
     }else if(type==="correct"){
+      // --- トイピアノ風の短い正解ファンファーレ（C5 → E5 → G5 → C6 → E6） ---
       const notes = [
-        { f: 523.25, t: 0.00 }, // C5
-        { f: 659.25, t: 0.08 }, // E5
-        { f: 783.99, t: 0.16 }, // G5
-        { f: 1046.50, t: 0.24 }, // C6
-        { f: 1318.51, t: 0.32 }  // E6
+        { f: 523.25, t: 0.00, dur: 0.35 }, // C5 (ド)
+        { f: 659.25, t: 0.06, dur: 0.35 }, // E5 (ミ)
+        { f: 783.99, t: 0.12, dur: 0.35 }, // G5 (ソ)
+        { f: 1046.50, t: 0.18, dur: 0.40 }, // C6 (高ド)
+        { f: 1318.51, t: 0.24, dur: 0.65 }  // E6 (高ミ - 華やかに響かせる)
       ];
 
       notes.forEach((n) => {
         const startTime = now + n.t;
-        const duration = 0.45;
+        const duration = n.dur;
 
+        // 1. 基音（サイン波：トイピアノの丸みのあるぽろんとした音）
         const oscSine = audioCtx.createOscillator();
         const gainSine = audioCtx.createGain();
         oscSine.type = "sine";
         oscSine.frequency.setValueAtTime(n.f, startTime);
 
-        gainSine.gain.setValueAtTime(0.001, startTime);
-        gainSine.gain.linearRampToValueAtTime(0.2, startTime + 0.015);
-        gainSine.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+        // 急激なアタックと自然な指数減衰
+        gainSine.gain.setValueAtTime(0.0001, startTime);
+        gainSine.gain.linearRampToValueAtTime(0.22, startTime + 0.005);
+        gainSine.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
 
         oscSine.connect(gainSine);
         gainSine.connect(audioCtx.destination);
         oscSine.start(startTime);
         oscSine.stop(startTime + duration);
 
+        // 2. 倍音成分（オクターブ上の三角波：ピコピコ感と軽快なトイピアノ感を追加）
         const oscTri = audioCtx.createOscillator();
         const gainTri = audioCtx.createGain();
         oscTri.type = "triangle";
-        oscTri.frequency.setValueAtTime(n.f, startTime);
+        oscTri.frequency.setValueAtTime(n.f * 2, startTime); // 1オクターブ上
 
-        gainTri.gain.setValueAtTime(0.001, startTime);
-        gainTri.gain.linearRampToValueAtTime(0.12, startTime + 0.01);
-        gainTri.gain.exponentialRampToValueAtTime(0.001, startTime + (duration * 0.7));
+        gainTri.gain.setValueAtTime(0.0001, startTime);
+        gainTri.gain.linearRampToValueAtTime(0.10, startTime + 0.004);
+        gainTri.gain.exponentialRampToValueAtTime(0.0001, startTime + (duration * 0.6));
 
         oscTri.connect(gainTri);
         gainTri.connect(audioCtx.destination);
         oscTri.start(startTime);
         oscTri.stop(startTime + duration);
+
+        // 3. アタック打撃音（超高音の極小のピン音でハンマーのポロン感を演出）
+        const oscClick = audioCtx.createOscillator();
+        const gainClick = audioCtx.createGain();
+        oscClick.type = "sine";
+        oscClick.frequency.setValueAtTime(n.f * 4, startTime);
+
+        gainClick.gain.setValueAtTime(0.08, startTime);
+        gainClick.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.025);
+
+        oscClick.connect(gainClick);
+        gainClick.connect(audioCtx.destination);
+        oscClick.start(startTime);
+        oscClick.stop(startTime + 0.025);
       });
     }else{
+      // 不正解音
       const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
       osc.connect(gain);gain.connect(audioCtx.destination);
       osc.type="sawtooth";
