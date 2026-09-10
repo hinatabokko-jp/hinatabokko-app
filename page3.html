@@ -37,6 +37,7 @@ header{text-align:center;margin-bottom:16px}
 .question{text-align:center;font-size:clamp(20px,4.5vw,28px);line-height:1.8;font-weight:700;min-height:80px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;padding:12px 16px;background:rgba(15,18,25,.5);border-radius:12px;border:1px solid rgba(255,255,255,.05)}
 .reading{color:#a5b4fc;font-weight:700;white-space:nowrap}
 .question-note{text-align:center;color:var(--sub);font-size:12px;margin-top:8px}
+.reading-notice{text-align:center;color:#f59e0b;font-size:12px;margin-top:4px;font-weight:600}
 .section-title{margin:20px 0 10px;color:var(--sub);font-size:12px;font-weight:700;letter-spacing:.05em;text-align:center}
 
 /* 手書きエリアとスクロールゾーンのコンテナ */
@@ -173,7 +174,7 @@ canvas {
 </head>
 <body>
 <div class="app">
-<header><h1 class="title">５年生漢字 小テスト復習</h1><div class="subtitle" id="headerSubtitle">全11問</div></header>
+<header><h1 class="title">５年生漢字 小テスト復習</h1><div class="subtitle" id="headerSubtitle">全20問</div></header>
 
 <div id="sectionSelectArea"><div class="section-grid" id="sectionGrid"></div></div>
 
@@ -186,7 +187,8 @@ canvas {
 <section id="testArea">
 <div class="question-label"><span id="sectionLabelText">QUESTION</span></div>
 <div class="question" id="question"></div>
-<div class="question-note">（読み仮名）の漢字を下の枠内に書いてください</div>
+<div class="question-note">（読み仮名）の文字を下の枠内に書いてください</div>
+<div class="reading-notice" id="readingNotice"></div>
 <div class="section-title">あなたの答え（手書き）</div>
 
 <div class="writing-container">
@@ -229,7 +231,7 @@ canvas {
 </div>
 
 <script>
-// 新しい問題データ（11問）
+// 問題データ（全20問）
 const allQuestions=[
   {type:2,words:[{kanji:"宿",reading:"しゅく"},{kanji:"舎",reading:"しゃ"}],sentence:"代表選手の{0}{1}"},
   {type:2,words:[{kanji:"往",reading:"おう"},{kanji:"路",reading:"ろ"}],sentence:"目的地までの{0}{1}"},
@@ -242,7 +244,16 @@ const allQuestions=[
   {type:1,words:[{kanji:"険",reading:"けわ"}],sentence:"{0}しい表情"},
   {type:1,words:[{kanji:"断",reading:"ことわ"}],sentence:"要求を{0}る"},
   {type:2,words:[{kanji:"心",reading:"しん"},{kanji:"境",reading:"きょう"}],sentence:"{0}{1}が変化する"},
-  {type:1,words:[{kanji:"逆",reading:"さか"}],sentence:"風に{0}らう"}
+  {type:1,words:[{kanji:"逆",reading:"さか"}],sentence:"風に{0}らう"},
+  // 追加された問題（8問）
+  {type:2,words:[{kanji:"接",reading:"せつ"},{kanji:"続",reading:"ぞく"}],sentence:"機器を{0}{1}する"},
+  {type:1,words:[{kanji:"勢",reading:"いきお"}],sentence:"{0}いをつけろ"},
+  {type:2,words:[{kanji:"し",reading:"史"},{kanji:"じつ",reading:"実"}],sentence:"{0}{1}に基づく話",readingNotice:"※「しじつ」はふりがな（ひらがな）で書いてください"},
+  {type:4,words:[{kanji:"じ",reading:"序"},{kanji:"ょ",reading:""},{kanji:"ぶ",reading:"文"},{kanji:"ん",reading:""}],sentence:"{0}{1}{2}{3}を読む",readingNotice:"※「じょぶん」はふりがな（ひらがな）で書いてください"},
+  {type:2,words:[{kanji:"資",reading:"し"},{kanji:"金",reading:"きん"}],sentence:"開業のための{0}{1}"},
+  {type:3,words:[{kanji:"非",reading:"ひ"},{kanji:"売",reading:"ばい"},{kanji:"品",reading:"ひん"}],sentence:"{0}{1}{2}の人形"},
+  {type:2,words:[{kanji:"総",reading:"そう"},{kanji:"数",reading:"すう"}],sentence:"{0}{1}を調べる"},
+  {type:2,words:[{kanji:"計",reading:"けい"},{kanji:"測",reading:"そく"}],sentence:"速度を{0}{1}する"}
 ];
 
 let questions=[],currentSectionIndex=0,currentIndex=0,answered=false,correctCount=0,userGraded=false;
@@ -287,7 +298,6 @@ function playSound(type){
       gain.gain.exponentialRampToValueAtTime(.01,now+.05);
       osc.start(now);osc.stop(now+.05);
     }else if(type==="correct"){
-      // トイピアノ風アルペジオ: C5, E5, G5, C6, E6
       const notes = [
         { f: 523.25, t: 0.00 }, // C5
         { f: 659.25, t: 0.06 }, // E5
@@ -298,29 +308,26 @@ function playSound(type){
 
       notes.forEach((n) => {
         const startTime = now + n.t;
-        const duration = 0.35; // トイピアノの軽快で短い減衰音
+        const duration = 0.35;
 
-        // 1. メインの音色：サイン波（澄んだ丸みのある音）
         const oscSine = audioCtx.createOscillator();
         const gainSine = audioCtx.createGain();
         oscSine.type = "sine";
         oscSine.frequency.setValueAtTime(n.f, startTime);
 
-        // トイピアノ特有の打弦のアタックと素早い減衰（Decay）
         gainSine.gain.setValueAtTime(0.0001, startTime);
-        gainSine.gain.linearRampToValueAtTime(0.25, startTime + 0.004); // アタック
-        gainSine.gain.exponentialRampToValueAtTime(0.0001, startTime + duration); // 指数減衰
+        gainSine.gain.linearRampToValueAtTime(0.25, startTime + 0.004);
+        gainSine.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
 
         oscSine.connect(gainSine);
         gainSine.connect(audioCtx.destination);
         oscSine.start(startTime);
         oscSine.stop(startTime + duration);
 
-        // 2. 倍音成分：三角波（トイピアノのピコッとした倍音感をプラス）
         const oscTri = audioCtx.createOscillator();
         const gainTri = audioCtx.createGain();
         oscTri.type = "triangle";
-        oscTri.frequency.setValueAtTime(n.f * 2, startTime); // 1オクターブ上の倍音
+        oscTri.frequency.setValueAtTime(n.f * 2, startTime);
 
         gainTri.gain.setValueAtTime(0.0001, startTime);
         gainTri.gain.linearRampToValueAtTime(0.08, startTime + 0.003);
@@ -468,7 +475,14 @@ function stopDrawing(e,i){
 function clearCanvas(){strokes=[];redrawAll()}
 function undoLastStroke(){if(strokes.length){strokes.pop();redrawAll();playSound("tap")}}
 
-function createQuestionHTML(item){let text=item.sentence;item.words.forEach((w,i)=>text=text.replace(`{${i}}`,`<span class="reading">（${w.reading||""}）</span>`));return text}
+function createQuestionHTML(item){
+  let text=item.sentence;
+  item.words.forEach((w,i)=>{
+    const readingText = w.reading ? `（${w.reading}）` : `（${w.kanji}）`;
+    text=text.replace(`{${i}}`,`<span class="reading">${readingText}</span>`);
+  });
+  return text;
+}
 
 function showQuestion(){
  const item=questions[currentIndex];
@@ -476,6 +490,16 @@ function showQuestion(){
  totalNumberEl.textContent=questions.length;
  questionTypeEl.textContent=item.words.length + "文字";
  questionEl.innerHTML=createQuestionHTML(item);
+ 
+ const readingNoticeEl = $("readingNotice");
+ if(item.readingNotice){
+   readingNoticeEl.textContent = item.readingNotice;
+   readingNoticeEl.style.display = "block";
+ } else {
+   readingNoticeEl.textContent = "";
+   readingNoticeEl.style.display = "none";
+ }
+
  answered=false;userGraded=false;
  buildWritingBoxes(item.words.length);
  answer.textContent="";
@@ -503,8 +527,8 @@ function nextQuestion(){
  playSound("tap");
  currentIndex++;
  if(currentIndex>=questions.length){
-   showResult();
-   return;
+    showResult();
+    return;
  }
  showQuestion();
  scrollToTop();
