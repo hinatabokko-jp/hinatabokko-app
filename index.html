@@ -11,8 +11,6 @@
   box-sizing:border-box;
   -webkit-tap-highlight-color:transparent;
   -webkit-user-select:none;
-  -moz-user-select:none;
-  -ms-user-select:none;
   user-select:none;
 }
 :root{--bg:#0f1219;--panel:#181d28;--panel-light:#222836;--border:#323b4e;--text:#f5f7fa;--sub:#9da6b5;--accent:#657dff;--success:#4cd964;--danger:#ff3b30}
@@ -379,41 +377,48 @@ function playSound(type){
       gain.gain.exponentialRampToValueAtTime(.01,now+.05);
       osc.start(now);osc.stop(now+.05);
     }else if(type==="correct"){
-      // 要望１：トイピアノ風和音サウンドへの変更
+      // トイピアノ風ファンファーレ音 (C5 → E5 → G5 → C6 → E6)
       const notes = [
-        [523.25, 0.00, 0.12, 0.22], // C5 (ド)
-        [659.25, 0.08, 0.12, 0.22], // E5 (ミ)
-        [783.99, 0.16, 0.14, 0.25], // G5 (ソ)
-        [1046.50, 0.26, 0.50, 0.30], // C6 (高いド)
-        [1318.51, 0.26, 0.50, 0.20]  // E6 (高いミ)
+        { f: 523.25, t: 0.00 }, // C5
+        { f: 659.25, t: 0.08 }, // E5
+        { f: 783.99, t: 0.16 }, // G5
+        { f: 1046.50, t: 0.24 }, // C6
+        { f: 1318.51, t: 0.32 }  // E6
       ];
 
-      notes.forEach(([freq, delay, dur, vol]) => {
-        const startTime = now + delay;
+      notes.forEach((n) => {
+        const startTime = now + n.t;
+        const duration = 0.45;
 
-        // 1. サイン波 (まろやかな主音)
+        // 音色1: サイン波 (やわらかい基音)
         const oscSine = audioCtx.createOscillator();
         const gainSine = audioCtx.createGain();
         oscSine.type = "sine";
-        oscSine.frequency.setValueAtTime(freq, startTime);
-        gainSine.gain.setValueAtTime(vol * 0.7, startTime);
-        gainSine.gain.exponentialRampToValueAtTime(0.001, startTime + dur);
+        oscSine.frequency.setValueAtTime(n.f, startTime);
+
+        gainSine.gain.setValueAtTime(0.001, startTime);
+        gainSine.gain.linearRampToValueAtTime(0.2, startTime + 0.015);
+        gainSine.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
         oscSine.connect(gainSine);
         gainSine.connect(audioCtx.destination);
         oscSine.start(startTime);
-        oscSine.stop(startTime + dur);
+        oscSine.stop(startTime + duration);
 
-        // 2. 三角波 (トイピアノらしい質感を加える高音成分)
+        // 音色2: 三角波 (トイピアノらしいコロコロ感・倍音)
         const oscTri = audioCtx.createOscillator();
         const gainTri = audioCtx.createGain();
         oscTri.type = "triangle";
-        oscTri.frequency.setValueAtTime(freq, startTime);
-        gainTri.gain.setValueAtTime(vol * 0.3, startTime);
-        gainTri.gain.exponentialRampToValueAtTime(0.001, startTime + (dur * 0.8));
+        oscTri.frequency.setValueAtTime(n.f, startTime);
+
+        gainTri.gain.setValueAtTime(0.001, startTime);
+        gainTri.gain.linearRampToValueAtTime(0.12, startTime + 0.01);
+        gainTri.gain.exponentialRampToValueAtTime(0.001, startTime + (duration * 0.7));
+
         oscTri.connect(gainTri);
         gainTri.connect(audioCtx.destination);
         oscTri.start(startTime);
-        oscTri.stop(startTime + dur);
+        oscTri.stop(startTime + duration);
       });
     }else{
       const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
@@ -486,8 +491,8 @@ function setupCanvas(cvs,ctx,index){
  cvs.onpointerup=e=>stopDrawing(e,index);
  cvs.onpointercancel=e=>stopDrawing(e,index);
 
- // 要望２：長押しによる選択・メニュー表示やスワイプの干渉を確実に抑止
- cvs.addEventListener("contextmenu", e => e.preventDefault());
+ // タッチ・長押し選択イベントを完全に無効化
+ cvs.oncontextmenu = e => { e.preventDefault(); e.stopPropagation(); return false; };
  cvs.addEventListener("touchstart", e => e.preventDefault(), { passive: false });
  cvs.addEventListener("touchmove", e => e.preventDefault(), { passive: false });
  cvs.addEventListener("touchend", e => e.preventDefault(), { passive: false });
@@ -497,9 +502,7 @@ function buildWritingBoxes(count){
  writingArea.innerHTML="";canvases=[];ctxs=[];strokes=[];
  for(let i=0;i<count;i++){
   const box=document.createElement("div");box.className="writing-box";
-  // 要望２：親要素でもメニューや選択動作をブロック
-  box.addEventListener("contextmenu", e => e.preventDefault());
-  
+  box.oncontextmenu = e => { e.preventDefault(); e.stopPropagation(); return false; };
   if(count>1){
     const label=document.createElement("div");
     label.className="box-number";
