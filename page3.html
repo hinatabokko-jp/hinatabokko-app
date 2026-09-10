@@ -33,8 +33,7 @@ header{text-align:center;margin-bottom:16px}
 .progress{color:var(--sub);font-size:14px}.progress strong{color:var(--accent);font-size:20px}
 .badge-group{display:flex;gap:8px}.badge{color:var(--sub);font-size:12px;background:var(--panel-light);border:1px solid var(--border);padding:4px 10px;border-radius:20px}
 .question-label{color:var(--accent);font-size:11px;font-weight:800;letter-spacing:.15em;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
-.audio-btn,.tool-btn{background:var(--panel-light);border:1px solid var(--border);color:var(--text);border-radius:10px;cursor:pointer}
-.audio-btn{padding:4px 10px;font-size:12px}.tool-btn{padding:8px 14px;font-size:13px;font-weight:600}
+.tool-btn{background:var(--panel-light);border:1px solid var(--border);color:var(--text);border-radius:10px;cursor:pointer;padding:8px 14px;font-size:13px;font-weight:600}
 .question{text-align:center;font-size:clamp(20px,4.5vw,28px);line-height:1.8;font-weight:700;min-height:80px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;padding:12px 16px;background:rgba(15,18,25,.5);border-radius:12px;border:1px solid rgba(255,255,255,.05)}
 .reading{color:#a5b4fc;font-weight:700;white-space:nowrap}
 .question-note{text-align:center;color:var(--sub);font-size:12px;margin-top:8px}
@@ -185,7 +184,7 @@ canvas {
 </div>
 
 <section id="testArea">
-<div class="question-label"><span id="sectionLabelText">QUESTION</span><button class="audio-btn" id="audioBtn">🔊 読み上げ</button></div>
+<div class="question-label"><span id="sectionLabelText">QUESTION</span></div>
 <div class="question" id="question"></div>
 <div class="question-note">（読み仮名）の漢字を下の枠内に書いてください</div>
 <div class="section-title">あなたの答え（手書き）</div>
@@ -230,6 +229,7 @@ canvas {
 </div>
 
 <script>
+// 新しい問題データ（11問）
 const allQuestions=[
   {type:2,words:[{kanji:"宿",reading:"しゅく"},{kanji:"舎",reading:"しゃ"}],sentence:"代表選手の{0}{1}"},
   {type:2,words:[{kanji:"往",reading:"おう"},{kanji:"路",reading:"ろ"}],sentence:"目的地までの{0}{1}"},
@@ -254,7 +254,7 @@ const BASE_QUESTION = 1;
 const $=id=>document.getElementById(id);
 const sectionSelectArea=$("sectionSelectArea"),sectionGrid=$("sectionGrid"),mainCard=$("mainCard"),headerSubtitle=$("headerSubtitle"),sectionLabelText=$("sectionLabelText");
 const questionEl=$("question"),currentNumberEl=$("currentNumber"),totalNumberEl=$("totalNumber"),questionTypeEl=$("questionType"),correctCountEl=$("correctCount"),writingArea=$("writingArea");
-const clearBtn=$("clearBtn"),undoBtn=$("undoBtn"),checkBtn=$("checkBtn"),nextBtn=$("nextBtn"),finishBtn=$("finishBtn"),audioBtn=$("audioBtn");
+const clearBtn=$("clearBtn"),undoBtn=$("undoBtn"),checkBtn=$("checkBtn"),nextBtn=$("nextBtn"),finishBtn=$("finishBtn");
 const answer=$("answer"),answerPlaceholder=$("answerPlaceholder"),selfGrading=$("selfGrading"),correctBtn=$("correctBtn"),incorrectBtn=$("incorrectBtn");
 const testArea=$("testArea"),resultArea=$("resultArea"),restartBtn=$("restartBtn"),backToMenuBtn=$("backToMenuBtn"),finalScore=$("finalScore");
 
@@ -287,66 +287,51 @@ function playSound(type){
       gain.gain.exponentialRampToValueAtTime(.01,now+.05);
       osc.start(now);osc.stop(now+.05);
     }else if(type==="correct"){
-      // --- トイピアノ風の短い正解ファンファーレ（C5 → E5 → G5 → C6 → E6） ---
+      // トイピアノ風アルペジオ: C5, E5, G5, C6, E6
       const notes = [
-        { f: 523.25, t: 0.00, dur: 0.35 }, // C5 (ド)
-        { f: 659.25, t: 0.06, dur: 0.35 }, // E5 (ミ)
-        { f: 783.99, t: 0.12, dur: 0.35 }, // G5 (ソ)
-        { f: 1046.50, t: 0.18, dur: 0.40 }, // C6 (高ド)
-        { f: 1318.51, t: 0.24, dur: 0.65 }  // E6 (高ミ - 華やかに響かせる)
+        { f: 523.25, t: 0.00 }, // C5
+        { f: 659.25, t: 0.06 }, // E5
+        { f: 783.99, t: 0.12 }, // G5
+        { f: 1046.50, t: 0.18 }, // C6
+        { f: 1318.51, t: 0.24 }  // E6
       ];
 
       notes.forEach((n) => {
         const startTime = now + n.t;
-        const duration = n.dur;
+        const duration = 0.35; // トイピアノの軽快で短い減衰音
 
-        // 1. 基音（サイン波：トイピアノの丸みのあるぽろんとした音）
+        // 1. メインの音色：サイン波（澄んだ丸みのある音）
         const oscSine = audioCtx.createOscillator();
         const gainSine = audioCtx.createGain();
         oscSine.type = "sine";
         oscSine.frequency.setValueAtTime(n.f, startTime);
 
-        // 急激なアタックと自然な指数減衰
+        // トイピアノ特有の打弦のアタックと素早い減衰（Decay）
         gainSine.gain.setValueAtTime(0.0001, startTime);
-        gainSine.gain.linearRampToValueAtTime(0.22, startTime + 0.005);
-        gainSine.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+        gainSine.gain.linearRampToValueAtTime(0.25, startTime + 0.004); // アタック
+        gainSine.gain.exponentialRampToValueAtTime(0.0001, startTime + duration); // 指数減衰
 
         oscSine.connect(gainSine);
         gainSine.connect(audioCtx.destination);
         oscSine.start(startTime);
         oscSine.stop(startTime + duration);
 
-        // 2. 倍音成分（オクターブ上の三角波：ピコピコ感と軽快なトイピアノ感を追加）
+        // 2. 倍音成分：三角波（トイピアノのピコッとした倍音感をプラス）
         const oscTri = audioCtx.createOscillator();
         const gainTri = audioCtx.createGain();
         oscTri.type = "triangle";
-        oscTri.frequency.setValueAtTime(n.f * 2, startTime); // 1オクターブ上
+        oscTri.frequency.setValueAtTime(n.f * 2, startTime); // 1オクターブ上の倍音
 
         gainTri.gain.setValueAtTime(0.0001, startTime);
-        gainTri.gain.linearRampToValueAtTime(0.10, startTime + 0.004);
-        gainTri.gain.exponentialRampToValueAtTime(0.0001, startTime + (duration * 0.6));
+        gainTri.gain.linearRampToValueAtTime(0.08, startTime + 0.003);
+        gainTri.gain.exponentialRampToValueAtTime(0.0001, startTime + (duration * 0.5));
 
         oscTri.connect(gainTri);
         gainTri.connect(audioCtx.destination);
         oscTri.start(startTime);
         oscTri.stop(startTime + duration);
-
-        // 3. アタック打撃音（超高音の極小のピン音でハンマーのポロン感を演出）
-        const oscClick = audioCtx.createOscillator();
-        const gainClick = audioCtx.createGain();
-        oscClick.type = "sine";
-        oscClick.frequency.setValueAtTime(n.f * 4, startTime);
-
-        gainClick.gain.setValueAtTime(0.08, startTime);
-        gainClick.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.025);
-
-        oscClick.connect(gainClick);
-        gainClick.connect(audioCtx.destination);
-        oscClick.start(startTime);
-        oscClick.stop(startTime + 0.025);
       });
     }else{
-      // 不正解音
       const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
       osc.connect(gain);gain.connect(audioCtx.destination);
       osc.type="sawtooth";
@@ -485,17 +470,6 @@ function undoLastStroke(){if(strokes.length){strokes.pop();redrawAll();playSound
 
 function createQuestionHTML(item){let text=item.sentence;item.words.forEach((w,i)=>text=text.replace(`{${i}}`,`<span class="reading">（${w.reading||""}）</span>`));return text}
 
-function speakQuestion(){
- if(!("speechSynthesis"in window))return;
- try {
-    window.speechSynthesis.cancel();
-    const item=questions[currentIndex];let t=item.sentence;
-    item.words.forEach((w,i)=>t=t.replace(`{${i}}`,w.reading||""));
-    const u=new SpeechSynthesisUtterance(t);u.lang="ja-JP";u.rate=.9;
-    window.speechSynthesis.speak(u);
- } catch(e){}
-}
-
 function showQuestion(){
  const item=questions[currentIndex];
  currentNumberEl.textContent=currentIndex+1;
@@ -551,7 +525,6 @@ nextBtn.onclick=nextQuestion;
 finishBtn.onclick=showMenu;
 backToMenuBtn.onclick=showMenu;
 restartBtn.onclick=restart;
-audioBtn.onclick=speakQuestion;
 correctBtn.onclick=()=>gradeAnswer(true);
 incorrectBtn.onclick=()=>gradeAnswer(false);
 
