@@ -7,7 +7,14 @@
 <!-- confetti.js library for celebration effects -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
+  user-select:none;
+}
 :root{--bg:#0f1219;--panel:#181d28;--panel-light:#222836;--border:#323b4e;--text:#f5f7fa;--sub:#9da6b5;--accent:#657dff;--success:#4cd964;--danger:#ff3b30}
 html,body{width:100%;margin:0;padding:0;background:var(--bg);scroll-behavior:smooth}
 body{min-height:100vh;background:radial-gradient(circle at 50% -10%,rgba(101,125,255,.15),transparent 50%),var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP","Yu Gothic",sans-serif;display:flex;justify-content:center;overflow-x:hidden}
@@ -98,6 +105,9 @@ header{text-align:center;margin-bottom:16px}
   overflow: hidden;
   box-shadow: 0 10px 25px rgba(0, 0, 0, .3);
   touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 .box-number {
   position: absolute;
@@ -135,6 +145,9 @@ canvas {
   z-index: 2;
   cursor: crosshair;
   touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .canvas-tools{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
@@ -366,54 +379,41 @@ function playSound(type){
       gain.gain.exponentialRampToValueAtTime(.01,now+.05);
       osc.start(now);osc.stop(now+.05);
     }else if(type==="correct"){
-      const voices = [
-        { startF: 520,  endF: 1050, delay: 0.00, dur: 0.55 },
-        { startF: 660,  endF: 1320, delay: 0.04, dur: 0.50 },
-        { startF: 780,  endF: 1560, delay: 0.08, dur: 0.52 },
-        { startF: 880,  endF: 1760, delay: 0.12, dur: 0.48 }
+      // 要望１：トイピアノ風和音サウンドへの変更
+      const notes = [
+        [523.25, 0.00, 0.12, 0.22], // C5 (ド)
+        [659.25, 0.08, 0.12, 0.22], // E5 (ミ)
+        [783.99, 0.16, 0.14, 0.25], // G5 (ソ)
+        [1046.50, 0.26, 0.50, 0.30], // C6 (高いド)
+        [1318.51, 0.26, 0.50, 0.20]  // E6 (高いミ)
       ];
-      voices.forEach(v => {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = "sine";
-        const t = now + v.delay;
-        osc.frequency.setValueAtTime(v.startF, t);
-        osc.frequency.exponentialRampToValueAtTime(v.endF, t + 0.18);
-        osc.frequency.linearRampToValueAtTime(v.endF * 0.95, t + v.dur);
-        gain.gain.setValueAtTime(0.001, t);
-        gain.gain.linearRampToValueAtTime(0.12, t + 0.08);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + v.dur);
-        osc.connect(gain);gain.connect(audioCtx.destination);
-        osc.start(t);osc.stop(t + v.dur);
-      });
-      const arpeggio = [
-        { f: 523.25, t: 0.00 },
-        { f: 659.25, t: 0.07 },
-        { f: 783.99, t: 0.14 },
-        { f: 1046.50, t: 0.21 },
-        { f: 1318.51, t: 0.28 }
-      ];
-      arpeggio.forEach(n => {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = "triangle";
-        osc.frequency.setValueAtTime(n.f, now + n.t);
-        gain.gain.setValueAtTime(0.18, now + n.t);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + n.t + 0.35);
-        osc.connect(gain);gain.connect(audioCtx.destination);
-        osc.start(now + n.t);osc.stop(now + n.t + 0.35);
-      });
-      const sparkles = [1567.98, 1760.00, 2093.00, 2349.32, 2637.02];
-      sparkles.forEach((freq, idx) => {
-        const t = now + 0.22 + idx * 0.04;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(freq, t);
-        gain.gain.setValueAtTime(0.08, t);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
-        osc.connect(gain);gain.connect(audioCtx.destination);
-        osc.start(t);osc.stop(t + 0.15);
+
+      notes.forEach(([freq, delay, dur, vol]) => {
+        const startTime = now + delay;
+
+        // 1. サイン波 (まろやかな主音)
+        const oscSine = audioCtx.createOscillator();
+        const gainSine = audioCtx.createGain();
+        oscSine.type = "sine";
+        oscSine.frequency.setValueAtTime(freq, startTime);
+        gainSine.gain.setValueAtTime(vol * 0.7, startTime);
+        gainSine.gain.exponentialRampToValueAtTime(0.001, startTime + dur);
+        oscSine.connect(gainSine);
+        gainSine.connect(audioCtx.destination);
+        oscSine.start(startTime);
+        oscSine.stop(startTime + dur);
+
+        // 2. 三角波 (トイピアノらしい質感を加える高音成分)
+        const oscTri = audioCtx.createOscillator();
+        const gainTri = audioCtx.createGain();
+        oscTri.type = "triangle";
+        oscTri.frequency.setValueAtTime(freq, startTime);
+        gainTri.gain.setValueAtTime(vol * 0.3, startTime);
+        gainTri.gain.exponentialRampToValueAtTime(0.001, startTime + (dur * 0.8));
+        oscTri.connect(gainTri);
+        gainTri.connect(audioCtx.destination);
+        oscTri.start(startTime);
+        oscTri.stop(startTime + dur);
       });
     }else{
       const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
@@ -485,12 +485,21 @@ function setupCanvas(cvs,ctx,index){
  cvs.onpointermove=e=>draw(e,index);
  cvs.onpointerup=e=>stopDrawing(e,index);
  cvs.onpointercancel=e=>stopDrawing(e,index);
+
+ // 要望２：長押しによる選択・メニュー表示やスワイプの干渉を確実に抑止
+ cvs.addEventListener("contextmenu", e => e.preventDefault());
+ cvs.addEventListener("touchstart", e => e.preventDefault(), { passive: false });
+ cvs.addEventListener("touchmove", e => e.preventDefault(), { passive: false });
+ cvs.addEventListener("touchend", e => e.preventDefault(), { passive: false });
 }
 
 function buildWritingBoxes(count){
  writingArea.innerHTML="";canvases=[];ctxs=[];strokes=[];
  for(let i=0;i<count;i++){
   const box=document.createElement("div");box.className="writing-box";
+  // 要望２：親要素でもメニューや選択動作をブロック
+  box.addEventListener("contextmenu", e => e.preventDefault());
+  
   if(count>1){
     const label=document.createElement("div");
     label.className="box-number";
