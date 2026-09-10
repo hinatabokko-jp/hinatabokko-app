@@ -1,636 +1,556 @@
 <!DOCTYPE html>
-<html lang="ja" class="h-full bg-slate-950 text-slate-100">
+<html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>スマート フラッシュライト</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#fffbe1',
-                            400: '#facc15',
-                            500: '#eab308',
-                            600: '#ca8a04',
-                        }
-                    },
-                    boxShadow: {
-                        'glow-yellow': '0 0 50px -5px rgba(234, 179, 8, 0.6), 0 0 20px -10px rgba(234, 179, 8, 0.8)',
-                        'glow-white': '0 0 60px 10px rgba(255, 255, 255, 0.8)',
-                        'glow-red': '0 0 50px -5px rgba(239, 68, 68, 0.6)'
-                    },
-                    animation: {
-                        'pulse-fast': 'pulse 0.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        /* タッチスクロール防止（アプリのような操作感） */
-        body {
-            touch-action: manipulation;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        /* スライダーの見た目カスタマイズ */
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #facc15;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(250, 204, 21, 0.8);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>５年生漢字 小テスト復習</title>
+<!-- confetti.js library for celebration effects -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;
+  user-select:none;
+}
+:root{--bg:#0f1219;--panel:#181d28;--panel-light:#222836;--border:#323b4e;--text:#f5f7fa;--sub:#9da6b5;--accent:#657dff;--success:#4cd964;--danger:#ff3b30}
+html,body{width:100%;margin:0;padding:0;background:var(--bg);scroll-behavior:smooth}
+body{min-height:100vh;background:radial-gradient(circle at 50% -10%,rgba(101,125,255,.15),transparent 50%),var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP","Yu Gothic",sans-serif;display:flex;justify-content:center;overflow-x:hidden}
+button{font:inherit;outline:none}
+.app{width:min(720px,100%);padding:16px}
+header{text-align:center;margin-bottom:16px}
+.title{margin:0;font-size:clamp(22px,5vw,32px);font-weight:900;letter-spacing:.04em;background:linear-gradient(135deg,#fff,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{margin-top:4px;color:var(--sub);font-size:13px}
+.section-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:16px}
+.section-card{background:var(--panel-light);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;cursor:pointer;transition:.2s}
+.section-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.section-card:active{transform:scale(.98)}
+.section-card-title{font-size:16px;font-weight:800;margin-bottom:4px}
+.section-card-sub{font-size:12px;color:var(--sub)}
+.card{background:rgba(24,29,40,.95);border:1px solid var(--border);border-radius:20px;padding:clamp(16px,3.5vw,24px);box-shadow:0 20px 50px rgba(0,0,0,.4)}
+.hidden{display:none!important}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px}
+.progress{color:var(--sub);font-size:14px}.progress strong{color:var(--accent);font-size:20px}
+.badge-group{display:flex;gap:8px}.badge{color:var(--sub);font-size:12px;background:var(--panel-light);border:1px solid var(--border);padding:4px 10px;border-radius:20px}
+.question-label{color:var(--accent);font-size:11px;font-weight:800;letter-spacing:.15em;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.audio-btn,.tool-btn{background:var(--panel-light);border:1px solid var(--border);color:var(--text);border-radius:10px;cursor:pointer}
+.audio-btn{padding:4px 10px;font-size:12px}.tool-btn{padding:8px 14px;font-size:13px;font-weight:600}
+.question{text-align:center;font-size:clamp(20px,4.5vw,28px);line-height:1.8;font-weight:700;min-height:80px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;padding:12px 16px;background:rgba(15,18,25,.5);border-radius:12px;border:1px solid rgba(255,255,255,.05)}
+.reading{color:#a5b4fc;font-weight:700;white-space:nowrap}
+.question-note{text-align:center;color:var(--sub);font-size:12px;margin-top:8px}
+.section-title{margin:20px 0 10px;color:var(--sub);font-size:12px;font-weight:700;letter-spacing:.05em;text-align:center}
+
+/* 手書きエリアとスクロールゾーンのコンテナ */
+.writing-container {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  justify-content: center;
+  width: 100%;
+}
+
+/* スマホ: 縦並び (column) / PC・タブレット: 横並び (row) */
+.writing-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex: 1;
+  width: 100%;
+}
+
+/* 画面幅600px以上の環境（PC・タブレット等）で横並びへ変換 */
+@media (min-width: 600px) {
+  .writing-area {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
+
+/* スクロール補助用サイドバー */
+.scroll-sidebar {
+  width: 40px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px;
+  color: var(--sub);
+  font-size: 11px;
+  text-align: center;
+  writing-mode: vertical-rl;
+  letter-spacing: 0.15em;
+  pointer-events: auto;
+  touch-action: pan-y;
+  flex-shrink: 0;
+}
+.scroll-sidebar span {
+  margin: 4px 0;
+  opacity: 0.7;
+}
+
+.writing-box {
+  position: relative;
+  width: min(75vw, 220px);
+  aspect-ratio: 1;
+  background: #fff;
+  border: 3px solid #3b4558;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, .3);
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.box-number {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #3b4558;
+  pointer-events: none;
+  z-index: 3;
+  background: rgba(230, 235, 245, .95);
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(59, 69, 88, 0.2);
+}
+.writing-box:before, .writing-box:after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+}
+.writing-box:before {
+  left: 0; right: 0; top: 50%;
+  border-top: 1px dashed rgba(100, 110, 130, .35);
+}
+.writing-box:after {
+  top: 0; bottom: 0; left: 50%;
+  border-left: 1px dashed rgba(100, 110, 130, .35);
+}
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 2;
+  cursor: crosshair;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.canvas-tools{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.buttons{display:grid;gap:10px;margin-top:16px}
+.btn{width:100%;min-height:50px;border:0;border-radius:12px;padding:10px 16px;color:#fff;font-size:16px;font-weight:800;cursor:pointer;transition:.1s;display:flex;justify-content:center;align-items:center;gap:8px}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-check{background:linear-gradient(135deg,#5b6eff,#8b5cf6);box-shadow:0 4px 15px rgba(91,110,255,.3)}
+.btn-next{background:linear-gradient(135deg,#2563eb,#3b82f6)}
+.btn-finish{background:transparent;border:1px solid #3b4351;color:#aeb7c5;min-height:42px;font-size:14px}
+.answer-section{margin-top:20px}.answer-box{min-height:70px;background:#10141b;border:1px solid var(--border);border-radius:12px;display:flex;justify-content:center;align-items:center;padding:12px}
+.answer-placeholder{color:#657080;font-size:13px;text-align:center}.answer{display:none;color:#fff;font-family:"Noto Serif JP","Yu Mincho",serif;font-size:clamp(32px,7vw,44px);font-weight:700;letter-spacing:.2em}
+.answer.show{display:block}
+.self-grading{display:none;margin-top:12px;grid-template-columns:1fr 1fr;gap:10px}.self-grading.show{display:grid}
+.btn-correct{background:rgba(94,214,160,.15);border:2px solid var(--success);color:var(--success)}
+.btn-incorrect{background:rgba(255,59,48,.15);border:2px solid var(--danger);color:var(--danger)}
+.btn-correct.selected{background:var(--success);color:#000}.btn-incorrect.selected{background:var(--danger);color:#fff}
+.result{display:none;text-align:center;padding:30px 10px}.result.show{display:block}
+.result-icon{font-size:54px}.result-score{font-size:42px;font-weight:900;color:var(--accent);margin:10px 0}.result-title{font-size:26px;font-weight:900}.result-message{margin-top:10px;color:var(--sub);line-height:1.8;font-size:14px}
+.footer{text-align:center;color:#525b69;font-size:11px;margin-top:16px}
+@media(max-width:480px){
+  .app{padding:10px}
+  .card{padding:14px;border-radius:16px}
+  .writing-box{width:min(78vw, 220px)}
+}
+</style>
 </head>
-<body class="h-full flex flex-col justify-between overflow-hidden relative selection:bg-yellow-500 selection:text-black">
-
-    <!-- フルスクリーン用スクリーンライト（バックライト代替） -->
-    <div id="screenLightOverlay" class="fixed inset-0 z-50 hidden flex flex-col justify-between p-6 transition-colors duration-200">
-        <div class="flex justify-between items-center">
-            <span class="text-sm font-semibold opacity-75 mix-blend-difference text-white">スクリーンライト点灯中</span>
-            <button id="closeScreenLightBtn" class="bg-black/40 text-white rounded-full p-3 w-12 h-12 flex items-center justify-center backdrop-blur-md active:scale-95 transition">
-                <i class="fa-solid fa-xmark text-xl"></i>
-            </button>
-        </div>
-        <div class="text-center mix-blend-difference text-white opacity-60 text-xs">
-            画面をタップして色を選択・操作バーを表示
-        </div>
-    </div>
-
-    <!-- ヘッダーバー -->
-    <header class="p-4 flex justify-between items-center z-10 border-b border-slate-800/60 bg-slate-900/40 backdrop-blur-md">
-        <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-lg bg-yellow-500/20 border border-yellow-500/40 flex items-center justify-center text-yellow-400">
-                <i class="fa-solid fa-bolt text-lg"></i>
-            </div>
-            <h1 class="text-lg font-bold tracking-wide bg-gradient-to-r from-yellow-200 to-yellow-500 bg-clip-text text-transparent">
-                FlashLight Web
-            </h1>
-        </div>
-        <div id="batteryStatus" class="flex items-center gap-2 text-xs text-slate-400 bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700">
-            <i id="batteryIcon" class="fa-solid fa-battery-three-quarters text-slate-300"></i>
-            <span id="batteryLevel">--%</span>
-        </div>
-    </header>
-
-    <!-- メインコンテンツ -->
-    <main class="flex-1 flex flex-col items-center justify-center p-6 z-10 max-w-md mx-auto w-full">
-        
-        <!-- ステータス表示メッセージ -->
-        <div class="mb-8 text-center">
-            <div id="statusBadge" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700 transition-all duration-300">
-                <span id="statusDot" class="w-2 h-2 rounded-full bg-slate-500"></span>
-                <span id="statusText">消灯中</span>
-            </div>
-            <p id="torchSupportMessage" class="text-xs text-slate-500 mt-2 h-4">
-                ボタンを押すとライトが点灯します
-            </p>
-        </div>
-
-        <!-- メイン電源ボタン -->
-        <div class="relative my-4 flex items-center justify-center">
-            <!-- 外側の光るリングエフェクト -->
-            <div id="glowRing" class="absolute w-56 h-56 rounded-full transition-all duration-500 opacity-0 scale-95 pointer-events-none"></div>
-
-            <!-- 電源ボタン本体 -->
-            <button id="powerBtn" class="relative z-10 w-48 h-48 rounded-full bg-gradient-to-b from-slate-800 to-slate-900 border-4 border-slate-700 shadow-2xl flex flex-col items-center justify-center gap-3 transition-all duration-200 active:scale-95 group hover:border-slate-600 focus:outline-none">
-                <div id="powerIconContainer" class="w-20 h-20 rounded-full bg-slate-800/80 border border-slate-700 flex items-center justify-center text-slate-500 transition-all duration-300 group-hover:text-slate-400">
-                    <i class="fa-solid fa-power-off text-4xl"></i>
-                </div>
-                <span id="powerBtnText" class="text-sm font-bold text-slate-400 tracking-wider uppercase">TOUCH TO START</span>
-            </button>
-        </div>
-
-        <!-- モード切替タブ -->
-        <div class="w-full mt-8 bg-slate-900/80 border border-slate-800 p-1.5 rounded-2xl flex gap-1 backdrop-blur-md">
-            <button id="modeTorchBtn" class="flex-1 py-2.5 px-3 rounded-xl text-xs font-medium transition flex items-center justify-center gap-2 bg-yellow-500 text-slate-950 font-bold shadow">
-                <i class="fa-solid fa-lightbulb"></i>
-                <span>カメラLED</span>
-            </button>
-            <button id="modeStrobeBtn" class="flex-1 py-2.5 px-3 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-burst"></i>
-                <span>点滅/SOS</span>
-            </button>
-            <button id="modeScreenBtn" class="flex-1 py-2.5 px-3 rounded-xl text-xs font-medium text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-mobile-screen-button"></i>
-                <span>画面ライト</span>
-            </button>
-        </div>
-
-        <!-- サブパネル：点滅・SOS設定 (初期は非表示) -->
-        <div id="strobePanel" class="w-full mt-4 bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 hidden space-y-4">
-            <div>
-                <div class="flex justify-between text-xs text-slate-300 mb-2">
-                    <span>点滅スピード (Strobe)</span>
-                    <span id="strobeSpeedVal" class="font-mono text-yellow-400">OFF</span>
-                </div>
-                <input id="strobeRange" type="range" min="0" max="10" value="0" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer">
-            </div>
-            <div class="flex gap-2">
-                <button id="sosBtn" class="flex-1 py-2 rounded-xl border border-red-500/40 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                    <span>SOS 信号モード</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- サブパネル：画面ライト色設定 (初期は非表示) -->
-        <div id="screenPanel" class="w-full mt-4 bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 hidden space-y-3">
-            <span class="text-xs text-slate-300 block mb-1">スクリーンカラーを選択</span>
-            <div class="flex justify-between items-center gap-2">
-                <button data-color="#ffffff" class="color-picker-btn w-9 h-9 rounded-full bg-white border-2 border-yellow-400 scale-110 shadow-md transition"></button>
-                <button data-color="#ffefaa" class="color-picker-btn w-9 h-9 rounded-full bg-[#ffefaa] border-2 border-transparent hover:scale-105 transition"></button>
-                <button data-color="#ff4444" class="color-picker-btn w-9 h-9 rounded-full bg-[#ff4444] border-2 border-transparent hover:scale-105 transition"></button>
-                <button data-color="#44ff44" class="color-picker-btn w-9 h-9 rounded-full bg-[#44ff44] border-2 border-transparent hover:scale-105 transition"></button>
-                <button data-color="#4488ff" class="color-picker-btn w-9 h-9 rounded-full bg-[#4488ff] border-2 border-transparent hover:scale-105 transition"></button>
-                <button data-color="#ff00ff" class="color-picker-btn w-9 h-9 rounded-full bg-[#ff00ff] border-2 border-transparent hover:scale-105 transition"></button>
-            </div>
-        </div>
-
-        <!-- タイマー機能 -->
-        <div class="w-full mt-4 flex items-center justify-between px-2">
-            <span class="text-xs text-slate-400">消灯タイマー</span>
-            <select id="timerSelect" class="bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-yellow-500">
-                <option value="0">オフ</option>
-                <option value="1">1分後</option>
-                <option value="3">3分後</option>
-                <option value="5">5分後</option>
-                <option value="10">10分後</option>
-            </select>
-        </div>
-
-    </main>
-
-    <!-- 通知トースト -->
-    <div id="toast" class="fixed bottom-16 left-1/2 transform -translate-x-1/2 bg-slate-800/90 text-slate-200 border border-slate-700 px-4 py-2 rounded-full text-xs opacity-0 pointer-events-none transition-all duration-300 z-40 backdrop-blur-md shadow-lg flex items-center gap-2">
-        <i id="toastIcon" class="fa-solid fa-circle-info text-yellow-400"></i>
-        <span id="toastMsg">通知メッセージ</span>
-    </div>
-
-    <!-- フッター -->
-    <footer class="p-3 text-center text-[10px] text-slate-600 border-t border-slate-900">
-        Web MediaTrack Torch API Powered • モバイルブラウザ推奨
-    </footer>
-
-    <script>
-        // アプリケーションの状態状態管理
-        const state = {
-            isOn: false,
-            mode: 'torch', // 'torch' | 'strobe' | 'screen'
-            strobeSpeed: 0, // 0 = OFF, 1~10
-            isSOS: false,
-            screenColor: '#ffffff',
-            timerMinutes: 0,
-            timerId: null,
-            strobeIntervalId: null,
-            mediaStream: null,
-            track: null,
-            torchSupported: false
-        };
-
-        // DOM要素の参照
-        const powerBtn = document.getElementById('powerBtn');
-        const powerIconContainer = document.getElementById('powerIconContainer');
-        const powerBtnText = document.getElementById('powerBtnText');
-        const glowRing = document.getElementById('glowRing');
-        const statusBadge = document.getElementById('statusBadge');
-        const statusDot = document.getElementById('statusDot');
-        const statusText = document.getElementById('statusText');
-        const torchSupportMessage = document.getElementById('torchSupportMessage');
-
-        const modeTorchBtn = document.getElementById('modeTorchBtn');
-        const modeStrobeBtn = document.getElementById('modeStrobeBtn');
-        const modeScreenBtn = document.getElementById('modeScreenBtn');
-
-        const strobePanel = document.getElementById('strobePanel');
-        const screenPanel = document.getElementById('screenPanel');
-        const strobeRange = document.getElementById('strobeRange');
-        const strobeSpeedVal = document.getElementById('strobeSpeedVal');
-        const sosBtn = document.getElementById('sosBtn');
-        const colorPickerBtns = document.querySelectorAll('.color-picker-btn');
-
-        const screenLightOverlay = document.getElementById('screenLightOverlay');
-        const closeScreenLightBtn = document.getElementById('closeScreenLightBtn');
-        const timerSelect = document.getElementById('timerSelect');
-
-        const toast = document.getElementById('toast');
-        const toastMsg = document.getElementById('toastMsg');
-        const toastIcon = document.getElementById('toastIcon');
-
-        // トースト表示関数
-        function showToast(message, iconClass = "fa-solid fa-circle-info text-yellow-400") {
-            toastMsg.textContent = message;
-            toastIcon.className = iconClass;
-            toast.classList.remove('opacity-0', 'pointer-events-none');
-            toast.classList.add('opacity-100');
-            setTimeout(() => {
-                toast.classList.remove('opacity-100');
-                toast.classList.add('opacity-0', 'pointer-events-none');
-            }, 3000);
-        }
-
-        // 触覚フィードバック（バイブレーション）
-        function triggerVibration(pattern = 40) {
-            if ('vibrate' in navigator) {
-                try {
-                    navigator.vibrate(pattern);
-                } catch (e) {
-                    // 一部環境で制限あり
-                }
-            }
-        }
-
-        // バッテリー残量APIの初期化
-        async function initBattery() {
-            if ('getBattery' in navigator) {
-                try {
-                    const battery = await navigator.getBattery();
-                    const updateBattery = () => {
-                        const level = Math.round(battery.level * 100);
-                        document.getElementById('batteryLevel').textContent = `${level}%`;
-                        const icon = document.getElementById('batteryIcon');
-                        if (battery.charging) {
-                            icon.className = "fa-solid fa-battery-charging text-green-400";
-                        } else if (level > 75) {
-                            icon.className = "fa-solid fa-battery-full text-slate-300";
-                        } else if (level > 30) {
-                            icon.className = "fa-solid fa-battery-half text-slate-300";
-                        } else {
-                            icon.className = "fa-solid fa-battery-quarter text-red-400";
-                        }
-                    };
-                    updateBattery();
-                    battery.addEventListener('levelchange', updateBattery);
-                    battery.addEventListener('chargingchange', updateBattery);
-                } catch (e) {
-                    console.log('Battery API not accessible');
-                }
-            }
-        }
-
-        // カメラのTorch機能初期化・取得
-        async function initTorchStream() {
-            if (state.track) return true;
-
-            try {
-                // リアカメラのストリームを取得
-                const constraints = {
-                    video: {
-                        facingMode: { exact: 'environment' }
-                    }
-                };
-                
-                try {
-                    state.mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-                } catch (err) {
-                    // exact指定で失敗した場合は通常の'environment'を試行
-                    state.mediaStream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: 'environment' }
-                    });
-                }
-
-                state.track = state.mediaStream.getVideoTracks()[0];
-                
-                // Capabilitiesチェック
-                const capabilities = state.track.getCapabilities ? state.track.getCapabilities() : {};
-                if ('torch' in capabilities) {
-                    state.torchSupported = true;
-                    torchSupportMessage.textContent = "背面カメラフラッシュが利用可能です";
-                    return true;
-                } else {
-                    state.torchSupported = false;
-                    torchSupportMessage.textContent = "端末のカメラライト非対応のため「画面ライト」をご利用ください";
-                    return false;
-                }
-            } catch (err) {
-                console.warn('Camera access error:', err);
-                state.torchSupported = false;
-                torchSupportMessage.textContent = "カメラ権限が無効または非対応です（画面ライト可）";
-                return false;
-            }
-        }
-
-        // 物理フラッシュライト（Torch）のオン/オフ切替
-        async function setHardwareTorch(on) {
-            if (!state.track) {
-                const initialized = await initTorchStream();
-                if (!initialized) return false;
-            }
-
-            try {
-                await state.track.applyConstraints({
-                    advanced: [{ torch: on }]
-                });
-                return true;
-            } catch (err) {
-                console.error("Torch constraint error:", err);
-                return false;
-            }
-        }
-
-        // メインのオン/オフ処理
-        async function toggleLight(forceState = null) {
-            const targetState = forceState !== null ? forceState : !state.isOn;
-            triggerVibration(targetState ? [30, 50, 30] : 40);
-
-            if (targetState) {
-                // オン処理
-                if (state.mode === 'screen') {
-                    openScreenLight();
-                    state.isOn = true;
-                } else {
-                    const success = await setHardwareTorch(true);
-                    if (success) {
-                        state.isOn = true;
-                    } else {
-                        // ハードウェアライトが使えない場合画面ライトへフォールバック
-                        showToast("カメラライトが利用できないため画面ライトを起動します", "fa-solid fa-triangle-exclamation text-amber-400");
-                        switchMode('screen');
-                        openScreenLight();
-                        state.isOn = true;
-                    }
-                }
-            } else {
-                // オフ処理
-                stopStrobeAndSOS();
-                if (state.track) {
-                    await setHardwareTorch(false);
-                }
-                closeScreenLight();
-                state.isOn = false;
-            }
-
-            updateUI();
-            handleTimerSetting();
-        }
-
-        // UI表示の同期更新
-        function updateUI() {
-            if (state.isOn) {
-                // ON状態のスタイリング
-                powerBtn.classList.remove('border-slate-700');
-                powerBtn.classList.add('border-yellow-400');
-                
-                powerIconContainer.classList.remove('bg-slate-800/80', 'text-slate-500');
-                powerIconContainer.classList.add('bg-yellow-500', 'text-slate-950', 'shadow-glow-yellow');
-                
-                glowRing.classList.remove('opacity-0', 'scale-95');
-                glowRing.classList.add('opacity-100', 'scale-100', 'bg-yellow-500/20', 'shadow-glow-yellow');
-
-                powerBtnText.textContent = "LIGHT ON";
-                powerBtnText.classList.remove('text-slate-400');
-                powerBtnText.classList.add('text-yellow-400', 'font-extrabold');
-
-                statusDot.className = "w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse";
-                statusBadge.className = "inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-yellow-500/10 text-yellow-300 border border-yellow-500/30 shadow-glow-yellow";
-                
-                if (state.isSOS) {
-                    statusText.textContent = "SOS信号 発信中";
-                } else if (state.strobeSpeed > 0) {
-                    statusText.textContent = `ストロボ点滅 (${state.strobeSpeed}Hz)`;
-                } else {
-                    statusText.textContent = state.mode === 'screen' ? "スクリーンライト点灯中" : "LEDライト点灯中";
-                }
-            } else {
-                // OFF状態のスタイリング
-                powerBtn.classList.remove('border-yellow-400');
-                powerBtn.classList.add('border-slate-700');
-
-                powerIconContainer.classList.remove('bg-yellow-500', 'text-slate-950', 'shadow-glow-yellow');
-                powerIconContainer.classList.add('bg-slate-800/80', 'text-slate-500');
-
-                glowRing.classList.remove('opacity-100', 'scale-100', 'bg-yellow-500/20', 'shadow-glow-yellow');
-                glowRing.classList.add('opacity-0', 'scale-95');
-
-                powerBtnText.textContent = "TOUCH TO START";
-                powerBtnText.classList.remove('text-yellow-400', 'font-extrabold');
-                powerBtnText.classList.add('text-slate-400');
-
-                statusDot.className = "w-2.5 h-2.5 rounded-full bg-slate-500";
-                statusBadge.className = "inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700";
-                statusText.textContent = "消灯中";
-            }
-        }
-
-        // ストロボ / SOS ループ処理
-        function startStrobe(hz) {
-            stopStrobeAndSOS();
-            state.strobeSpeed = hz;
-            state.isSOS = false;
-            
-            if (hz === 0) {
-                if (state.isOn) toggleLight(true); // 常時点灯へ復帰
-                return;
-            }
-
-            let lightState = false;
-            const intervalMs = Math.max(50, 1000 / (hz * 2)); // 点滅周波数
-
-            state.strobeIntervalId = setInterval(async () => {
-                lightState = !lightState;
-                if (state.mode === 'screen') {
-                    screenLightOverlay.style.backgroundColor = lightState ? state.screenColor : '#000000';
-                } else {
-                    await setHardwareTorch(lightState);
-                }
-            }, intervalMs);
-
-            if (!state.isOn) {
-                state.isOn = true;
-                updateUI();
-            }
-        }
-
-        // SOSモールス信号パターン ( ... --- ... )
-        function startSOS() {
-            stopStrobeAndSOS();
-            state.isSOS = true;
-            state.strobeSpeed = 0;
-            strobeRange.value = 0;
-            strobeSpeedVal.textContent = "SOS";
-
-            const unit = 180; // モールス信号の1単位(ms)
-            // 点 (1unit) / 線 (3unit) / パルス間 (1unit) / 文字間 (3unit) / 語間 (7unit)
-            const pattern = [
-                1, 1, 1, 1, 1, 3, // . . .
-                3, 1, 3, 1, 3, 3, // - - -
-                1, 1, 1, 1, 1, 7  // . . .
-            ];
-
-            let step = 0;
-
-            const runSOSStep = async () => {
-                if (!state.isSOS) return;
-                
-                const isLightOn = (step % 2 === 0);
-                const durationUnits = pattern[step % pattern.length];
-
-                if (state.mode === 'screen') {
-                    screenLightOverlay.style.backgroundColor = isLightOn ? state.screenColor : '#000000';
-                } else {
-                    await setHardwareTorch(isLightOn);
-                }
-
-                step = (step + 1) % pattern.length;
-                state.strobeIntervalId = setTimeout(runSOSStep, durationUnits * unit);
-            };
-
-            if (!state.isOn) {
-                state.isOn = true;
-                updateUI();
-            }
-
-            runSOSStep();
-        }
-
-        function stopStrobeAndSOS() {
-            if (state.strobeIntervalId) {
-                clearInterval(state.strobeIntervalId);
-                clearTimeout(state.strobeIntervalId);
-                state.strobeIntervalId = null;
-            }
-            state.strobeSpeed = 0;
-            state.isSOS = false;
-            strobeSpeedVal.textContent = "OFF";
-        }
-
-        // スクリーンライトの全画面起動
-        function openScreenLight() {
-            screenLightOverlay.style.backgroundColor = state.screenColor;
-            screenLightOverlay.classList.remove('hidden');
-            // Fullscreen API試行
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen().catch(() => {});
-            }
-        }
-
-        function closeScreenLight() {
-            screenLightOverlay.classList.add('hidden');
-            if (document.fullscreenElement) {
-                document.exitFullscreen().catch(() => {});
-            }
-        }
-
-        // モード切替処理
-        function switchMode(newMode) {
-            state.mode = newMode;
-
-            // タブのCSS更新
-            const activeClass = "bg-yellow-500 text-slate-950 font-bold shadow";
-            const inactiveClass = "text-slate-400 hover:text-slate-200";
-
-            modeTorchBtn.className = `flex-1 py-2.5 px-3 rounded-xl text-xs font-medium transition flex items-center justify-center gap-2 ${newMode === 'torch' ? activeClass : inactiveClass}`;
-            modeStrobeBtn.className = `flex-1 py-2.5 px-3 rounded-xl text-xs font-medium transition flex items-center justify-center gap-2 ${newMode === 'strobe' ? activeClass : inactiveClass}`;
-            modeScreenBtn.className = `flex-1 py-2.5 px-3 rounded-xl text-xs font-medium transition flex items-center justify-center gap-2 ${newMode === 'screen' ? activeClass : inactiveClass}`;
-
-            // パネルの表示制御
-            strobePanel.classList.toggle('hidden', newMode !== 'strobe');
-            screenPanel.classList.toggle('hidden', newMode !== 'screen');
-
-            // ライトがすでに点灯中の場合、新しいモードへ即時切替
-            if (state.isOn) {
-                if (newMode === 'screen') {
-                    setHardwareTorch(false);
-                    openScreenLight();
-                } else if (newMode === 'torch') {
-                    closeScreenLight();
-                    stopStrobeAndSOS();
-                    setHardwareTorch(true);
-                } else if (newMode === 'strobe') {
-                    closeScreenLight();
-                }
-                updateUI();
-            }
-        }
-
-        // タイマー処理
-        function handleTimerSetting() {
-            if (state.timerId) {
-                clearTimeout(state.timerId);
-                state.timerId = null;
-            }
-
-            const mins = parseInt(timerSelect.value, 10);
-            if (mins > 0 && state.isOn) {
-                showToast(`${mins}分後に自動消灯します`, "fa-solid fa-clock text-yellow-400");
-                state.timerId = setTimeout(() => {
-                    toggleLight(false);
-                    showToast("タイマーにより消灯しました", "fa-solid fa-circle-check text-green-400");
-                }, mins * 60 * 1000);
-            }
-        }
-
-        // イベントリレーの設定
-        powerBtn.addEventListener('click', () => toggleLight());
-
-        modeTorchBtn.addEventListener('click', () => switchMode('torch'));
-        modeStrobeBtn.addEventListener('click', () => switchMode('strobe'));
-        modeScreenBtn.addEventListener('click', () => switchMode('screen'));
-
-        // ストロボスライダーの操作
-        strobeRange.addEventListener('input', (e) => {
-            const val = parseInt(e.target.value, 10);
-            if (val === 0) {
-                stopStrobeAndSOS();
-                strobeSpeedVal.textContent = "OFF";
-                if (state.isOn) setHardwareTorch(true);
-            } else {
-                strobeSpeedVal.textContent = `${val} Hz`;
-                startStrobe(val);
-            }
-        });
-
-        // SOSボタン
-        sosBtn.addEventListener('click', () => {
-            triggerVibration([50, 100, 50]);
-            startSOS();
-            showToast("SOS非常信号を出力中", "fa-solid fa-triangle-exclamation text-red-400");
-        });
-
-        // カラーピッカーボタン
-        colorPickerBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                colorPickerBtns.forEach(b => b.classList.replace('border-yellow-400', 'border-transparent'));
-                btn.classList.replace('border-transparent', 'border-yellow-400');
-                state.screenColor = btn.getAttribute('data-color');
-
-                if (state.mode === 'screen' && state.isOn) {
-                    screenLightOverlay.style.backgroundColor = state.screenColor;
-                }
-            });
-        });
-
-        // スクリーンライト閉じるボタン
-        closeScreenLightBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleLight(false);
-        });
-
-        // 画面タップでスクリーンライトを消灯できる操作感
-        screenLightOverlay.addEventListener('click', () => {
-            toggleLight(false);
-        });
-
-        timerSelect.addEventListener('change', handleTimerSetting);
-
-        // 初期ロード時カメラ権限のチェック準備
-        window.addEventListener('load', () => {
-            initBattery();
-            // 初期状態判定
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                torchSupportMessage.textContent = "お使いのブラウザはカメラLED非対応です（画面ライトのみ）";
-            }
-        });
-    </script>
+<body>
+<div class="app">
+<header><h1 class="title">５年生漢字 小テスト復習</h1><div class="subtitle" id="headerSubtitle">全11問</div></header>
+
+<div id="sectionSelectArea"><div class="section-grid" id="sectionGrid"></div></div>
+
+<main class="card hidden" id="mainCard">
+<div class="topbar">
+<div class="progress"><strong id="currentNumber">1</strong> / <span id="totalNumber">10</span> 問</div>
+<div class="badge-group"><div class="badge">正解: <span id="correctCount">0</span></div><div class="badge" id="questionType">1文字</div></div>
+</div>
+
+<section id="testArea">
+<div class="question-label"><span id="sectionLabelText">QUESTION</span><button class="audio-btn" id="audioBtn">🔊 読み上げ</button></div>
+<div class="question" id="question"></div>
+<div class="question-note">（読み仮名）の漢字を下の枠内に書いてください</div>
+<div class="section-title">あなたの答え（手書き）</div>
+
+<div class="writing-container">
+  <div class="writing-area" id="writingArea"></div>
+  <div class="scroll-sidebar" title="指で上下になぞってスクロール">
+    <span>👆</span><span>スクロール余白</span><span>👇</span>
+  </div>
+</div>
+
+<div class="canvas-tools">
+<button class="tool-btn" id="undoBtn">↩ 1画戻す</button>
+<button class="tool-btn" id="clearBtn">↺ 全て消す</button>
+</div>
+<div class="buttons"><button class="btn btn-check" id="checkBtn">✓ 答え合わせ</button></div>
+
+<div class="answer-section">
+<div class="section-title">正解</div>
+<div class="answer-box"><span class="answer-placeholder" id="answerPlaceholder">「答え合わせ」を押すと正解が表示されます</span><div class="answer" id="answer"></div></div>
+<div class="self-grading" id="selfGrading">
+<button class="btn btn-correct" id="correctBtn">⭕ 合ってた！</button>
+<button class="btn btn-incorrect" id="incorrectBtn">❌ 違ってた</button>
+</div>
+</div>
+
+<div class="buttons" style="margin-top:20px">
+<button class="btn btn-next" id="nextBtn" disabled>▶ 次の問題へ</button>
+<button class="btn btn-finish" id="finishBtn">コース選択へ戻る</button>
+</div>
+</section>
+
+<section class="result" id="resultArea">
+<div class="result-icon">🎉</div><div class="result-title">おつかれさまでした！</div>
+<div class="result-score" id="finalScore">0 / 0</div>
+<div class="result-message" id="resultMessage"></div>
+<button class="btn btn-next" id="restartBtn" style="margin-top:24px">↻ もう一度挑戦する</button>
+<button class="btn btn-finish" id="backToMenuBtn" style="margin-top:8px">コース選択に戻る</button>
+</section>
+</main>
+<div class="footer">５年生漢字 小テスト復習</div>
+</div>
+
+<script>
+// 新しい問題データ（11問）
+const allQuestions=[
+  {type:2,words:[{kanji:"宿",reading:"しゅく"},{kanji:"舎",reading:"しゃ"}],sentence:"代表選手の{0}{1}"},
+  {type:2,words:[{kanji:"往",reading:"おう"},{kanji:"路",reading:"ろ"}],sentence:"目的地までの{0}{1}"},
+  {type:1,words:[{kanji:"罪",reading:"つみ"}],sentence:"{0}を償う"},
+  {type:1,words:[{kanji:"防",reading:"ふせ"}],sentence:"落下を{0}ぐ"},
+  {type:2,words:[{kanji:"鉱",reading:"こう"},{kanji:"山",reading:"ざん"}],sentence:"金がとれる{0}{1}"},
+  {type:2,words:[{kanji:"成",reading:"せい"},{kanji:"績",reading:"せき"}],sentence:"{0}{1}が上がる"},
+  {type:3,words:[{kanji:"志",reading:"し"},{kanji:"望",reading:"ぼう"},{kanji:"校",reading:"こう"}],sentence:"兄の{0}{1}{2}"},
+  {type:3,words:[{kanji:"航",reading:"こう"},{kanji:"空",reading:"くう"},{kanji:"機",reading:"き"}],sentence:"{0}{1}{2}で運ぶ"},
+  {type:1,words:[{kanji:"険",reading:"けわ"}],sentence:"{0}しい表情"},
+  {type:1,words:[{kanji:"断",reading:"ことわ"}],sentence:"要求を{0}る"},
+  {type:2,words:[{kanji:"心",reading:"しん"},{kanji:"境",reading:"きょう"}],sentence:"{0}{1}が変化する"},
+  {type:1,words:[{kanji:"逆",reading:"さか"}],sentence:"風に{0}らう"}
+];
+
+let questions=[],currentSectionIndex=0,currentIndex=0,answered=false,correctCount=0,userGraded=false;
+let canvases=[],ctxs=[],strokes=[],currentStroke=null,currentCanvasIndex=-1,drawing=false;
+
+const BASE_CHAPTER = 1;
+const BASE_QUESTION = 1;
+
+const $=id=>document.getElementById(id);
+const sectionSelectArea=$("sectionSelectArea"),sectionGrid=$("sectionGrid"),mainCard=$("mainCard"),headerSubtitle=$("headerSubtitle"),sectionLabelText=$("sectionLabelText");
+const questionEl=$("question"),currentNumberEl=$("currentNumber"),totalNumberEl=$("totalNumber"),questionTypeEl=$("questionType"),correctCountEl=$("correctCount"),writingArea=$("writingArea");
+const clearBtn=$("clearBtn"),undoBtn=$("undoBtn"),checkBtn=$("checkBtn"),nextBtn=$("nextBtn"),finishBtn=$("finishBtn"),audioBtn=$("audioBtn");
+const answer=$("answer"),answerPlaceholder=$("answerPlaceholder"),selfGrading=$("selfGrading"),correctBtn=$("correctBtn"),incorrectBtn=$("incorrectBtn");
+const testArea=$("testArea"),resultArea=$("resultArea"),restartBtn=$("restartBtn"),backToMenuBtn=$("backToMenuBtn"),finalScore=$("finalScore");
+
+let audioCtx = null;
+function initAudio() {
+  if(!audioCtx) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if(AudioContextClass) audioCtx = new AudioContextClass();
+  }
+  if(audioCtx && audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
+}
+
+function scrollToTop() {
+  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e){}
+}
+
+function playSound(type){
+ try {
+    initAudio();
+    if(!audioCtx) return;
+    const now = audioCtx.currentTime;
+
+    if(type==="tap"){
+      const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
+      osc.connect(gain);gain.connect(audioCtx.destination);
+      osc.frequency.setValueAtTime(600,now);
+      gain.gain.setValueAtTime(.05,now);
+      gain.gain.exponentialRampToValueAtTime(.01,now+.05);
+      osc.start(now);osc.stop(now+.05);
+    }else if(type==="correct"){
+      const notes = [
+        { f: 523.25, t: 0.00 }, // C5
+        { f: 659.25, t: 0.08 }, // E5
+        { f: 783.99, t: 0.16 }, // G5
+        { f: 1046.50, t: 0.24 }, // C6
+        { f: 1318.51, t: 0.32 }  // E6
+      ];
+
+      notes.forEach((n) => {
+        const startTime = now + n.t;
+        const duration = 0.45;
+
+        const oscSine = audioCtx.createOscillator();
+        const gainSine = audioCtx.createGain();
+        oscSine.type = "sine";
+        oscSine.frequency.setValueAtTime(n.f, startTime);
+
+        gainSine.gain.setValueAtTime(0.001, startTime);
+        gainSine.gain.linearRampToValueAtTime(0.2, startTime + 0.015);
+        gainSine.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+        oscSine.connect(gainSine);
+        gainSine.connect(audioCtx.destination);
+        oscSine.start(startTime);
+        oscSine.stop(startTime + duration);
+
+        const oscTri = audioCtx.createOscillator();
+        const gainTri = audioCtx.createGain();
+        oscTri.type = "triangle";
+        oscTri.frequency.setValueAtTime(n.f, startTime);
+
+        gainTri.gain.setValueAtTime(0.001, startTime);
+        gainTri.gain.linearRampToValueAtTime(0.12, startTime + 0.01);
+        gainTri.gain.exponentialRampToValueAtTime(0.001, startTime + (duration * 0.7));
+
+        oscTri.connect(gainTri);
+        gainTri.connect(audioCtx.destination);
+        oscTri.start(startTime);
+        oscTri.stop(startTime + duration);
+      });
+    }else{
+      const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
+      osc.connect(gain);gain.connect(audioCtx.destination);
+      osc.type="sawtooth";
+      osc.frequency.setValueAtTime(220,now);
+      osc.frequency.setValueAtTime(180,now+.15);
+      gain.gain.setValueAtTime(.1,now);
+      gain.gain.exponentialRampToValueAtTime(.01,now+.3);
+      osc.start(now);osc.stop(now+.3);
+    }
+ } catch(e) {}
+}
+
+function triggerConfetti(){
+ try {
+    if(typeof confetti==="function") confetti({particleCount:100,spread:80,origin:{y:.6}});
+ } catch(e) {}
+}
+
+function initSectionMenu(){
+ sectionGrid.innerHTML="";const size=10,total=Math.ceil(allQuestions.length/size);
+ for(let i=0;i<total;i++){
+  const chapterNum = BASE_CHAPTER + i;
+  const startNum = BASE_QUESTION + i*size;
+  const endNum = Math.min(BASE_QUESTION + (i+1)*size - 1, BASE_QUESTION + allQuestions.length - 1);
+  
+  const card=document.createElement("div");card.className="section-card";
+  card.innerHTML=`<div class="section-card-title">第 ${chapterNum} 章</div><div class="section-card-sub">問 ${startNum} 〜 問 ${endNum} （${endNum-startNum+1}問）</div>`;
+  card.addEventListener("click",()=>startSection(i));sectionGrid.appendChild(card);
+ }
+}
+
+function startSection(i){
+ playSound("tap");currentSectionIndex=i;const size=10,start=i*size,end=Math.min((i+1)*size,allQuestions.length);
+ questions=allQuestions.slice(start,end);sectionSelectArea.classList.add("hidden");mainCard.classList.remove("hidden");testArea.classList.remove("hidden");resultArea.classList.remove("show");
+ 
+ const chapterNum = BASE_CHAPTER + i;
+ const startNum = BASE_QUESTION + start;
+ const endNum = BASE_QUESTION + end - 1;
+
+ headerSubtitle.textContent=`第 ${chapterNum} 章 （問 ${startNum} 〜 問 ${endNum}）`;
+ sectionLabelText.textContent=`第 ${chapterNum} 章 - QUESTION`;
+ currentIndex=0;correctCount=0;correctCountEl.textContent=0;showQuestion();
+ scrollToTop();
+}
+
+function showMenu(){
+ playSound("tap");
+ mainCard.classList.add("hidden");
+ sectionSelectArea.classList.remove("hidden");
+ headerSubtitle.textContent=`全${allQuestions.length}問`;
+ scrollToTop();
+}
+
+function setupCanvas(cvs,ctx,index){
+ if(!cvs) return;
+ const rect=cvs.getBoundingClientRect();
+ if(rect.width === 0 || rect.height === 0) return;
+ 
+ const ratio=window.devicePixelRatio||1;
+ cvs.width=rect.width*ratio;cvs.height=rect.height*ratio;
+ ctx.setTransform(ratio,0,0,ratio,0,0);
+ ctx.lineCap="round";ctx.lineJoin="round";
+ ctx.lineWidth=Math.max(4,rect.width/30);
+ ctx.strokeStyle="#1a1a1a";
+ 
+ cvs.onpointerdown=e=>startDrawing(e,index);
+ cvs.onpointermove=e=>draw(e,index);
+ cvs.onpointerup=e=>stopDrawing(e,index);
+ cvs.onpointercancel=e=>stopDrawing(e,index);
+
+ cvs.oncontextmenu = e => { e.preventDefault(); e.stopPropagation(); return false; };
+ cvs.addEventListener("touchstart", e => e.preventDefault(), { passive: false });
+ cvs.addEventListener("touchmove", e => e.preventDefault(), { passive: false });
+ cvs.addEventListener("touchend", e => e.preventDefault(), { passive: false });
+}
+
+function buildWritingBoxes(count){
+ writingArea.innerHTML="";canvases=[];ctxs=[];strokes=[];
+ for(let i=0;i<count;i++){
+  const box=document.createElement("div");box.className="writing-box";
+  box.oncontextmenu = e => { e.preventDefault(); e.stopPropagation(); return false; };
+  if(count>1){
+    const label=document.createElement("div");
+    label.className="box-number";
+    label.textContent=`${i+1}文字目`;
+    box.appendChild(label);
+  }
+  const cvs=document.createElement("canvas");
+  box.appendChild(cvs);
+  writingArea.appendChild(box);
+  const ctx=cvs.getContext("2d");
+  canvases.push(cvs);
+  ctxs.push(ctx);
+  
+  setTimeout(()=>setupCanvas(cvs,ctx,i), 30);
+  setTimeout(()=>setupCanvas(cvs,ctx,i), 150);
+ }
+}
+
+function redrawAll(){
+ canvases.forEach((cvs,idx)=>{
+  const ctx=ctxs[idx],rect=cvs.getBoundingClientRect();
+  if(!ctx || rect.width === 0) return;
+  ctx.clearRect(0,0,rect.width,rect.height);
+  strokes.filter(s=>s.canvasIndex===idx).forEach(s=>{
+    if(!s.points.length)return;
+    ctx.beginPath();
+    ctx.moveTo(s.points[0].x,s.points[0].y);
+    for(let i=1;i<s.points.length;i++)ctx.lineTo(s.points[i].x,s.points[i].y);
+    ctx.stroke();
+  });
+ });
+}
+
+function getPoint(e,cvs){const r=cvs.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
+
+function startDrawing(e,i){
+ initAudio();
+ const cvs=canvases[i];
+ try { cvs.setPointerCapture(e.pointerId); } catch(_){}
+ drawing=true;currentCanvasIndex=i;currentStroke={canvasIndex:i,points:[getPoint(e,cvs)]};
+ strokes.push(currentStroke);redrawAll();
+}
+
+function draw(e,i){if(!drawing||currentCanvasIndex!==i)return;currentStroke.points.push(getPoint(e,canvases[i]));redrawAll()}
+
+function stopDrawing(e,i){
+ if(!drawing||currentCanvasIndex!==i)return;
+ drawing=false;
+ try{canvases[i].releasePointerCapture(e.pointerId)}catch(_){}
+ currentCanvasIndex=-1;
+}
+
+function clearCanvas(){strokes=[];redrawAll()}
+function undoLastStroke(){if(strokes.length){strokes.pop();redrawAll();playSound("tap")}}
+
+function createQuestionHTML(item){let text=item.sentence;item.words.forEach((w,i)=>text=text.replace(`{${i}}`,`<span class="reading">（${w.reading||""}）</span>`));return text}
+
+function speakQuestion(){
+ if(!("speechSynthesis"in window))return;
+ try {
+    window.speechSynthesis.cancel();
+    const item=questions[currentIndex];let t=item.sentence;
+    item.words.forEach((w,i)=>t=t.replace(`{${i}}`,w.reading||""));
+    const u=new SpeechSynthesisUtterance(t);u.lang="ja-JP";u.rate=.9;
+    window.speechSynthesis.speak(u);
+ } catch(e){}
+}
+
+function showQuestion(){
+ const item=questions[currentIndex];
+ currentNumberEl.textContent=currentIndex+1;
+ totalNumberEl.textContent=questions.length;
+ questionTypeEl.textContent=item.words.length + "文字";
+ questionEl.innerHTML=createQuestionHTML(item);
+ answered=false;userGraded=false;
+ buildWritingBoxes(item.words.length);
+ answer.textContent="";
+ answer.classList.remove("show");
+ answerPlaceholder.style.display="block";
+ selfGrading.classList.remove("show");
+ selfGrading.style.display="none";
+ correctBtn.classList.remove("selected");
+ incorrectBtn.classList.remove("selected");
+ checkBtn.disabled=false;
+ nextBtn.disabled=true;
+}
+
+function checkAnswer(){if(answered)return;playSound("tap");const item=questions[currentIndex];answer.textContent=item.words.map(w=>w.kanji).join(" ");answer.classList.add("show");answerPlaceholder.style.display="none";selfGrading.style.display="grid";answered=true;checkBtn.disabled=true;nextBtn.disabled=false}
+
+function gradeAnswer(ok){
+ playSound(ok?"correct":"incorrect");
+ if(ok) triggerConfetti();
+ if(!userGraded&&ok)correctCount++;else if(userGraded&&!ok&&correctCount>0)correctCount--;correctCountEl.textContent=correctCount;userGraded=true;
+ if(ok){correctBtn.classList.add("selected");incorrectBtn.classList.remove("selected")}else{incorrectBtn.classList.add("selected");correctBtn.classList.remove("selected")}
+ nextBtn.disabled=false;
+}
+
+function nextQuestion(){
+ playSound("tap");
+ currentIndex++;
+ if(currentIndex>=questions.length){
+   showResult();
+   return;
+ }
+ showQuestion();
+ scrollToTop();
+}
+
+function showResult(){
+ testArea.classList.add("hidden");resultArea.classList.add("show");finalScore.textContent=`${correctCount} / ${questions.length}`;
+ const ratio=correctCount/questions.length;let msg="よくがんばりました！";if(ratio===1){msg="素晴らしい！パーフェクト達成です！🎉";triggerConfetti()}else if(ratio>=.8)msg="高得点です！あと少しで満点！";else if(ratio>=.5)msg="ナイスファイト！繰り返し練習しよう！";$("resultMessage").innerHTML=msg;
+ scrollToTop();
+}
+
+function restart(){ startSection(currentSectionIndex); }
+
+clearBtn.onclick=()=>{playSound("tap");clearCanvas()};
+undoBtn.onclick=undoLastStroke;
+checkBtn.onclick=checkAnswer;
+nextBtn.onclick=nextQuestion;
+finishBtn.onclick=showMenu;
+backToMenuBtn.onclick=showMenu;
+restartBtn.onclick=restart;
+audioBtn.onclick=speakQuestion;
+correctBtn.onclick=()=>gradeAnswer(true);
+incorrectBtn.onclick=()=>gradeAnswer(false);
+
+const resizeHandler = ()=>{
+ if(!mainCard.classList.contains("hidden")){
+  canvases.forEach((c,i)=>setupCanvas(c,ctxs[i],i));
+  redrawAll();
+ }
+};
+window.addEventListener("resize", resizeHandler);
+
+if(window.ResizeObserver){
+ const ro = new ResizeObserver(()=>{ resizeHandler(); });
+ ro.observe(document.body);
+}
+
+window.onload=initSectionMenu;
+</script>
 </body>
 </html>
