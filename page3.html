@@ -17,27 +17,28 @@
 html,body{width:100%;margin:0;padding:0;background:var(--bg);scroll-behavior:smooth}
 body{min-height:100vh;background:radial-gradient(circle at 50% -10%,rgba(101,125,255,.15),transparent 50%),var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP","Yu Gothic",sans-serif;display:flex;justify-content:center;overflow-x:hidden}
 button{font:inherit;outline:none}
-.app{width:min(720px,100%);padding:16px}
-header{text-align:center;margin-bottom:16px}
-.title{margin:0;font-size:clamp(22px,5vw,32px);font-weight:900;letter-spacing:.04em;background:linear-gradient(135deg,#fff,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.subtitle{margin-top:4px;color:var(--sub);font-size:13px}
-.section-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:16px}
+.app{width:min(860px,100%);padding:12px 16px}
+
+/* 要望1: タイトル周りを小さくして横並びに配置 */
+header{text-align:center;margin-bottom:12px;display:flex;align-items:baseline;justify-content:center;gap:12px;flex-wrap:wrap}
+.title{margin:0;font-size:clamp(16px,3.5vw,20px);font-weight:900;letter-spacing:.04em;background:linear-gradient(135deg,#fff,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{margin:0;color:var(--sub);font-size:12px}
+
+.section-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:12px}
 .section-card{background:var(--panel-light);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;cursor:pointer;transition:.2s}
 .section-card:hover{border-color:var(--accent);transform:translateY(-2px)}
 .section-card:active{transform:scale(.98)}
 .section-card-title{font-size:16px;font-weight:800;margin-bottom:4px}
 .section-card-sub{font-size:12px;color:var(--sub)}
-.card{background:rgba(24,29,40,.95);border:1px solid var(--border);border-radius:20px;padding:clamp(16px,3.5vw,24px);box-shadow:0 20px 50px rgba(0,0,0,.4)}
+.card{background:rgba(24,29,40,.95);border:1px solid var(--border);border-radius:20px;padding:clamp(12px,3vw,20px);box-shadow:0 20px 50px rgba(0,0,0,.4)}
 .hidden{display:none!important}
-.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:10px}
 .progress{color:var(--sub);font-size:14px}.progress strong{color:var(--accent);font-size:20px}
 .badge-group{display:flex;gap:8px}.badge{color:var(--sub);font-size:12px;background:var(--panel-light);border:1px solid var(--border);padding:4px 10px;border-radius:20px}
-.question-label{color:var(--accent);font-size:11px;font-weight:800;letter-spacing:.15em;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
-.tool-btn{background:var(--panel-light);border:1px solid var(--border);color:var(--text);border-radius:10px;cursor:pointer;padding:8px 14px;font-size:13px;font-weight:600}
-.question{text-align:center;font-size:clamp(20px,4.5vw,28px);line-height:1.8;font-weight:700;min-height:80px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;padding:12px 16px;background:rgba(15,18,25,.5);border-radius:12px;border:1px solid rgba(255,255,255,.05)}
+.tool-btn{background:var(--panel-light);border:1px solid var(--border);color:var(--text);border-radius:10px;cursor:pointer;padding:6px 12px;font-size:12px;font-weight:600}
+.question{text-align:center;font-size:clamp(18px,4vw,24px);line-height:1.6;font-weight:700;min-height:60px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;padding:8px 12px;background:rgba(15,18,25,.5);border-radius:12px;border:1px solid rgba(255,255,255,.05)}
 .reading{color:#a5b4fc;font-weight:700;white-space:nowrap}
-.question-note{text-align:center;color:var(--sub);font-size:12px;margin-top:8px}
-.section-title{margin:20px 0 10px;color:var(--sub);font-size:12px;font-weight:700;letter-spacing:.05em;text-align:center}
+.question-note{text-align:center;color:var(--sub);font-size:11px;margin-top:6px;margin-bottom:10px}
 
 /* 手書きエリアとスクロールゾーンのコンテナ */
 .writing-container {
@@ -48,23 +49,17 @@ header{text-align:center;margin-bottom:16px}
   width: 100%;
 }
 
-/* 手書きエリアのスタイル定義 */
+/* 横並び配置 */
 .writing-area {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
   flex: 1;
   width: 100%;
-}
-
-/* 画面幅600px以上の環境（PC・タブレット等）で横並びへ変換 */
-@media (min-width: 600px) {
-  .writing-area {
-    flex-direction: row;
-    flex-wrap: nowrap; /* 3文字でも折り返さず横並びを維持 */
-  }
+  max-width: 100%;
+  overflow: visible;
 }
 
 /* スクロール補助用サイドバー */
@@ -94,8 +89,8 @@ header{text-align:center;margin-bottom:16px}
 
 .writing-box {
   position: relative;
-  width: 220px;
-  max-width: 30%; /* 横並び時に枠が画面からはみ出さない調整 */
+  width: min(28vw, 180px);
+  max-width: 180px;
   aspect-ratio: 1;
   background: #fff;
   border: 3px solid #3b4558;
@@ -149,32 +144,35 @@ canvas {
   user-select: none;
 }
 
-.canvas-tools{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
-.buttons{display:grid;gap:10px;margin-top:16px}
-.btn{width:100%;min-height:50px;border:0;border-radius:12px;padding:10px 16px;color:#fff;font-size:16px;font-weight:800;cursor:pointer;transition:.1s;display:flex;justify-content:center;align-items:center;gap:8px}
+.canvas-tools{display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+.buttons{display:grid;gap:10px;margin-top:12px}
+.btn{width:100%;min-height:46px;border:0;border-radius:12px;padding:8px 16px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;transition:.1s;display:flex;justify-content:center;align-items:center;gap:8px}
 .btn:disabled{opacity:.35;cursor:not-allowed}
 .btn-check{background:linear-gradient(135deg,#5b6eff,#8b5cf6);box-shadow:0 4px 15px rgba(91,110,255,.3)}
 .btn-next{background:linear-gradient(135deg,#2563eb,#3b82f6)}
-.btn-finish{background:transparent;border:1px solid #3b4351;color:#aeb7c5;min-height:42px;font-size:14px}
-.answer-section{margin-top:20px}.answer-box{min-height:70px;background:#10141b;border:1px solid var(--border);border-radius:12px;display:flex;justify-content:center;align-items:center;padding:12px}
-.answer-placeholder{color:#657080;font-size:13px;text-align:center}.answer{display:none;color:#fff;font-family:"Noto Serif JP","Yu Mincho",serif;font-size:clamp(32px,7vw,44px);font-weight:700;letter-spacing:.2em}
+.btn-finish{background:transparent;border:1px solid #3b4351;color:#aeb7c5;min-height:38px;font-size:13px}
+.answer-section{margin-top:12px}.answer-box{min-height:60px;background:#10141b;border:1px solid var(--border);border-radius:12px;display:flex;justify-content:center;align-items:center;padding:8px}
+.answer-placeholder{color:#657080;font-size:12px;text-align:center}.answer{display:none;color:#fff;font-family:"Noto Serif JP","Yu Mincho",serif;font-size:clamp(28px,6vw,38px);font-weight:700;letter-spacing:.2em}
 .answer.show{display:block}
-.self-grading{display:none;margin-top:12px;grid-template-columns:1fr 1fr;gap:10px}.self-grading.show{display:grid}
+.self-grading{display:none;margin-top:10px;grid-template-columns:1fr 1fr;gap:10px}.self-grading.show{display:grid}
 .btn-correct{background:rgba(94,214,160,.15);border:2px solid var(--success);color:var(--success)}
 .btn-incorrect{background:rgba(255,59,48,.15);border:2px solid var(--danger);color:var(--danger)}
 .btn-correct.selected{background:var(--success);color:#000}.btn-incorrect.selected{background:var(--danger);color:#fff}
-.result{display:none;text-align:center;padding:30px 10px}.result.show{display:block}
-.result-icon{font-size:54px}.result-score{font-size:42px;font-weight:900;color:var(--accent);margin:10px 0}.result-title{font-size:26px;font-weight:900}.result-message{margin-top:10px;color:var(--sub);line-height:1.8;font-size:14px}
-.footer{text-align:center;color:#525b69;font-size:11px;margin-top:16px}
+.result{display:none;text-align:center;padding:20px 10px}.result.show{display:block}
+.result-icon{font-size:48px}.result-score{font-size:36px;font-weight:900;color:var(--accent);margin:8px 0}.result-title{font-size:22px;font-weight:900}.result-message{margin-top:8px;color:var(--sub);line-height:1.6;font-size:13px}
+.footer{text-align:center;color:#525b69;font-size:10px;margin-top:12px}
+
 @media(max-width:480px){
-  .app{padding:10px}
-  .card{padding:14px;border-radius:16px}
-  .writing-box{width:min(78vw, 220px); max-width:100%;}
+  .app{padding:6px}
+  .card{padding:10px;border-radius:14px}
+  .writing-box{width: min(27vw, 110px);}
+  .scroll-sidebar{width: 28px; font-size: 9px;}
 }
 </style>
 </head>
 <body>
 <div class="app">
+<!-- 要望1: タイトルとサブタイトルを並べて配置 -->
 <header><h1 class="title">５年生漢字 小テスト復習</h1><div class="subtitle" id="headerSubtitle">全19問</div></header>
 
 <div id="sectionSelectArea"><div class="section-grid" id="sectionGrid"></div></div>
@@ -186,10 +184,10 @@ canvas {
 </div>
 
 <section id="testArea">
-<div class="question-label"><span id="sectionLabelText">QUESTION</span></div>
+<!-- 要望2: QUESTIONラベル行を削除 -->
 <div class="question" id="question"></div>
 <div class="question-note">（読み仮名）の漢字を下の枠内に書いてください</div>
-<div class="section-title">あなたの答え（手書き）</div>
+<!-- 要望4: あなたの答え（手書き）ラベル行を削除 -->
 
 <div class="writing-container">
   <div class="writing-area" id="writingArea"></div>
@@ -205,7 +203,7 @@ canvas {
 <div class="buttons"><button class="btn btn-check" id="checkBtn">✓ 答え合わせ</button></div>
 
 <div class="answer-section">
-<div class="section-title">正解</div>
+<!-- 要望5: 正解ラベル行を削除 -->
 <div class="answer-box"><span class="answer-placeholder" id="answerPlaceholder">「答え合わせ」を押すと正解が表示されます</span><div class="answer" id="answer"></div></div>
 <div class="self-grading" id="selfGrading">
 <button class="btn btn-correct" id="correctBtn">⭕ 合ってた！</button>
@@ -213,7 +211,7 @@ canvas {
 </div>
 </div>
 
-<div class="buttons" style="margin-top:20px">
+<div class="buttons" style="margin-top:14px">
 <button class="btn btn-next" id="nextBtn" disabled>▶ 次の問題へ</button>
 <button class="btn btn-finish" id="finishBtn">コース選択へ戻る</button>
 </div>
@@ -223,7 +221,7 @@ canvas {
 <div class="result-icon">🎉</div><div class="result-title">おつかれさまでした！</div>
 <div class="result-score" id="finalScore">0 / 0</div>
 <div class="result-message" id="resultMessage"></div>
-<button class="btn btn-next" id="restartBtn" style="margin-top:24px">↻ もう一度挑戦する</button>
+<button class="btn btn-next" id="restartBtn" style="margin-top:20px">↻ もう一度挑戦する</button>
 <button class="btn btn-finish" id="backToMenuBtn" style="margin-top:8px">コース選択に戻る</button>
 </section>
 </main>
@@ -245,7 +243,6 @@ const allQuestions=[
   {type:1,words:[{kanji:"断",reading:"ことわ"}],sentence:"要求を{0}る"},
   {type:2,words:[{kanji:"心",reading:"しん"},{kanji:"境",reading:"きょう"}],sentence:"{0}{1}が変化する"},
   {type:1,words:[{kanji:"逆",reading:"さか"}],sentence:"風に{0}らう"},
-  // 新規追加項目
   {type:2,words:[{kanji:"接",reading:"せつ"},{kanji:"続",reading:"ぞく"}],sentence:"機器を{0}{1}する"},
   {type:1,words:[{kanji:"勢",reading:"いきお"}],sentence:"{0}いをつける"},
   {type:2,words:[{kanji:"史",reading:"し"},{kanji:"実",reading:"じつ"}],sentence:"{0}{1}に基づく話"},
@@ -263,12 +260,13 @@ const BASE_CHAPTER = 1;
 const BASE_QUESTION = 1;
 
 const $=id=>document.getElementById(id);
-const sectionSelectArea=$("sectionSelectArea"),sectionGrid=$("sectionGrid"),mainCard=$("mainCard"),headerSubtitle=$("headerSubtitle"),sectionLabelText=$("sectionLabelText");
+const sectionSelectArea=$("sectionSelectArea"),sectionGrid=$("sectionGrid"),mainCard=$("mainCard"),headerSubtitle=$("headerSubtitle");
 const questionEl=$("question"),currentNumberEl=$("currentNumber"),totalNumberEl=$("totalNumber"),questionTypeEl=$("questionType"),correctCountEl=$("correctCount"),writingArea=$("writingArea");
 const clearBtn=$("clearBtn"),undoBtn=$("undoBtn"),checkBtn=$("checkBtn"),nextBtn=$("nextBtn"),finishBtn=$("finishBtn");
 const answer=$("answer"),answerPlaceholder=$("answerPlaceholder"),selfGrading=$("selfGrading"),correctBtn=$("correctBtn"),incorrectBtn=$("incorrectBtn");
 const testArea=$("testArea"),resultArea=$("resultArea"),restartBtn=$("restartBtn"),backToMenuBtn=$("backToMenuBtn"),finalScore=$("finalScore");
 
+// 要望3: 読み上げ機能は不使用（効果音のみ定義）
 let audioCtx = null;
 function initAudio() {
   if(!audioCtx) {
@@ -299,11 +297,11 @@ function playSound(type){
       osc.start(now);osc.stop(now+.05);
     }else if(type==="correct"){
       const notes = [
-        { f: 523.25, t: 0.00 }, // C5
-        { f: 659.25, t: 0.06 }, // E5
-        { f: 783.99, t: 0.12 }, // G5
-        { f: 1046.50, t: 0.18 }, // C6
-        { f: 1318.51, t: 0.24 }  // E6
+        { f: 523.25, t: 0.00 },
+        { f: 659.25, t: 0.06 },
+        { f: 783.99, t: 0.12 },
+        { f: 1046.50, t: 0.18 },
+        { f: 1318.51, t: 0.24 }
       ];
 
       notes.forEach((n) => {
@@ -379,7 +377,6 @@ function startSection(i){
  const endNum = BASE_QUESTION + end - 1;
 
  headerSubtitle.textContent=`第 ${chapterNum} 章 （問 ${startNum} 〜 問 ${endNum}）`;
- sectionLabelText.textContent=`第 ${chapterNum} 章 - QUESTION`;
  currentIndex=0;correctCount=0;correctCountEl.textContent=0;showQuestion();
  scrollToTop();
 }
