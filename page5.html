@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>元素記号マスター - 第4周期（1〜36）</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --panel-bg: rgba(23, 32, 54, 0.6);
+            --text-main: #f0f4f8;
+            --text-sub: #94a3b8;
+            --accent-cyan: #38bdf8;
+            --accent-blue: #6366f1;
+            
+            /* 分類別カラー (スタイリッシュなネオン調) */
+            --nonmetal: #38bdf8;
+            --noble-gas: #f43f5e;
+            --alkali-metal: #fb923c;
+            --alkaline-earth: #facc15;
+            --transition-metal: #a855f7;
+            --post-transition: #4ade80;
+            --metalloid: #2dd4bf;
+            --halogen: #ec4899;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(56, 189, 248, 0.12) 0%, transparent 40%);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #fff 30%, var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        p.subtitle {
+            color: var(--text-sub);
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+        }
+
+        /* 制御ボタン領域 */
+        .controls {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            background: var(--panel-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* 周期表グリッドコンテナ (横長レイアウト) */
+        .periodic-table {
+            display: grid;
+            grid-template-columns: repeat(18, minmax(60px, 1fr));
+            grid-template-rows: repeat(4, minmax(85px, 1fr));
+            gap: 10px;
+            width: 100%;
+            max-width: 1400px;
+            padding: 24px;
+            background: var(--panel-bg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        /* フリップカード全体のスタイル */
+        .card-container {
+            perspective: 1000px;
+            aspect-ratio: 4 / 5;
+            cursor: pointer;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 10px;
+        }
+
+        .card-container.flipped .card {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(15, 23, 42, 0.8);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .card-container:hover .card-face {
+            border-color: var(--category-color, var(--accent-cyan));
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+        }
+
+        /* 表（表面）: 記号のみ */
+        .card-front {
+            /* スタイリング */
+        }
+
+        .card-front .symbol {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px var(--category-color, transparent);
+        }
+
+        .card-front .number {
+            position: absolute;
+            top: 6px;
+            left: 8px;
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            font-weight: 500;
+        }
+
+        /* 裏（裏面）: 記号 + 改行 + 日本語名 */
+        .card-back {
+            transform: rotateY(180deg);
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
+            border-color: var(--category-color, var(--accent-cyan));
+        }
+
+        .card-back .symbol {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-sub);
+            margin-bottom: 2px;
+        }
+
+        .card-back .name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 0 8px var(--category-color, transparent);
+        }
+
+        /* 凡例 (カテゴリインジケーター) */
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 24px;
+            justify-content: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: var(--text-sub);
+        }
+
+        .legend-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        /* レスポンシブ調整（タブレット縦方向など狭い画面用） */
+        @media (max-width: 1024px) {
+            .periodic-table {
+                gap: 6px;
+                padding: 12px;
+            }
+            .card-front .symbol { font-size: 1.4rem; }
+            .card-back .symbol { font-size: 1rem; }
+            .card-back .name { font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>PERIODIC TABLE</h1>
+        <p class="subtitle">元素周期表 Flashcards (第1周期 〜 第4周期)</p>
+    </header>
+
+    <div class="controls">
+        <button class="btn" onclick="flipAll(false)">すべて表にする</button>
+        <button class="btn" onclick="flipAll(true)">すべて裏にする</button>
+    </div>
+
+    <!-- 周期表カード配置エリア -->
+    <div class="periodic-table" id="periodicTable"></div>
+
+    <!-- 凡例 -->
+    <div class="legend">
+        <div class="legend-item"><div class="legend-color" style="background: var(--nonmetal)"></div>非金属</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--noble-gas)"></div>希ガス</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--alkali-metal)"></div>アルカリ金属</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--alkaline-earth)"></div>アルカリ土類金属</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--transition-metal)"></div>遷移金属</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--metalloid)"></div>半金属</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--halogen)"></div>ハロゲン</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--post-transition)"></div>元素（その他）</div>
+    </div>
+
+    <script>
+        // 1番〜36番（第4周期まで）の元素データ
+        const elements = [
+            // 第1周期
+            { num: 1, symbol: 'H', name: '水素', col: 1, row: 1, cat: 'nonmetal' },
+            { num: 2, symbol: 'He', name: 'ヘリウム', col: 18, row: 1, cat: 'noble-gas' },
+            
+            // 第2周期
+            { num: 3, symbol: 'Li', name: 'リチウム', col: 1, row: 2, cat: 'alkali-metal' },
+            { num: 4, symbol: 'Be', name: 'ベリリウム', col: 2, row: 2, cat: 'alkaline-earth' },
+            { num: 5, symbol: 'B', name: 'ホウ素', col: 13, row: 2, cat: 'metalloid' },
+            { num: 6, symbol: 'C', name: '炭素', col: 14, row: 2, cat: 'nonmetal' },
+            { num: 7, symbol: 'N', name: '窒素', col: 15, row: 2, cat: 'nonmetal' },
+            { num: 8, symbol: 'O', name: '酸素', col: 16, row: 2, cat: 'nonmetal' },
+            { num: 9, symbol: 'F', name: 'フッ素', col: 17, row: 2, cat: 'halogen' },
+            { num: 10, symbol: 'Ne', name: 'ネオン', col: 18, row: 2, cat: 'noble-gas' },
+
+            // 第3周期
+            { num: 11, symbol: 'Na', name: 'ナトリウム', col: 1, row: 3, cat: 'alkali-metal' },
+            { num: 12, symbol: 'Mg', name: 'マグネシウム', col: 2, row: 3, cat: 'alkaline-earth' },
+            { num: 13, symbol: 'Al', name: 'アルミニウム', col: 13, row: 3, cat: 'post-transition' },
+            { num: 14, symbol: 'Si', name: 'ケイ素', col: 14, row: 3, cat: 'metalloid' },
+            { num: 15, symbol: 'P', name: 'リン', col: 15, row: 3, cat: 'nonmetal' },
+            { num: 16, symbol: 'S', name: '硫黄', col: 16, row: 3, cat: 'nonmetal' },
+            { num: 17, symbol: 'Cl', name: '塩素', col: 17, row: 3, cat: 'halogen' },
+            { num: 18, symbol: 'Ar', name: 'アルゴン', col: 18, row: 3, cat: 'noble-gas' },
+
+            // 第4周期
+            { num: 19, symbol: 'K', name: 'カリウム', col: 1, row: 4, cat: 'alkali-metal' },
+            { num: 20, symbol: 'Ca', name: 'カルシウム', col: 2, row: 4, cat: 'alkaline-earth' },
+            { num: 21, symbol: 'Sc', name: 'スカンジウム', col: 3, row: 4, cat: 'transition-metal' },
+            { num: 22, symbol: 'Ti', name: 'チタン', col: 4, row: 4, cat: 'transition-metal' },
+            { num: 23, symbol: 'V', name: 'バナジウム', col: 5, row: 4, cat: 'transition-metal' },
+            { num: 24, symbol: 'Cr', name: 'クロム', col: 6, row: 4, cat: 'transition-metal' },
+            { num: 25, symbol: 'Mn', name: 'マンガン', col: 7, row: 4, cat: 'transition-metal' },
+            { num: 26, symbol: 'Fe', name: '鉄', col: 8, row: 4, cat: 'transition-metal' },
+            { num: 27, symbol: 'Co', name: 'コバルト', col: 9, row: 4, cat: 'transition-metal' },
+            { num: 28, symbol: 'Ni', name: 'ニッケル', col: 10, row: 4, cat: 'transition-metal' },
+            { num: 29, symbol: 'Cu', name: '銅', col: 11, row: 4, cat: 'transition-metal' },
+            { num: 30, symbol: 'Zn', name: '亜鉛', col: 12, row: 4, cat: 'transition-metal' },
+            { num: 31, symbol: 'Ga', name: 'ガリウム', col: 13, row: 4, cat: 'post-transition' },
+            { num: 32, symbol: 'Ge', name: 'ゲルマニウム', col: 14, row: 4, cat: 'metalloid' },
+            { num: 33, symbol: 'As', name: 'ヒ素', col: 15, row: 4, cat: 'metalloid' },
+            { num: 34, symbol: 'Se', name: 'セレン', col: 16, row: 4, cat: 'nonmetal' },
+            { num: 35, symbol: 'Br', name: '臭素', col: 17, row: 4, cat: 'halogen' },
+            { num: 36, symbol: 'Kr', name: 'クリプトン', col: 18, row: 4, cat: 'noble-gas' }
+        ];
+
+        const container = document.getElementById('periodicTable');
+
+        // カードの生成と周期表へのバインド
+        elements.forEach(elem => {
+            const cardContainer = document.createElement('div');
+            cardContainer.className = 'card-container';
+            // CSS Gridの座標を指定して周期表の形に配置
+            cardContainer.style.gridColumn = elem.col;
+            cardContainer.style.gridRow = elem.row;
+            cardContainer.style.setProperty('--category-color', `var(--${elem.cat})`);
+
+            cardContainer.innerHTML = `
+                <div class="card">
+                    <div class="card-face card-front">
+                        <span class="number">${elem.num}</span>
+                        <span class="symbol">${elem.symbol}</span>
+                    </div>
+                    <div class="card-face card-back">
+                        <span class="symbol">${elem.symbol}</span>
+                        <span class="name">${elem.name}</span>
+                    </div>
+                </div>
+            `;
+
+            // クリック/タップで反転
+            cardContainer.addEventListener('click', () => {
+                cardContainer.classList.toggle('flipped');
+            });
+
+            container.appendChild(cardContainer);
+        });
+
+        // 一括反転機能
+        function flipAll(toBack) {
+            const cards = document.querySelectorAll('.card-container');
+            cards.forEach(card => {
+                if (toBack) {
+                    card.classList.add('flipped');
+                } else {
+                    card.classList.remove('flipped');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
