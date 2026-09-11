@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>百人一首</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts: Shippori Mincho & Zen Kaku Gothic New -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;600;700&display=swap" rel="stylesheet">
@@ -38,8 +41,8 @@
             color: #f1f5f9;
             font-family: 'Zen Kaku Gothic New', sans-serif;
             background-image: 
-                radial-gradient(circle at 15% 15%, rgba(212, 175, 55, 0.04) 0%, transparent 50%),
-                radial-gradient(circle at 85% 85%, rgba(230, 57, 70, 0.04) 0%, transparent 50%);
+                radial-gradient(circle at 15% 15%, rgba(212, 175, 55, 0.05) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(230, 57, 70, 0.04) 0%, transparent 45%);
             min-height: 100vh;
         }
 
@@ -55,11 +58,6 @@
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .karuta-card:hover {
-            border-color: rgba(212, 175, 55, 0.55);
-            box-shadow: 0 16px 36px -4px rgba(212, 175, 55, 0.2);
-        }
-
         .option-card {
             background: linear-gradient(145deg, #141824, #0c0f17);
             border: 1px solid #202738;
@@ -70,6 +68,13 @@
             border-color: #d4af37;
             background: linear-gradient(145deg, #1d2334, #121622);
             transform: translateX(4px);
+        }
+
+        /* 改行させない横広テキストボックス (スクロールバー・矢印非表示) */
+        .wide-single-line {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         /* 紙吹雪キャンバス */
@@ -85,12 +90,21 @@
 
         /* アニメーション */
         @keyframes popIn {
-            0% { transform: scale(0.92); opacity: 0; }
+            0% { transform: scale(0.94); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
 
         .animate-pop {
             animation: popIn 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes slideUpToast {
+            0% { transform: translateY(100%); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .animate-toast {
+            animation: slideUpToast 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         @keyframes shake {
@@ -102,32 +116,23 @@
         .animate-shake {
             animation: shake 0.35s ease-in-out;
         }
-
-        /* 1行目が改行されないように横スクロール対応 */
-        .wide-no-wrap {
-            white-space: nowrap;
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-        .wide-no-wrap::-webkit-scrollbar {
-            display: none;
-        }
     </style>
 </head>
 <body class="flex flex-col min-h-screen justify-between relative overflow-x-hidden select-none">
 
     <canvas id="confetti-canvas"></canvas>
 
+    <!-- ヘッダー -->
     <header class="border-b border-darkborder bg-darkcard/90 backdrop-blur sticky top-0 z-40">
-        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+        <div class="max-w-5xl mx-auto px-4 py-3.5 flex justify-between items-center">
             <div class="flex items-center space-x-3">
                 <span class="text-accentgold text-2xl font-mincho font-bold tracking-widest border-b-2 border-accentgold pb-0.5">百人一首</span>
             </div>
             <div id="quiz-progress-container" class="hidden flex items-center space-x-4">
-                <div class="text-xs text-gray-400">
+                <div class="text-xs text-gray-400 font-sans">
                     問題 <span id="current-question-num" class="text-accentgold text-lg font-bold font-mincho">1</span> / 10
                 </div>
-                <div class="w-24 sm:w-32 bg-gray-800 h-2 rounded-full overflow-hidden border border-gray-700">
+                <div class="w-24 sm:w-36 bg-gray-800 h-2 rounded-full overflow-hidden border border-gray-700">
                     <div id="progress-bar" class="bg-gradient-to-r from-amber-600 to-accentgold h-full w-0 transition-all duration-300"></div>
                 </div>
             </div>
@@ -142,58 +147,75 @@
                 <div class="inline-block p-4 rounded-full bg-accentgold/10 border border-accentgold/30 mb-2">
                     <i class="fa-solid font-mincho text-4xl text-accentgold">百</i>
                 </div>
-                <h1 class="text-4xl font-extrabold font-mincho text-slate-100 tracking-wider">百人一首</h1>
-                <p class="text-sm text-gray-400 leading-relaxed">
+                <h1 class="text-4xl font-extrabold font-mincho text-slate-100 tracking-widest">百人一首</h1>
+                <p class="text-sm text-gray-400 leading-relaxed font-sans">
                     上の句（kaminoku）に対応する正しい下の句（shimonoku）を5つの選択肢から選んで暗記しましょう。
                 </p>
             </div>
 
-            <div class="p-4 bg-darkbg/70 rounded-xl border border-darkborder text-left space-y-2 text-xs text-gray-300">
+            <div class="p-4 bg-darkbg/80 rounded-xl border border-darkborder text-left space-y-2 text-xs text-gray-300">
                 <div class="flex items-center text-accentgold font-bold">
                     <i class="fa-solid fa-circle-info mr-2"></i>学習ルール
                 </div>
-                <ul class="list-disc list-inside space-y-1 text-gray-400 leading-relaxed">
+                <ul class="list-inside space-y-1.5 text-gray-400 leading-relaxed list-disc">
                     <li>1回のプレイで全10問が出題されます。</li>
-                    <li>正解・不正解に関わらず、回答後に全歌（ku-zentai）が表示されます。</li>
-                    <li>正解時には雅やかなトイピアノ音と紙吹雪でお祝いします！</li>
+                    <li>選択後、画面内およびトーストにて歌全体（ku-zentai）が表示されます。</li>
+                    <li>正解時にはトイピアノ風のサウンドと紙吹雪でお祝いします。</li>
                 </ul>
             </div>
 
             <button id="start-btn" class="w-full py-4 bg-gradient-to-r from-amber-600 via-yellow-600 to-amber-500 hover:from-amber-500 hover:to-yellow-500 text-slate-950 font-bold font-mincho text-lg rounded-xl shadow-lg shadow-amber-900/30 transition duration-200 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center space-x-2">
                 <i class="fa-solid fa-play"></i>
-                <span>練習を開始する</span>
+                <span>暗記練習を開始する</span>
             </button>
         </div>
 
         <!-- クイズ画面 -->
-        <div id="quiz-screen" class="hidden max-w-5xl w-full grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+        <div id="quiz-screen" class="hidden max-w-5xl w-full grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
             
-            <!-- 画面左側：kaminoku を表示 -->
-            <div class="md:col-span-5 flex flex-col justify-between karuta-card p-6 sm:p-8 rounded-2xl relative overflow-hidden">
+            <!-- 画面左側：kaminoku 表示 ＋ 正解表示テキストボックス -->
+            <div class="md:col-span-5 flex flex-col justify-between karuta-card p-6 rounded-2xl relative overflow-hidden min-h-[380px]">
                 <div class="absolute top-0 right-0 w-24 h-24 bg-accentgold/5 rounded-bl-full pointer-events-none"></div>
                 <div>
-                    <div class="flex justify-between items-center mb-6">
+                    <div class="flex justify-between items-center mb-4">
                         <span class="text-xs font-bold tracking-wider text-accentgold uppercase bg-accentgold/10 px-3 py-1 rounded-full border border-accentgold/20">
-                            提示札（kaminoku）
+                            提示札 (kaminoku)
                         </span>
                         <span class="text-xs text-gray-500">上の句</span>
                     </div>
 
-                    <div class="my-8 text-center py-8">
+                    <div class="my-6 text-center py-6 border-b border-darkborder/50">
                         <div id="kaminoku-text" class="text-3xl sm:text-4xl font-extrabold font-mincho text-slate-100 tracking-widest leading-relaxed">
                             <!-- JS挿入 -->
                         </div>
                     </div>
                 </div>
 
-                <div class="text-xs text-gray-500 text-center border-t border-darkborder pt-4">
+                <!-- 要求仕様準拠：回答後に表示される ku-zentai シンプルテキストボックス (スクロールバー・上下ボタンなし) -->
+                <div id="inline-answer-box" class="hidden space-y-2 mt-2 transition-all duration-300">
+                    <div class="text-[11px] font-bold text-accentgold/80 tracking-widest flex items-center">
+                        <i class="fa-solid fa-book-open mr-1.5"></i>【 歌全体 (ku-zentai) 】
+                    </div>
+                    <div class="bg-darkbg/90 border border-accentgold/30 rounded-xl p-3.5 font-mincho space-y-2 text-slate-100 shadow-inner">
+                        <!-- 1行目: kaminoku & " " & 2banme & " " & 3banme (改行せず横幅を広く確保) -->
+                        <div id="inline-line-1" class="wide-single-line text-sm sm:text-base font-bold text-amber-200">
+                            <!-- JS挿入 -->
+                        </div>
+                        <!-- 2行目: shimonoku & " " & 5banme -->
+                        <div id="inline-line-2" class="wide-single-line text-sm sm:text-base font-bold text-slate-200">
+                            <!-- JS挿入 -->
+                        </div>
+                    </div>
+                </div>
+
+                <div id="kaminoku-footer-hint" class="text-xs text-gray-500 text-center border-t border-darkborder pt-3 mt-4">
                     対応する「下の句（shimonoku）」を選択してください
                 </div>
             </div>
 
             <!-- 画面右側：shimonoku 5枚選択肢 -->
             <div class="md:col-span-7 flex flex-col justify-center space-y-3">
-                <div class="text-xs font-bold tracking-wider text-gray-400 px-1 mb-1 flex items-center justify-between">
+                <div class="text-xs font-bold tracking-wider text-gray-400 px-1 flex items-center justify-between">
                     <span>選択肢（shimonoku）</span>
                     <span class="text-gray-500 font-normal">ランダム5択</span>
                 </div>
@@ -201,39 +223,36 @@
                 <div id="options-container" class="space-y-3">
                     <!-- JS挿入 -->
                 </div>
+
+                <div id="next-btn-container" class="hidden pt-2">
+                    <button id="next-question-btn" class="w-full py-3.5 bg-gradient-to-r from-accentgold to-amber-500 hover:from-amber-500 hover:to-accentgold text-slate-950 font-bold font-mincho text-base rounded-xl transition duration-200 shadow-lg shadow-amber-900/20 active:scale-[0.99] flex items-center justify-center space-x-2">
+                        <span>次の問題へ進む</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- 正解・不正解共通の「ku-zentai」表示トーストモーダル -->
-        <div id="ku-zentai-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-            <div class="karuta-card max-w-2xl w-full p-6 sm:p-8 rounded-2xl border-2 border-accentgold/50 shadow-2xl animate-pop text-center space-y-6">
-                
-                <!-- 結果バッジ（正解 or 不正解） -->
-                <div id="modal-status-badge" class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full border">
-                    <i id="modal-status-icon" class="text-lg"></i>
-                    <span id="modal-status-text" class="font-bold text-sm tracking-widest"></span>
+        <!-- 要求仕様準拠：トーストで ku-zentai を表示 -->
+        <div id="ku-zentai-toast" class="hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 max-w-xl w-[92%] z-50 animate-toast">
+            <div class="karuta-card p-4 sm:p-5 rounded-2xl border-2 border-accentgold/60 shadow-2xl backdrop-blur-md bg-darkcard/95 flex flex-col space-y-3">
+                <div class="flex items-center justify-between border-b border-darkborder pb-2">
+                    <div id="toast-status-badge" class="inline-flex items-center space-x-2 px-3 py-0.5 rounded-full text-xs font-bold">
+                        <i id="toast-status-icon"></i>
+                        <span id="toast-status-text"></span>
+                    </div>
+                    <span class="text-[11px] text-gray-400 font-sans">歌全体 (ku-zentai)</span>
                 </div>
 
-                <div class="space-y-3 py-2">
-                    <p class="text-xs text-gray-400 tracking-widest font-sans">【 歌全体（ku-zentai） 】</p>
-                    
-                    <!-- 要求仕様準拠の歌表示エリア -->
-                    <div class="bg-darkbg/90 p-6 rounded-xl border border-darkborder space-y-4 font-mincho text-slate-100 text-lg sm:text-xl md:text-2xl tracking-widest leading-relaxed">
-                        <!-- １行目: kaminoku & " " & 2banme & " " & 3banme （改行しないよう横幅確保） -->
-                        <div class="wide-no-wrap text-center font-bold text-amber-200 pb-3 border-b border-gray-800/80">
-                            <span id="ku-line-1"></span>
-                        </div>
-                        <!-- ２行目: shimonoku & " " & 5banme -->
-                        <div class="wide-no-wrap text-center font-bold text-slate-100">
-                            <span id="ku-line-2"></span>
-                        </div>
+                <!-- 1行目: kaminoku & " " & 2banme & " " & 3banme / 2行目: shimonoku & " " & 5banme -->
+                <div class="space-y-1.5 font-mincho text-slate-100 px-1">
+                    <div id="toast-line-1" class="wide-single-line text-sm sm:text-base font-bold text-amber-200">
+                        <!-- JS挿入 -->
+                    </div>
+                    <div id="toast-line-2" class="wide-single-line text-sm sm:text-base font-bold text-slate-100">
+                        <!-- JS挿入 -->
                     </div>
                 </div>
-
-                <button id="next-question-btn" class="w-full py-3.5 bg-gradient-to-r from-accentgold to-amber-500 hover:from-amber-500 hover:to-accentgold text-slate-950 font-bold font-mincho text-base rounded-xl transition duration-200 shadow-lg shadow-amber-900/20 active:scale-[0.99] flex items-center justify-center space-x-2">
-                    <span>次の問題へ</span>
-                    <i class="fa-solid fa-arrow-right"></i>
-                </button>
             </div>
         </div>
 
@@ -241,12 +260,12 @@
         <div id="result-screen" class="hidden max-w-md w-full karuta-card p-8 rounded-2xl text-center space-y-6 animate-pop">
             <div class="space-y-2">
                 <i class="fa-solid fa-trophy text-4xl text-accentgold mb-2"></i>
-                <h2 class="text-2xl font-bold font-mincho text-slate-100">結果発表</h2>
-                <p class="text-xs text-gray-400">10問の練習が終了しました</p>
+                <h2 class="text-2xl font-bold font-mincho text-slate-100">練習完了</h2>
+                <p class="text-xs text-gray-400">10問の挑戦が終了しました</p>
             </div>
 
             <div class="bg-darkbg/80 p-6 rounded-xl border border-darkborder space-y-3">
-                <div class="text-sm text-gray-400">正解数</div>
+                <div class="text-xs text-gray-400">正解数</div>
                 <div class="text-5xl font-extrabold font-mincho text-accentgold">
                     <span id="final-score">0</span> <span class="text-xl text-gray-400 font-sans">/ 10</span>
                 </div>
@@ -368,7 +387,8 @@
             { kaminoku: "花さそふ", banme2: "嵐の庭の", banme3: "雪ならで", shimonoku: "ふりゆくものは", banme5: "わが身なりけり" },
             { kaminoku: "来ぬ人を", banme2: "松帆の浦の", banme3: "夕なぎに", shimonoku: "焼くや藻塩の", banme5: "身もこがれつつ" },
             { kaminoku: "風そよぐ", banme2: "楢の小川の", banme3: "夕暮は", shimonoku: "みそぎぞ夏の", banme5: "しるしなりける" },
-            { kaminoku: "人もをし", banme2: "人もうらめし", banme3: "あぢきなく", shimonoku: "世を思ふゆゑに", banme5: "もの思ふ身は" }
+            { kaminoku: "人もをし", banme2: "人もうらめし", banme3: "あぢきなく", shimonoku: "世を思ふゆゑに", banme5: "もの思ふ身は" },
+            { kaminoku: "百敷や", banme2: "古き軒端の", banme3: "しのぶにも", shimonoku: "なほあまりある", banme5: "昔なりけり" }
         ];
 
         // Web Audio API によるトイピアノ風正解ファンファーレ音の実装
@@ -391,7 +411,7 @@
          * 音階（アルペジオ）： ド・ミ・ソ・高ド・高ミ（C5 → E5 → G5 → C6 → E6）
          * 音色： サイン波（Sine）と三角波（Triangle）を重ねた、やわらかくピコピコとしたトイピアノ風の音
          */
-        function playCorrectSound() {
+        function playToyPianoFanfare() {
             initAudio();
             if (!audioCtx) return;
 
@@ -415,25 +435,25 @@
                 oscSine.type = 'sine';
                 oscSine.frequency.setValueAtTime(note.freq, startTime);
 
-                // 2. 三角波 (Triangle) - アタック感のある高音倍音
+                // 2. 三角波 (Triangle) - アタック感のある倍音
                 const oscTri = audioCtx.createOscillator();
                 oscTri.type = 'triangle';
                 oscTri.frequency.setValueAtTime(note.freq, startTime);
 
-                // 音量ゲインエンベロープ
+                // 音量エンベロープ
                 const gainNode = audioCtx.createGain();
                 gainNode.gain.setValueAtTime(0.0001, startTime);
-                // アタック
+                // 高速アタック
                 gainNode.gain.exponentialRampToValueAtTime(0.22, startTime + 0.012);
-                // 減衰
+                // ゆるやかな減衰
                 gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
 
-                // オーディオグラフ接続
+                // ノードの接続
                 oscSine.connect(gainNode);
                 oscTri.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
 
-                // 再生コントロール
+                // 再生開始と停止
                 oscSine.start(startTime);
                 oscTri.start(startTime);
 
@@ -462,7 +482,7 @@
                 this.size = Math.random() * 8 + 6;
                 this.speedY = Math.random() * 3 + 3;
                 this.speedX = Math.random() * 2 - 1;
-                // 和風の色彩（金、朱、白、桜色、翡翠、琥珀）
+                // 雅な色彩（金、朱、白、桜色、翡翠、琥珀）
                 const colors = ['#d4af37', '#e63946', '#f8fafc', '#ffb7c5', '#10b981', '#f59e0b'];
                 this.color = colors[Math.floor(Math.random() * colors.length)];
                 this.rotation = Math.random() * 360;
@@ -487,7 +507,7 @@
 
         function triggerConfetti() {
             confettiParticles = [];
-            for (let i = 0; i < 75; i++) {
+            for (let i = 0; i < 80; i++) {
                 confettiParticles.push(new Particle());
             }
 
@@ -520,7 +540,7 @@
         let score = 0;
         let isAnswered = false;
 
-        // DOM要素参照
+        // DOM参照
         const startScreen = document.getElementById('start-screen');
         const quizScreen = document.getElementById('quiz-screen');
         const resultScreen = document.getElementById('result-screen');
@@ -529,24 +549,31 @@
         const startBtn = document.getElementById('start-btn');
         const restartBtn = document.getElementById('restart-btn');
         const nextQuestionBtn = document.getElementById('next-question-btn');
+        const nextBtnContainer = document.getElementById('next-btn-container');
         
         const kaminokuText = document.getElementById('kaminoku-text');
         const optionsContainer = document.getElementById('options-container');
-        const kuZentaiModal = document.getElementById('ku-zentai-modal');
+        const kaminokuFooterHint = document.getElementById('kaminoku-footer-hint');
         
-        const modalStatusBadge = document.getElementById('modal-status-badge');
-        const modalStatusIcon = document.getElementById('modal-status-icon');
-        const modalStatusText = document.getElementById('modal-status-text');
-        
-        const kuLine1 = document.getElementById('ku-line-1');
-        const kuLine2 = document.getElementById('ku-line-2');
+        // 画面内 ku-zentai 表示ボックス
+        const inlineAnswerBox = document.getElementById('inline-answer-box');
+        const inlineLine1 = document.getElementById('inline-line-1');
+        const inlineLine2 = document.getElementById('inline-line-2');
+
+        // トースト ku-zentai 表示
+        const kuZentaiToast = document.getElementById('ku-zentai-toast');
+        const toastStatusBadge = document.getElementById('toast-status-badge');
+        const toastStatusIcon = document.getElementById('toast-status-icon');
+        const toastStatusText = document.getElementById('toast-status-text');
+        const toastLine1 = document.getElementById('toast-line-1');
+        const toastLine2 = document.getElementById('toast-line-2');
         
         const currentQuestionNum = document.getElementById('current-question-num');
         const progressBar = document.getElementById('progress-bar');
         const finalScore = document.getElementById('final-score');
         const resultRank = document.getElementById('result-rank');
 
-        // 配列シャッフル
+        // 配列シャッフル関数
         function shuffle(array) {
             const arr = [...array];
             for (let i = arr.length - 1; i > 0; i--) {
@@ -577,6 +604,12 @@
             isAnswered = false;
             const currentItem = currentQuestions[currentQuestionIndex];
 
+            // UIリセット
+            inlineAnswerBox.classList.add('hidden');
+            kuZentaiToast.classList.add('hidden');
+            nextBtnContainer.classList.add('hidden');
+            kaminokuFooterHint.classList.remove('hidden');
+
             // 進捗表示
             currentQuestionNum.textContent = currentQuestionIndex + 1;
             progressBar.style.width = `${((currentQuestionIndex + 1) / 10) * 100}%`;
@@ -584,7 +617,7 @@
             // 上の句 (kaminoku) 表示
             kaminokuText.textContent = currentItem.kaminoku;
 
-            // 下の句 (shimonoku) 5枚選択肢生成
+            // 下の句 (shimonoku) 5枚選択肢生成 (正解1 + 誤答4)
             const otherItems = HYAKUNIN_ISSHU_DATA.filter(item => item.shimonoku !== currentItem.shimonoku);
             const dummyItems = shuffle(otherItems).slice(0, 4);
             const options = shuffle([currentItem, ...dummyItems]);
@@ -593,7 +626,7 @@
             optionsContainer.innerHTML = '';
             options.forEach((opt, idx) => {
                 const btn = document.createElement('button');
-                btn.className = `option-card w-full p-4 rounded-xl text-left flex items-center justify-between text-slate-200 font-mincho text-lg tracking-wider focus:outline-none`;
+                btn.className = `option-card w-full p-4 rounded-xl text-left flex items-center justify-between text-slate-200 font-mincho text-lg tracking-wider focus:outline-none cursor-pointer`;
                 
                 btn.innerHTML = `
                     <div class="flex items-center space-x-3">
@@ -608,69 +641,70 @@
             });
         }
 
-        // 回答判定
+        // 回答判定と表示
         function checkAnswer(selectedOpt, correctOpt, buttonEl) {
             if (isAnswered) return;
             isAnswered = true;
 
             const isCorrect = (selectedOpt.shimonoku === correctOpt.shimonoku);
 
+            // 選択肢ボタンの表示更新
+            const allButtons = optionsContainer.querySelectorAll('button');
+            allButtons.forEach(btn => btn.disabled = true);
+
             if (isCorrect) {
-                // 正解
                 score++;
                 buttonEl.classList.remove('option-card');
-                buttonEl.classList.add('bg-accentemerald/20', 'border-accentemerald', 'text-amber-200');
+                buttonEl.classList.add('bg-accentemerald/20', 'border-accentemerald', 'text-amber-200', 'font-bold');
 
                 // ファンファーレ音 & 紙吹雪
-                playCorrectSound();
+                playToyPianoFanfare();
                 triggerConfetti();
 
-                // トーストモーダルの結果バッジ（正解）
-                modalStatusBadge.className = "inline-flex items-center space-x-2 px-4 py-1.5 rounded-full border border-accentemerald/30 bg-accentemerald/10 text-accentemerald";
-                modalStatusIcon.className = "fa-solid fa-circle-check text-lg";
-                modalStatusText.textContent = "正解！";
+                // トーストバッジ（正解）
+                toastStatusBadge.className = "inline-flex items-center space-x-1 px-3 py-0.5 rounded-full border border-accentemerald/40 bg-accentemerald/10 text-accentemerald";
+                toastStatusIcon.className = "fa-solid fa-circle-check";
+                toastStatusText.textContent = "正解";
             } else {
-                // 不正解
-                buttonEl.classList.add('border-red-500', 'bg-red-950/30', 'animate-shake');
+                buttonEl.classList.add('border-red-500', 'bg-red-950/40', 'text-red-200', 'animate-shake');
                 
-                // 正解のボタンを強調表示
-                const buttons = optionsContainer.querySelectorAll('button');
-                buttons.forEach(btn => {
+                // 正解のボタンをハイライト
+                allButtons.forEach(btn => {
                     if (btn.textContent.includes(correctOpt.shimonoku)) {
-                        btn.classList.add('border-accentgold', 'bg-accentgold/10');
+                        btn.classList.add('border-accentgold', 'bg-accentgold/20', 'text-amber-200');
                     }
                 });
 
-                // トーストモーダルの結果バッジ（不正解）
-                modalStatusBadge.className = "inline-flex items-center space-x-2 px-4 py-1.5 rounded-full border border-red-500/30 bg-red-500/10 text-red-400";
-                modalStatusIcon.className = "fa-solid fa-circle-xmark text-lg";
-                modalStatusText.textContent = "不正解...";
+                // トーストバッジ（不正解）
+                toastStatusBadge.className = "inline-flex items-center space-x-1 px-3 py-0.5 rounded-full border border-red-500/40 bg-red-500/10 text-red-400";
+                toastStatusIcon.className = "fa-solid fa-circle-xmark";
+                toastStatusText.textContent = "不正解";
             }
 
-            // 正解・不正解どちらでも要求仕様に従い「ku-zentai」をトーストモーダルで表示
-            showKuZentaiModal(correctOpt, isCorrect);
-        }
-
-        /**
-         * 仕様要求通りに ku-zentai をフォーマット表示
-         * １行目： kaminoku & " " & 2banme & " " & 3banme （改行しないよう横幅確保）
-         * ２行目： shimonoku & " " & 5banme
-         */
-        function showKuZentaiModal(item, isCorrect) {
+            // --- 要求仕様に準拠した答え（ku-zentai）の構築と表示 ---
             // 1行目: kaminoku & " " & 2banme & " " & 3banme
-            kuLine1.textContent = `${item.kaminoku}　${item.banme2}　${item.banme3}`;
+            const line1Text = `${correctOpt.kaminoku} ${correctOpt.banme2} ${correctOpt.banme3}`;
             // 2行目: shimonoku & " " & 5banme
-            kuLine2.textContent = `${item.shimonoku}　${item.banme5}`;
+            const line2Text = `${correctOpt.shimonoku} ${correctOpt.banme5}`;
 
-            const delay = isCorrect ? 250 : 600;
-            setTimeout(() => {
-                kuZentaiModal.classList.remove('hidden');
-            }, delay);
+            // A. 画面内テキストボックス（改行なし・スクロール/上下ボタンなし・シンプル）
+            inlineLine1.textContent = line1Text;
+            inlineLine2.textContent = line2Text;
+            inlineAnswerBox.classList.remove('hidden');
+            kaminokuFooterHint.classList.add('hidden');
+
+            // B. トースト表示
+            toastLine1.textContent = line1Text;
+            toastLine2.textContent = line2Text;
+            kuZentaiToast.classList.remove('hidden');
+
+            // 「次の問題へ」ボタンを表示
+            nextBtnContainer.classList.remove('hidden');
         }
 
         // 次の問題へ進む
         function nextQuestion() {
-            kuZentaiModal.classList.add('hidden');
+            kuZentaiToast.classList.add('hidden');
             currentQuestionIndex++;
 
             if (currentQuestionIndex < 10) {
@@ -684,19 +718,20 @@
         function showResult() {
             quizScreen.classList.add('hidden');
             progressContainer.classList.add('hidden');
+            kuZentaiToast.classList.add('hidden');
             resultScreen.classList.remove('hidden');
 
             finalScore.textContent = score;
 
-            // ランク評価メッセージ
+            // 評価ランク
             if (score === 10) {
                 resultRank.textContent = "全問正解！ 見事な歌人です！";
             } else if (score >= 7) {
                 resultRank.textContent = "素晴らしい！ かなりの実力です";
             } else if (score >= 4) {
-                resultRank.textContent = "あともう一歩！ 繰り返し練習しましょう";
+                resultRank.textContent = "あともう一歩！ 繰り返し暗記しましょう";
             } else {
-                resultRank.textContent = "百人一首に少しずつ慣れていきましょう！";
+                resultRank.textContent = "焦らず少しずつ覚えていきましょう！";
             }
         }
 
@@ -707,13 +742,6 @@
             startScreen.classList.remove('hidden');
         };
         nextQuestionBtn.onclick = nextQuestion;
-
-        // モーダル外側クリック時の操作
-        kuZentaiModal.onclick = (e) => {
-            if (e.target === kuZentaiModal) {
-                nextQuestion();
-            }
-        };
     </script>
 </body>
 </html>
