@@ -38,8 +38,8 @@
             color: #f1f5f9;
             font-family: 'Zen Kaku Gothic New', sans-serif;
             background-image: 
-                radial-gradient(circle at 15% 15%, rgba(212, 175, 55, 0.035) 0%, transparent 45%),
-                radial-gradient(circle at 85% 85%, rgba(230, 57, 70, 0.035) 0%, transparent 45%);
+                radial-gradient(circle at 15% 15%, rgba(212, 175, 55, 0.04) 0%, transparent 50%),
+                radial-gradient(circle at 85% 85%, rgba(230, 57, 70, 0.04) 0%, transparent 50%);
             min-height: 100vh;
         }
 
@@ -51,13 +51,13 @@
         .karuta-card {
             background: linear-gradient(145deg, #161b27, #0e111a);
             border: 1px solid rgba(212, 175, 55, 0.22);
-            box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.75);
+            box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.85);
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .karuta-card:hover {
             border-color: rgba(212, 175, 55, 0.55);
-            box-shadow: 0 16px 36px -4px rgba(212, 175, 55, 0.15);
+            box-shadow: 0 16px 36px -4px rgba(212, 175, 55, 0.2);
         }
 
         .option-card {
@@ -103,7 +103,7 @@
             animation: shake 0.35s ease-in-out;
         }
 
-        /* 改行防止スクロール用 */
+        /* 1行目が改行されないように横スクロール対応 */
         .wide-no-wrap {
             white-space: nowrap;
             overflow-x: auto;
@@ -118,7 +118,6 @@
 
     <canvas id="confetti-canvas"></canvas>
 
-    <!-- ヘッダー -->
     <header class="border-b border-darkborder bg-darkcard/90 backdrop-blur sticky top-0 z-40">
         <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-3">
@@ -155,8 +154,8 @@
                 </div>
                 <ul class="list-disc list-inside space-y-1 text-gray-400 leading-relaxed">
                     <li>1回のプレイで全10問が出題されます。</li>
-                    <li>正解するとファンファーレと共に歌全体（ku-zentai）が美しく表示されます。</li>
-                    <li>全問正解を目指して練習を重ねましょう！</li>
+                    <li>正解・不正解に関わらず、回答後に全歌（ku-zentai）が表示されます。</li>
+                    <li>正解時には雅やかなトイピアノ音と紙吹雪でお祝いします！</li>
                 </ul>
             </div>
 
@@ -196,7 +195,7 @@
             <div class="md:col-span-7 flex flex-col justify-center space-y-3">
                 <div class="text-xs font-bold tracking-wider text-gray-400 px-1 mb-1 flex items-center justify-between">
                     <span>選択肢（shimonoku）</span>
-                    <span class="text-gray-500 font-normal">5択</span>
+                    <span class="text-gray-500 font-normal">ランダム5択</span>
                 </div>
 
                 <div id="options-container" class="space-y-3">
@@ -205,25 +204,26 @@
             </div>
         </div>
 
-        <!-- 正解時の「ku-zentai」表示用トースト / モーダル -->
+        <!-- 正解・不正解共通の「ku-zentai」表示トーストモーダル -->
         <div id="ku-zentai-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
             <div class="karuta-card max-w-2xl w-full p-6 sm:p-8 rounded-2xl border-2 border-accentgold/50 shadow-2xl animate-pop text-center space-y-6">
                 
-                <div class="inline-flex items-center space-x-2 text-accentemerald bg-accentemerald/10 px-4 py-1.5 rounded-full border border-accentemerald/30">
-                    <i class="fa-solid fa-circle-check text-lg"></i>
-                    <span class="font-bold text-sm tracking-widest">正解！</span>
+                <!-- 結果バッジ（正解 or 不正解） -->
+                <div id="modal-status-badge" class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full border">
+                    <i id="modal-status-icon" class="text-lg"></i>
+                    <span id="modal-status-text" class="font-bold text-sm tracking-widest"></span>
                 </div>
 
                 <div class="space-y-3 py-2">
                     <p class="text-xs text-gray-400 tracking-widest font-sans">【 歌全体（ku-zentai） 】</p>
                     
-                    <!-- 指定通りの表示エリア -->
+                    <!-- 要求仕様準拠の歌表示エリア -->
                     <div class="bg-darkbg/90 p-6 rounded-xl border border-darkborder space-y-4 font-mincho text-slate-100 text-lg sm:text-xl md:text-2xl tracking-widest leading-relaxed">
-                        <!-- 1行目: kaminoku & " " & 2banme & " " & 3banme (改行しないよう十分な横幅確保) -->
+                        <!-- １行目: kaminoku & " " & 2banme & " " & 3banme （改行しないよう横幅確保） -->
                         <div class="wide-no-wrap text-center font-bold text-amber-200 pb-3 border-b border-gray-800/80">
                             <span id="ku-line-1"></span>
                         </div>
-                        <!-- 2行目: shimonoku & " " & 5banme -->
+                        <!-- ２行目: shimonoku & " " & 5banme -->
                         <div class="wide-no-wrap text-center font-bold text-slate-100">
                             <span id="ku-line-2"></span>
                         </div>
@@ -268,108 +268,107 @@
     </footer>
 
     <script>
-        // 百人一首 全100首の定義データ
+        // 百人一首 全100首データ
         const HYAKUNIN_ISSHU_DATA = [
-            { kaminoku: "秋の田の", banme2: "かりほの庵の", banme3: "苫をあらみ", shimonoku: "わが衣手は", banme5: "露にぬれつつ", kuZentai: "秋の田の　かりほの庵の　苫をあらみ　わが衣手は　露にぬれつつ" },
-            { kaminoku: "春過ぎて", banme2: "夏来にけらし", banme3: "白妙の", shimonoku: "衣ほすてふ", banme5: "天の香具山", kuZentai: "春過ぎて　夏来にけらし　白妙の　衣ほすてふ　天の香具山" },
-            { kaminoku: "あしびきの", banme2: "山鳥の尾の", banme3: "しだり尾の", shimonoku: "ながながし夜を", banme5: "ひとりかも寝む", kuZentai: "あしびきの　山鳥の尾の　しだり尾の　ながながし夜を　ひとりかも寝む" },
-            { kaminoku: "田子の浦に", banme2: "うち出でて見れば", banme3: "白妙の", shimonoku: "富士の高嶺に", banme5: "雪は降りつつ", kuZentai: "田子の浦に　うち出でて見れば　白妙の　富士の高嶺に　雪は降りつつ" },
-            { kaminoku: "奥山に", banme2: "もみぢ踏み分け", banme3: "鳴く鹿の", shimonoku: "声聞く時ぞ", banme5: "秋は悲しき", kuZentai: "奥山に　もみぢ踏み分け　鳴く鹿の　声聞く時ぞ　秋は悲しき" },
-            { kaminoku: "かささぎの", banme2: "渡せる橋に", banme3: "おく霜の", shimonoku: "白きを見れば", banme5: "夜ぞふけにける", kuZentai: "かささぎの　渡せる橋に　おく霜の　白きを見れば夜ぞふけにける" },
-            { kaminoku: "天の原", banme2: "ふりさけ見れば", banme3: "春日なる", shimonoku: "三笠の山に", banme5: "出でし月かも", kuZentai: "天の原　ふりさけ見れば　春日なる　三笠の山に　出でし月かも" },
-            { kaminoku: "わが庵は", banme2: "都のたつみ", banme3: "しかぞ住む", shimonoku: "世をうぢ山と", banme5: "人はいふなり", kuZentai: "わが庵は　都のたつみ　しかぞ住む　世をうぢ山と　人はいふなり" },
-            { kaminoku: "花の色は", banme2: "うつりにけりな", banme3: "いたづらに", shimonoku: "わが身世にふる", banme5: "ながめせしまに", kuZentai: "花の色は　うつりにけりな　いたづらに　わが身世にふる　ながめせしまに" },
-            { kaminoku: "これやこの", banme2: "行くも帰るも", banme3: "別れては", shimonoku: "知るも知らぬも", banme5: "逢坂の関", kuZentai: "これやこの　行くも帰るも　別れては　知るも知らぬも　逢坂の関" },
-            { kaminoku: "わたの原", banme2: "八十島かけて", banme3: "漕ぎ出でぬと", shimonoku: "人には告げよ", banme5: "あまの釣舟", kuZentai: "わたの原　八十島かけて　漕ぎ出でぬと　人には告げよ　あまの釣舟" },
-            { kaminoku: "天つ風", banme2: "雲のかよひ路", banme3: "吹きとぢよ", shimonoku: "をとめの姿", banme5: "しばしとどめむ", kuZentai: "天つ風　雲のかよひ路　吹きとぢよ　をとめの姿　しばしとどめむ" },
-            { kaminoku: "筑波嶺の", banme2: "峰より落つる", banme3: "みなの川", shimonoku: "恋ぞつもりて", banme5: "淵となりぬる", kuZentai: "筑波嶺の　峰より落つる　みなの川　恋ぞつもりて　淵となりぬる" },
-            { kaminoku: "陸奥の", banme2: "しのぶもぢずり", banme3: "誰ゆゑに", shimonoku: "みだれそめにし", banme5: "我ならなくに", kuZentai: "陸奥の　しのぶもぢずり　誰ゆゑに　みだれそめにし　我ならなくに" },
-            { kaminoku: "君がため", banme2: "春の野に出でて", banme3: "若菜つむ", shimonoku: "わが衣手に", banme5: "雪は降りつつ", kuZentai: "君がため　春の野に出でて　若菜つむ　わが衣手に　雪は降りつつ" },
-            { kaminoku: "立ち別れ", banme2: "いなばの山の", banme3: "峰に生ふる", shimonoku: "まつとし聞かば", banme5: "今帰り来む", kuZentai: "立ち別れ　いなばの山の　峰に生ふる　まつとし聞かば　今帰り来む" },
-            { kaminoku: "ちはやぶる", banme2: "神代も聞かず", banme3: "竜田川", shimonoku: "からくれなゐに", banme5: "水くくるとは", kuZentai: "ちはやぶる　神代も聞かず　竜田川　からくれなゐに　水くくるとは" },
-            { kaminoku: "住の江の", banme2: "岸に寄る波", banme3: "よるさへや", shimonoku: "夢の通ひ路", banme5: "人目よくらむ", kuZentai: "住の江の　岸に寄る波　よるさへや　夢の通ひ路　人目よくらむ" },
-            { kaminoku: "難波潟", banme2: "短き葦の", banme3: "ふしの間も", shimonoku: "逢はでこの世を", banme5: "過ぐしてよとや", kuZentai: "難波潟　短き葦の　ふしの間も　逢はでこの世を　過ぐしてよとや" },
-            { kaminoku: "わびぬれば", banme2: "今はた同じ", banme3: "難波なる", shimonoku: "身をつくしても", banme5: "逢はむとぞ思ふ", kuZentai: "わびぬれば　今はた同じ　難波なる　身をつくしても　逢はむとぞ思ふ" },
-            { kaminoku: "今来むと", banme2: "いひしばかりに", banme3: "長月の", shimonoku: "有明の月を", banme5: "待ち出でつるかな", kuZentai: "今来むと　いひしばかりに　長月の　有明の月を　待ち出でつるかな" },
-            { kaminoku: "吹くからに", banme2: "秋の草木の", banme3: "しをるれば", shimonoku: "むべ山風を", banme5: "あらしといふらむ", kuZentai: "吹くからに　秋の草木の　しをるれば　むべ山風を　あらしといふらむ" },
-            { kaminoku: "月見れば", banme2: "千々に物こそ", banme3: "悲しけれ", shimonoku: "わが身ひとつの", banme5: "秋にはあらねど", kuZentai: "月見れば　千々に物こそ　悲しけれ　わが身ひとつの　秋にはあらねど" },
-            { kaminoku: "このたびは", banme2: "幣もとりあへず", banme3: "手向山", shimonoku: "紅葉の錦", banme5: "神のまにまに", kuZentai: "このたびは　幣もとりあへず　手向山　紅葉の錦　神のまにまに" },
-            { kaminoku: "名にしおはば", banme2: "逢坂山の", banme3: "さねかづら", shimonoku: "人に知られで", banme5: "くるよしもがな", kuZentai: "名にしおはば　逢坂山の　さねかづら　人に知られで　くるよしもがな" },
-            { kaminoku: "小倉山", banme2: "峰のもみぢ葉", banme3: "心あらば", shimonoku: "今ひとたびの", banme5: "みゆき待たなむ", kuZentai: "小倉山　峰のもみぢ葉　心あらば　今ひとたびの　みゆき待たなむ" },
-            { kaminoku: "みかの原", banme2: "わきて流るる", banme3: "泉川", shimonoku: "いつ見きとてか", banme5: "恋しかるらむ", kuZentai: "みかの原　わきて流るる　泉川　いつ見きとてか恋しかるらむ" },
-            { kaminoku: "山里は", banme2: "冬ぞ寂しさ", banme3: "まさりける", shimonoku: "人目も草も", banme5: "かれぬと思へば", kuZentai: "山里は　冬ぞ寂しさ　まさりける　人目も草も　かれぬと思へば" },
-            { kaminoku: "心あてに", banme2: "折らばや折らむ", banme3: "初霜の", shimonoku: "置きまどはせる", banme5: "白菊の花", kuZentai: "心あてに　折らばや折らむ　初霜の　置きまどはせる　白菊の花" },
-            { kaminoku: "有明の", banme2: "つれなく見えし", banme3: "別れより", shimonoku: "暁ばかり", banme5: "憂きものはなし", kuZentai: "有明の　つれなく見えし　別れより　暁ばかり　憂きものはなし" },
-            { kaminoku: "朝ぼらけ", banme2: "有明の月と", banme3: "見るまでに", shimonoku: "吉野の里に", banme5: "降れる白雪", kuZentai: "朝ぼらけ　有明の月と　見るまでに　吉野の里に　降れる白雪" },
-            { kaminoku: "山川に", banme2: "風のかけたる", banme3: "しがらみは", shimonoku: "流れもあへぬ", banme5: "紅葉なりけり", kuZentai: "山川に　風のかけたる　しがらみは　流れもあへぬ　紅葉なりけり" },
-            { kaminoku: "久方の", banme2: "光のどけき", banme3: "春の日に", shimonoku: "しづごころなく", banme5: "花の散るらむ", kuZentai: "久方の　光のどけき　春の日に　しづごころなく　花の散るらむ" },
-            { kaminoku: "誰をかも", banme2: "知る人にせむ", banme3: "高砂の", shimonoku: "松も昔の", banme5: "友ならなくに", kuZentai: "誰をかも　知る人にせむ　高砂の　松も昔の　友ならなくに" },
-            { kaminoku: "人はいさ", banme2: "心もしらず", banme3: "ふるさとは", shimonoku: "花ぞ昔の", banme5: "香ににほひける", kuZentai: "人はいさ　心もしらず　ふるさとは　花ぞ昔の　香ににほひける" },
-            { kaminoku: "夏の夜は", banme2: "まだ宵ながら", banme3: "あけぬるを", shimonoku: "雲のいづこに", banme5: "月宿るらむ", kuZentai: "夏の夜は　まだ宵ながら　あけぬるを　雲のいづこに　月宿るらむ" },
-            { kaminoku: "白露に", banme2: "風の吹きしく", banme3: "秋の野は", shimonoku: "つらぬきとめぬ", banme5: "玉ぞ散りける", kuZentai: "白露に　風の吹きしく　秋の野は　つらぬきとめぬ　玉ぞ散りける" },
-            { kaminoku: "忘らるる", banme2: "身をば思はず", banme3: "誓ひてし", shimonoku: "人の命の", banme5: "惜しくもあるかな", kuZentai: "忘らるる　身をば思はず　誓ひてし　人の命の　惜しくもあるかな" },
-            { kaminoku: "浅茅生の", banme2: "小野の篠原", banme3: "しのぶれど", shimonoku: "あまりてなどか", banme5: "人の恋しき", kuZentai: "浅茅生の　小野の篠原　しのぶれど　あまりてなどか　人の恋しき" },
-            { kaminoku: "忍ぶれど", banme2: "色に出でにけり", banme3: "わが恋は", shimonoku: "ものや思ふと", banme5: "人の問ふまで", kuZentai: "忍ぶれど　色に出でにけり　わが恋は　ものや思ふと　人の問ふまで" },
-            { kaminoku: "恋すてふ", banme2: "わが名はまだき", banme3: "立ちにけり", shimonoku: "人知れずこそ", banme5: "思ひそめしか", kuZentai: "恋すてふ　わが名はまだき　立ちにけり　人知れずこそ　思ひそめしか" },
-            { kaminoku: "契りきな", banme2: "かたみに袖を", banme3: "しぼりつつ", shimonoku: "末の松山", banme5: "波こさじとは", kuZentai: "契りきな　かたみに袖を　しぼりつつ　末の松山　波こさじとは" },
-            { kaminoku: "逢ひ見ての", banme2: "後の心に", banme3: "くらぶれば", shimonoku: "昔はものを", banme5: "思はざりけり", kuZentai: "逢ひ見ての　後の心に　くらぶれば　昔はものを　思はざりけり" },
-            { kaminoku: "逢ふことの", banme2: "絶えてしなくば", banme3: "なかなかに", shimonoku: "人をも身をも", banme5: "恨みざらまし", kuZentai: "逢ふことの　絶えてしなくば　なかなかに　人をも身をも　恨みざらまし" },
-            { kaminoku: "あはれとも", banme2: "いふべき人は", banme3: "おもほえで", shimonoku: "身のいたづらに", banme5: "なりぬべきかな", kuZentai: "あはれとも　いふべき人は　おもほえで　身のいたづらに　なりぬべきかな" },
-            { kaminoku: "由良の門を", banme2: "渡る舟人", banme3: "かぢを絶え", shimonoku: "行方もしらぬ", banme5: "恋の道かな", kuZentai: "由良の門を　渡る舟人　かぢを絶え　行方もしらぬ　恋の道かな" },
-            { kaminoku: "八重むぐら", banme2: "しげれる宿の", banme3: "さびしきに", shimonoku: "人こそ見えね", banme5: "秋は来にけり", kuZentai: "八重むぐら　しげれる宿の　さびしきに　人こそ見えね　秋は来にけり" },
-            { kaminoku: "風をいたみ", banme2: "岩うつ波の", banme3: "おのれのみ", shimonoku: "くだけてものを", banme5: "思ふころかな", kuZentai: "風をいたみ　岩うつ波の　おのれのみ　くだけてものを　思ふころかな" },
-            { kaminoku: "御垣守", banme2: "衛士のたく火の", banme3: "夜は燃え", shimonoku: "昼は消えつつ", banme5: "ものをこそ思へ", kuZentai: "御垣守　衛士のたく火の　夜は燃え　昼は消えつつ　ものをこそ思へ" },
-            { kaminoku: "君がため", banme2: "惜しからざりし", banme3: "命さへ", shimonoku: "長くもがなと", banme5: "思ひけるかな", kuZentai: "君がため　惜しからざりし　命さへ　長くもがなと　思ひけるかな" },
-            { kaminoku: "かくとだに", banme2: "えやはいぶきの", banme3: "さしも草", shimonoku: "さしも知らじな", banme5: "燃ゆる思ひを", kuZentai: "かくとだに　えやはいぶきの　さしも草　さしも知らじな　燃ゆる思ひを" },
-            { kaminoku: "明けぬれば", banme2: "暮るるものとは", banme3: "知りながら", shimonoku: "なほ恨めしき", banme5: "朝ぼらけかな", kuZentai: "明けぬれば　暮るるものとは　知りながら　なほ恨めしき　朝ぼらけかな" },
-            { kaminoku: "嘆きつつ", banme2: "ひとり寝る夜の", banme3: "明くる間は", shimonoku: "いかに久しき", banme5: "ものとかは知る", kuZentai: "嘆きつつ　ひとり寝る夜の　明くる間は　いかに久しき　ものとかは知る" },
-            { kaminoku: "忘れじの", banme2: "行末までは", banme3: "かたければ", shimonoku: "今日を限りの", banme5: "命ともがな", kuZentai: "忘れじの　行末までは　かたければ　今日を限りの　命ともがな" },
-            { kaminoku: "滝の音は", banme2: "絶えて久しく", banme3: "なりぬれど", shimonoku: "名こそ流れて", banme5: "なほ聞こえけれ", kuZentai: "滝の音は　絶えて久しく　なりぬれど　名こそ流れて　なほ聞こえけれ" },
-            { kaminoku: "あらざらむ", banme2: "この世のほかの", banme3: "思ひ出に", shimonoku: "今ひとたびの", banme5: "逢ふこともがな", kuZentai: "あらざらむ　この世のほかの　思ひ出に　今ひとたびの　逢ふこともがな" },
-            { kaminoku: "めぐり逢ひて", banme2: "見しやそれとも", banme3: "わがぬ間に", shimonoku: "雲隠れにし", banme5: "夜半の月かな", kuZentai: "めぐり逢ひて　見しやそれとも　わがぬ間に　雲隠れにし　夜半の月かな" },
-            { kaminoku: "有馬山", banme2: "猪名の笹原", banme3: "風吹けば", shimonoku: "いでそよ人を", banme5: "忘れやはする", kuZentai: "有馬山　猪名の笹原　風吹けば　いでそよ人を　忘れやはする" },
-            { kaminoku: "やすらはで", banme2: "寝なましものを", banme3: "小夜更けて", shimonoku: "傾くまでの", banme5: "月を見しかな", kuZentai: "やすらはで　寝なましものを　小夜更けて　傾くまでの　月を見しかな" },
-            { kaminoku: "大江山", banme2: "いく野の道の", banme3: "遠ければ", shimonoku: "まだふみも見ず", banme5: "天の橋立", kuZentai: "大江山　いく野の道の　遠ければ　まだふみも見ず　天の橋立" },
-            { kaminoku: "いにしへの", banme2: "奈良の都の", banme3: "八重桜", shimonoku: "今日九重に", banme5: "にほひぬるかな", kuZentai: "いにしへの　奈良の都の　八重桜　今日九重に　にほひぬるかな" },
-            { kaminoku: "夜をこめて", banme2: "鳥のそら音は", banme3: "はかるとも", shimonoku: "よに逢坂の", banme5: "関は許さじ", kuZentai: "夜をこめて　鳥のそら音は　はかるとも　よに逢坂の　関は許さじ" },
-            { kaminoku: "今はただ", banme2: "思ひ絶えなむ", banme3: "とばかりを", shimonoku: "人づてならで", banme5: "言ふよしもがな", kuZentai: "今はただ　思ひ絶えなむ　とばかりを　人づてならで　言ふよしもがな" },
-            { kaminoku: "朝ぼらけ", banme2: "宇治の川霧", banme3: "絶え絶えに", shimonoku: "あらはれわたる", banme5: "瀬々の網代木", kuZentai: "朝ぼらけ　宇治の川霧　絶え絶えに　あらはれわたる瀬々の網代木" },
-            { kaminoku: "恨みわび", banme2: "ほさぬ袖だに", banme3: "あるものを", shimonoku: "恋に朽ちなむ", banme5: "名こそ惜しけれ", kuZentai: "恨みわび　ほさぬ袖だに　あるものを　恋に朽ちなむ　名こそ惜しけれ" },
-            { kaminoku: "もろともに", banme2: "あはれと思へ", banme3: "山桜", shimonoku: "花よりほかに", banme5: "知る人もなし", kuZentai: "もろともに　あはれと思へ　山桜　花よりほかに　知る人もなし" },
-            { kaminoku: "春の夜の", banme2: "夢ばかりなる", banme3: "手枕に", shimonoku: "かひなく立たむ", banme5: "名こそ惜しけれ", kuZentai: "春の夜の　夢ばかりなる　手枕に　かひなく立たむ　名こそ惜しけれ" },
-            { kaminoku: "心にも", banme2: "あらで憂き世に", banme3: "ながらへば", shimonoku: "恋しかるべき", banme5: "夜半の月かな", kuZentai: "心にも　あらで憂き世に　ながらへば　恋しかるべき　夜半の月かな" },
-            { kaminoku: "嵐吹く", banme2: "三室の山の", banme3: "もみぢ葉は", shimonoku: "竜田の川の", banme5: "錦なりけり", kuZentai: "嵐吹く　三室の山の　もみぢ葉は　竜田の川の　錦なりけり" },
-            { kaminoku: "寂しさに", banme2: "宿を立ち出でて", banme3: "眺むれば", shimonoku: "いづくも同じ", banme5: "秋の夕暮", kuZentai: "寂しさに　宿を立ち出でて　眺むれば　いづくも同じ　秋の夕暮" },
-            { kaminoku: "夕されば", banme2: "門田の稲葉", banme3: "おとづれて", shimonoku: "あしのまろやに", banme5: "秋風ぞ吹く", kuZentai: "夕されば　門田の稲葉　おとづれて　あしのまろやに　秋風ぞ吹く" },
-            { kaminoku: "音に聞く", banme2: "高師の浜の", banme3: "あだ波は", shimonoku: "かけじや袖の", banme5: "ぬれもこそすれ", kuZentai: "音に聞く　高師の浜の　あだ波は　かけじや袖の　ぬれもこそすれ" },
-            { kaminoku: "高砂の", banme2: "尾上の桜", banme3: "咲きにけり", shimonoku: "外山の霞", banme5: "立たずもあらなむ", kuZentai: "高砂の　尾上の桜　咲きにけり　外山の霞　立たずもあらなむ" },
-            { kaminoku: "うかりける", banme2: "人を初瀬の", banme3: "山おろし", shimonoku: "はげしかれとは", banme5: "祈らぬものを", kuZentai: "うかりける　人を初瀬の　山おろし　はげしかれとは　祈らぬものを" },
-            { kaminoku: "契りおきし", banme2: "させもが露を", banme3: "命にて", shimonoku: "あはれ今年の", banme5: "秋もいぬめり", kuZentai: "契りおきし　させもが露を　命にて　あはれ今年の　秋もいぬめり" },
-            { kaminoku: "わたの原", banme2: "漕ぎ出でて見れば", banme3: "久方の", shimonoku: "雲居にまがふ", banme5: "沖つ白波", kuZentai: "わたの原　漕ぎ出でて見れば　久方の　雲居にまがふ　沖つ白波" },
-            { kaminoku: "瀬をはやみ", banme2: "岩にせかるる", banme3: "滝川の", shimonoku: "われても末に", banme5: "逢はむとぞ思ふ", kuZentai: "瀬をはやみ　岩にせかるる　滝川の　われても末に　逢はむとぞ思ふ" },
-            { kaminoku: "淡路島", banme2: "かよふ千鳥の", banme3: "鳴く声に", shimonoku: "幾夜寝覚めぬ", banme5: "須磨の関守", kuZentai: "淡路島　かよふ千鳥の　鳴く声に　幾夜寝覚めぬ　須磨の関守" },
-            { kaminoku: "秋風に", banme2: "たなびく雲の", banme3: "絶え間より", shimonoku: "もれ出づる月の", banme5: "影のさやけさ", kuZentai: "秋風に　たなびく雲の　絶え間より　もれ出づる月の影のさやけさ" },
-            { kaminoku: "長からむ", banme2: "心も知らず", banme3: "黒髪の", shimonoku: "乱れて今朝は", banme5: "ものをこそ思へ", kuZentai: "長からむ　心も知らず　黒髪の　乱れて今朝は　ものをこそ思へ" },
-            { kaminoku: "ほととぎす", banme2: "鳴きつる方を", banme3: "眺むれば", shimonoku: "ただ有明の", banme5: "月ぞ残れる", kuZentai: "ほととぎす　鳴きつる方を　眺むれば　ただ有明の　月ぞ残れる" },
-            { kaminoku: "思ひわび", banme2: "さても命は", banme3: "あるものを", shimonoku: "憂きに堪へぬは", banme5: "涙なりけり", kuZentai: "思ひわび　さても命は　あるものを　憂きに堪へぬは　涙なりけり" },
-            { kaminoku: "世の中よ", banme2: "道こそなけれ", banme3: "思ひ入る", shimonoku: "山の奥にも", banme5: "鹿ぞ鳴くなる", kuZentai: "世の中よ　道こそなけれ　思ひ入る1山の奥にも　鹿ぞ鳴くなる".replace("1", "") },
-            { kaminoku: "ながらへば", banme2: "またこの頃や", banme3: "しのばれむ", shimonoku: "憂しと見し世ぞ", banme5: "今は恋しき", kuZentai: "ながらへば　またこの頃や{しのばれむ　憂しと見し世ぞ　今は恋しき".replace("{", "") },
-            { kaminoku: "夜もすがら", banme2: "もの思ふ頃は", banme3: "明けやらで", shimonoku: "ねやのひまゝへ", banme5: "つれなかりけり", kuZentai: "夜もすがら　もの思ふ頃は　明けやらで　ねやのひまゝへ　つれなかりけり" },
-            { kaminoku: "嘆けとて", banme2: "月やはものを", banme3: "思はする", shimonoku: "かこち顔なる", banme5: "わが涙かな", kuZentai: "嘆けとて　月やはものを　思はする{かこち顔なる　わが涙かな".replace("{", "") },
-            { kaminoku: "村雨の", banme2: "露もまだひぬ", banme3: "槙の葉に", shimonoku: "霧立ちのぼる", banme5: "秋の夕暮", kuZentai: "村雨の　露もまだひぬ　槙の葉に　霧立ちのぼる　秋の夕暮" },
-            { kaminoku: "難波江の", banme2: "葦のかりねの", banme3: "ひとよゆゑ", shimonoku: "身をつくしてや", banme5: "恋ひわたるべき", kuZentai: "難波江の　葦のかりねの　ひとよゆゑ{" + "身をつくしてやt恋ひわたるべき".replace("t", "").replace("{", "") },
-            { kaminoku: "玉の緒よ", banme2: "絶えなば絶えね", banme3: "ながらへば", shimonoku: "忍ぶることの", banme5: "弱りもぞする", kuZentai: "玉の緒よ　絶えなば絶えね　ながらへば　忍ぶることの　弱りもぞする" },
-            { kaminoku: "見せばやな", banme2: "雄島のあまの", banme3: "袖だにも", shimonoku: "濡れにぞ濡れし", banme5: "色は変はらず", kuZentai: "見せばやな　雄島のあまの　袖だにも　濡れにぞ濡れし　色は変はらず" },
-            { kaminoku: "きりぎりす", banme2: "鳴くや霜夜の", banme3: "さむしろに", shimonoku: "衣かたしき", banme5: "ひとりかも寝む", kuZentai: "きりぎりす　鳴くや霜夜の　さむしろに　衣かたしき　ひとりかも寝む" },
-            { kaminoku: "わが袖は", banme2: "潮干に見えぬ", banme3: "沖の石の", shimonoku: "人こそ知らね", banme5: "乾く間もなし", kuZentai: "わが袖は　潮干に見えぬ　沖の石の　人こそ知らね　乾く間もなし" },
-            { kaminoku: "世の中は", banme2: "常にもがもな", banme3: "渚こぐ", shimonoku: "海士の小舟の", banme5: "綱手かなしも", kuZentai: "世の中は　常にもがもな　渚こぐ　海士の小舟の　綱手かなしも" },
-            { kaminoku: "み吉野の", banme2: "山の秋風", banme3: "さ夜更けて", shimonoku: "ふるさと寒く", banme5: "衣打つなり", kuZentai: "み吉野の{山の秋風　さ夜更けて　ふるさと寒く　衣打つなり".replace("{", "") },
-            { kaminoku: "おほけなく", banme2: "うき世の民に", banme3: "おほふかな", shimonoku: "わが立つ杣に", banme5: "墨染の袖", kuZentai: "おほけなく　うき世の民に　おほふかな　わが立つ杣に　墨染の袖" },
-            { kaminoku: "花さそふ", banme2: "嵐の庭の", banme3: "雪ならで", shimonoku: "ふりゆくものは", banme5: "わが身なりけり", kuZentai: "花さそふ　嵐の庭の　雪ならで　ふりゆくものは　わが身なりけり" },
-            { kaminoku: "来ぬ人を", banme2: "松帆の浦の", banme3: "夕なぎに", shimonoku: "焼くや藻塩の", banme5: "身もこがれつつ", kuZentai: "来ぬ人を　松帆の浦の　夕なぎに　焼くや藻塩の　身もこがれつつ" },
-            { kaminoku: "風そよぐ", banme2: "楢の小川の", banme3: "夕暮は", shimonoku: "みそぎぞ夏の", banme5: "しるしなりける", kuZentai: "風そよぐ　楢の小川の　夕暮は　みそぎぞ夏の　しるしなりける" },
-            { kaminoku: "人もをし", banme2: "人もうらめし", banme3: "あぢきなく", shimonoku: "世を思ふゆゑに", banme5: "もの思ふ身は", kuZentai: "人もをし{人もうらめし　あぢきなく　世を思ふゆゑに　もの思ふ身は".replace("{", "") },
-            { kaminoku: "百敷や", banme2: "古き軒端の", banme3: "しのぶにも", shimonoku: "なほあまりある", banme5: "昔なりけり", kuZentai: "百敷や　古き軒端の　しのぶにも　なほあまりある　昔なりけり" }
+            { kaminoku: "秋の田の", banme2: "かりほの庵の", banme3: "苫をあらみ", shimonoku: "わが衣手は", banme5: "露にぬれつつ" },
+            { kaminoku: "春過ぎて", banme2: "夏来にけらし", banme3: "白妙の", shimonoku: "衣ほすてふ", banme5: "天の香具山" },
+            { kaminoku: "あしびきの", banme2: "山鳥の尾の", banme3: "しだり尾の", shimonoku: "ながながし夜を", banme5: "ひとりかも寝む" },
+            { kaminoku: "田子の浦に", banme2: "うち出でて見れば", banme3: "白妙の", shimonoku: "富士の高嶺に", banme5: "雪は降りつつ" },
+            { kaminoku: "奥山に", banme2: "もみぢ踏み分け", banme3: "鳴く鹿の", shimonoku: "声聞く時ぞ", banme5: "秋は悲しき" },
+            { kaminoku: "かささぎの", banme2: "渡せる橋に", banme3: "おく霜の", shimonoku: "白きを見れば", banme5: "夜ぞふけにける" },
+            { kaminoku: "天の原", banme2: "ふりさけ見れば", banme3: "春日なる", shimonoku: "三笠の山に", banme5: "出でし月かも" },
+            { kaminoku: "わが庵は", banme2: "都のたつみ", banme3: "しかぞ住む", shimonoku: "世をうぢ山と", banme5: "人はいふなり" },
+            { kaminoku: "花の色は", banme2: "うつりにけりな", banme3: "いたづらに", shimonoku: "わが身世にふる", banme5: "ながめせしまに" },
+            { kaminoku: "これやこの", banme2: "行くも帰るも", banme3: "別れては", shimonoku: "知るも知らぬも", banme5: "逢坂の関" },
+            { kaminoku: "わたの原", banme2: "八十島かけて", banme3: "漕ぎ出でぬと", shimonoku: "人には告げよ", banme5: "あまの釣舟" },
+            { kaminoku: "天つ風", banme2: "雲のかよひ路", banme3: "吹きとぢよ", shimonoku: "をとめの姿", banme5: "しばしとどめむ" },
+            { kaminoku: "筑波嶺の", banme2: "峰より落つる", banme3: "みなの川", shimonoku: "恋ぞつもりて", banme5: "淵となりぬる" },
+            { kaminoku: "陸奥の", banme2: "しのぶもぢずり", banme3: "誰ゆゑに", shimonoku: "みだれそめにし", banme5: "我ならなくに" },
+            { kaminoku: "君がため", banme2: "春の野に出でて", banme3: "若菜つむ", shimonoku: "わが衣手に", banme5: "雪は降りつつ" },
+            { kaminoku: "立ち別れ", banme2: "いなばの山の", banme3: "峰に生ふる", shimonoku: "まつとし聞かば", banme5: "今帰り来む" },
+            { kaminoku: "ちはやぶる", banme2: "神代も聞かず", banme3: "竜田川", shimonoku: "からくれなゐに", banme5: "水くくるとは" },
+            { kaminoku: "住の江の", banme2: "岸に寄る波", banme3: "よるさへや", shimonoku: "夢の通ひ路", banme5: "人目よくらむ" },
+            { kaminoku: "難波潟", banme2: "短き葦の", banme3: "ふしの間も", shimonoku: "逢はでこの世を", banme5: "過ぐしてよとや" },
+            { kaminoku: "わびぬれば", banme2: "今はた同じ", banme3: "難波なる", shimonoku: "身をつくしても", banme5: "逢はむとぞ思ふ" },
+            { kaminoku: "今来むと", banme2: "いひしばかりに", banme3: "長月の", shimonoku: "有明の月を", banme5: "待ち出でつるかな" },
+            { kaminoku: "吹くからに", banme2: "秋の草木の", banme3: "しをるれば", shimonoku: "むべ山風を", banme5: "あらしといふらむ" },
+            { kaminoku: "月見れば", banme2: "千々に物こそ", banme3: "悲しけれ", shimonoku: "わが身ひとつの", banme5: "秋にはあらねど" },
+            { kaminoku: "このたびは", banme2: "幣もとりあへず", banme3: "手向山", shimonoku: "紅葉の錦", banme5: "神のまにまに" },
+            { kaminoku: "名にしおはば", banme2: "逢坂山の", banme3: "さねかづら", shimonoku: "人に知られで", banme5: "くるよしもがな" },
+            { kaminoku: "小倉山", banme2: "峰のもみぢ葉", banme3: "心あらば", shimonoku: "今ひとたびの", banme5: "みゆき待たなむ" },
+            { kaminoku: "みかの原", banme2: "わきて流るる", banme3: "泉川", shimonoku: "いつ見きとてか", banme5: "恋しかるらむ" },
+            { kaminoku: "山里は", banme2: "冬ぞ寂しさ", banme3: "まさりける", shimonoku: "人目も草も", banme5: "かれぬと思へば" },
+            { kaminoku: "心あてに", banme2: "折らばや折らむ", banme3: "初霜の", shimonoku: "置きまどはせる", banme5: "白菊の花" },
+            { kaminoku: "有明の", banme2: "つれなく見えし", banme3: "別れより", shimonoku: "暁ばかり", banme5: "憂きものはなし" },
+            { kaminoku: "朝ぼらけ", banme2: "有明の月と", banme3: "見るまでに", shimonoku: "吉野の里に", banme5: "降れる白雪" },
+            { kaminoku: "山川に", banme2: "風のかけたる", banme3: "しがらみは", shimonoku: "流れもあへぬ", banme5: "紅葉なりけり" },
+            { kaminoku: "久方の", banme2: "光のどけき", banme3: "春の日に", shimonoku: "しづごころなく", banme5: "花の散るらむ" },
+            { kaminoku: "誰をかも", banme2: "知る人にせむ", banme3: "高砂の", shimonoku: "松も昔の", banme5: "友ならなくに" },
+            { kaminoku: "人はいさ", banme2: "心もしらず", banme3: "ふるさとは", shimonoku: "花ぞ昔の", banme5: "香ににほひける" },
+            { kaminoku: "夏の夜は", banme2: "まだ宵ながら", banme3: "あけぬるを", shimonoku: "雲のいづこに", banme5: "月宿るらむ" },
+            { kaminoku: "白露に", banme2: "風の吹きしく", banme3: "秋の野は", shimonoku: "つらぬきとめぬ", banme5: "玉ぞ散りける" },
+            { kaminoku: "忘らるる", banme2: "身をば思はず", banme3: "誓ひてし", shimonoku: "人の命の", banme5: "惜しくもあるかな" },
+            { kaminoku: "浅茅生の", banme2: "小野の篠原", banme3: "しのぶれど", shimonoku: "あまりてなどか", banme5: "人の恋しき" },
+            { kaminoku: "忍ぶれど", banme2: "色に出でにけり", banme3: "わが恋は", shimonoku: "ものや思ふと", banme5: "人の問ふまで" },
+            { kaminoku: "恋すてふ", banme2: "わが名はまだき", banme3: "立ちにけり", shimonoku: "人知れずこそ", banme5: "思ひそめしか" },
+            { kaminoku: "契りきな", banme2: "かたみに袖を", banme3: "しぼりつつ", shimonoku: "末の松山", banme5: "波こさじとは" },
+            { kaminoku: "逢ひ見ての", banme2: "後の心に", banme3: "くらぶれば", shimonoku: "昔はものを", banme5: "思はざりけり" },
+            { kaminoku: "逢ふことの", banme2: "絶えてしなくば", banme3: "なかなかに", shimonoku: "人をも身をも", banme5: "恨みざらまし" },
+            { kaminoku: "あはれとも", banme2: "いふべき人は", banme3: "おもほえで", shimonoku: "身のいたづらに", banme5: "なりぬべきかな" },
+            { kaminoku: "由良の門を", banme2: "渡る舟人", banme3: "かぢを絶え", shimonoku: "行方もしらぬ", banme5: "恋の道かな" },
+            { kaminoku: "八重むぐら", banme2: "しげれる宿の", banme3: "さびしきに", shimonoku: "人こそ見えね", banme5: "秋は来にけり" },
+            { kaminoku: "風をいたみ", banme2: "岩うつ波の", banme3: "おのれのみ", shimonoku: "くだけてものを", banme5: "思ふころかな" },
+            { kaminoku: "御垣守", banme2: "衛士のたく火の", banme3: "夜は燃え", shimonoku: "昼は消えつつ", banme5: "ものをこそ思へ" },
+            { kaminoku: "君がため", banme2: "惜しからざりし", banme3: "命さへ", shimonoku: "長くもがなと", banme5: "思ひけるかな" },
+            { kaminoku: "かくとだに", banme2: "えやはいぶきの", banme3: "さしも草", shimonoku: "さしも知らじな", banme5: "燃ゆる思ひを" },
+            { kaminoku: "明けぬれば", banme2: "暮るるものとは", banme3: "知りながら", shimonoku: "なほ恨めしき", banme5: "朝ぼらけかな" },
+            { kaminoku: "嘆きつつ", banme2: "ひとり寝る夜の", banme3: "明くる間は", shimonoku: "いかに久しき", banme5: "ものとかは知る" },
+            { kaminoku: "忘れじの", banme2: "行末までは", banme3: "かたければ", shimonoku: "今日を限りの", banme5: "命ともがな" },
+            { kaminoku: "滝の音は", banme2: "絶えて久しく", banme3: "なりぬれど", shimonoku: "名こそ流れて", banme5: "なほ聞こえけれ" },
+            { kaminoku: "あらざらむ", banme2: "この世のほかの", banme3: "思ひ出に", shimonoku: "今ひとたびの", banme5: "逢ふこともがな" },
+            { kaminoku: "めぐり逢ひて", banme2: "見しやそれとも", banme3: "わかぬ間に", shimonoku: "雲隠れにし", banme5: "夜半の月かな" },
+            { kaminoku: "有馬山", banme2: "猪名の笹原", banme3: "風吹けば", shimonoku: "いでそよ人を", banme5: "忘れやはする" },
+            { kaminoku: "やすらはで", banme2: "寝なましものを", banme3: "小夜更けて", shimonoku: "傾くまでの", banme5: "月を見しかな" },
+            { kaminoku: "大江山", banme2: "いく野の道の", banme3: "遠ければ", shimonoku: "まだふみも見ず", banme5: "天の橋立" },
+            { kaminoku: "いにしへの", banme2: "奈良の都の", banme3: "八重桜", shimonoku: "今日九重に", banme5: "にほひぬるかな" },
+            { kaminoku: "夜をこめて", banme2: "鳥のそら音は", banme3: "はかるとも", shimonoku: "よに逢坂の", banme5: "関は許さじ" },
+            { kaminoku: "今はただ", banme2: "思ひ絶えなむ", banme3: "とばかりを", shimonoku: "人づてならで", banme5: "言ふよしもがな" },
+            { kaminoku: "朝ぼらけ", banme2: "宇治の川霧", banme3: "絶え絶えに", shimonoku: "あらはれわたる", banme5: "瀬々の網代木" },
+            { kaminoku: "恨みわび", banme2: "ほさぬ袖だに", banme3: "あるものを", shimonoku: "恋に朽ちなむ", banme5: "名こそ惜しけれ" },
+            { kaminoku: "もろともに", banme2: "あはれと思へ", banme3: "山桜", shimonoku: "花よりほかに", banme5: "知る人もなし" },
+            { kaminoku: "春の夜の", banme2: "夢ばかりなる", banme3: "手枕に", shimonoku: "かひなく立たむ", banme5: "名こそ惜しけれ" },
+            { kaminoku: "心にも", banme2: "あらで憂き世に", banme3: "ながらへば", shimonoku: "恋しかるべき", banme5: "夜半の月かな" },
+            { kaminoku: "嵐吹く", banme2: "三室の山の", banme3: "もみぢ葉は", shimonoku: "竜田の川の", banme5: "錦なりけり" },
+            { kaminoku: "寂しさに", banme2: "宿を立ち出でて", banme3: "眺むれば", shimonoku: "いづくも同じ", banme5: "秋の夕暮" },
+            { kaminoku: "夕されば", banme2: "門田の稲葉", banme3: "おとづれて", shimonoku: "あしのまろやに", banme5: "秋風ぞ吹く" },
+            { kaminoku: "音に聞く", banme2: "高師の浜の", banme3: "あだ波は", shimonoku: "かけじや袖の", banme5: "ぬれもこそすれ" },
+            { kaminoku: "高砂の", banme2: "尾上の桜", banme3: "咲きにけり", shimonoku: "外山の霞", banme5: "立たずもあらなむ" },
+            { kaminoku: "うかりける", banme2: "人を初瀬の", banme3: "山おろし", shimonoku: "はげしかれとは", banme5: "祈らぬものを" },
+            { kaminoku: "契りおきし", banme2: "させもが露を", banme3: "命にて", shimonoku: "あはれ今年の", banme5: "秋もいぬめり" },
+            { kaminoku: "わたの原", banme2: "漕ぎ出でて見れば", banme3: "久方の", shimonoku: "雲居にまがふ", banme5: "沖つ白波" },
+            { kaminoku: "瀬をはやみ", banme2: "岩にせかるる", banme3: "滝川の", shimonoku: "われても末に", banme5: "逢はむとぞ思ふ" },
+            { kaminoku: "淡路島", banme2: "かよふ千鳥の", banme3: "鳴く声に", shimonoku: "幾夜寝覚めぬ", banme5: "須磨の関守" },
+            { kaminoku: "秋風に", banme2: "たなびく雲の", banme3: "絶え間より", shimonoku: "もれ出づる月の", banme5: "影のさやけさ" },
+            { kaminoku: "長からむ", banme2: "心も知らず", banme3: "黒髪の", shimonoku: "乱れて今朝は", banme5: "ものをこそ思へ" },
+            { kaminoku: "ほととぎす", banme2: "鳴きつる方を", banme3: "眺むれば", shimonoku: "ただ有明の", banme5: "月ぞ残れる" },
+            { kaminoku: "思ひわび", banme2: "さても命は", banme3: "あるものを", shimonoku: "憂きに堪へぬは", banme5: "涙なりけり" },
+            { kaminoku: "世の中よ", banme2: "道こそなけれ", banme3: "思ひ入る", shimonoku: "山の奥にも", banme5: "鹿ぞ鳴くなる" },
+            { kaminoku: "ながらへば", banme2: "またこの頃や", banme3: "しのばれむ", shimonoku: "憂しと見し世ぞ", banme5: "今は恋しき" },
+            { kaminoku: "夜もすがら", banme2: "もの思ふ頃は", banme3: "明けやらで", shimonoku: "ねやのひまさへ", banme5: "つれなかりけり" },
+            { kaminoku: "嘆けとて", banme2: "月やはものを", banme3: "思はする", shimonoku: "かこち顔なる", banme5: "わが涙かな" },
+            { kaminoku: "村雨の", banme2: "露もまだひぬ", banme3: "槙の葉に", shimonoku: "霧立ちのぼる", banme5: "秋の夕暮" },
+            { kaminoku: "難波江の", banme2: "葦のかりねの", banme3: "ひとよゆゑ", shimonoku: "身をつくしてや", banme5: "恋ひわたるべき" },
+            { kaminoku: "玉の緒よ", banme2: "絶えなば絶えね", banme3: "ながらへば", shimonoku: "忍ぶることの", banme5: "弱りもぞする" },
+            { kaminoku: "見せばやな", banme2: "雄島のあまの", banme3: "袖だにも", shimonoku: "濡れにぞ濡れし", banme5: "色は変はらず" },
+            { kaminoku: "きりぎりす", banme2: "鳴くや霜夜の", banme3: "さむしろに", shimonoku: "衣かたしき", banme5: "ひとりかも寝む" },
+            { kaminoku: "わが袖は", banme2: "潮干に見えぬ", banme3: "沖の石の", shimonoku: "人こそ知らね", banme5: "乾く間もなし" },
+            { kaminoku: "世の中は", banme2: "常にもがもな", banme3: "渚こぐ", shimonoku: "海士の小舟の", banme5: "綱手かなしも" },
+            { kaminoku: "み吉野の", banme2: "山の秋風", banme3: "さ夜更けて", shimonoku: "ふるさと寒く", banme5: "衣打つなり" },
+            { kaminoku: "おほけなく", banme2: "うき世の民に", banme3: "おほふかな", shimonoku: "わが立つ杣に", banme5: "墨染の袖" },
+            { kaminoku: "花さそふ", banme2: "嵐の庭の", banme3: "雪ならで", shimonoku: "ふりゆくものは", banme5: "わが身なりけり" },
+            { kaminoku: "来ぬ人を", banme2: "松帆の浦の", banme3: "夕なぎに", shimonoku: "焼くや藻塩の", banme5: "身もこがれつつ" },
+            { kaminoku: "風そよぐ", banme2: "楢の小川の", banme3: "夕暮は", shimonoku: "みそぎぞ夏の", banme5: "しるしなりける" },
+            { kaminoku: "人もをし", banme2: "人もうらめし", banme3: "あぢきなく", shimonoku: "世を思ふゆゑに", banme5: "もの思ふ身は" }
         ];
 
         // Web Audio API によるトイピアノ風正解ファンファーレ音の実装
@@ -388,7 +387,7 @@
         }
 
         /**
-         * 仕様パラメータ準拠：
+         * 仕様指定の音響パラメータ：
          * 音階（アルペジオ）： ド・ミ・ソ・高ド・高ミ（C5 → E5 → G5 → C6 → E6）
          * 音色： サイン波（Sine）と三角波（Triangle）を重ねた、やわらかくピコピコとしたトイピアノ風の音
          */
@@ -396,7 +395,7 @@
             initAudio();
             if (!audioCtx) return;
 
-            // 周波数定義 (Hz) : C5, E5, G5, C6, E6
+            // 周波数 (Hz) : C5, E5, G5, C6, E6
             const notes = [
                 { freq: 523.25, timeOffset: 0.00 }, // C5
                 { freq: 659.25, timeOffset: 0.06 }, // E5
@@ -409,32 +408,32 @@
 
             notes.forEach(note => {
                 const startTime = now + note.timeOffset;
-                const duration = 0.45; // 残響持続時間
+                const duration = 0.45; // 余韻持続時間
 
-                // 1. サイン波 (Sine) - やわらかい基本音
+                // 1. サイン波 (Sine) - やわらかな基音
                 const oscSine = audioCtx.createOscillator();
                 oscSine.type = 'sine';
                 oscSine.frequency.setValueAtTime(note.freq, startTime);
 
-                // 2. 三角波 (Triangle) - トイピアノらしいアタック感のある高音成分
+                // 2. 三角波 (Triangle) - アタック感のある高音倍音
                 const oscTri = audioCtx.createOscillator();
                 oscTri.type = 'triangle';
                 oscTri.frequency.setValueAtTime(note.freq, startTime);
 
-                // 音量ゲイン制御 (アタック & エンベロープ)
+                // 音量ゲインエンベロープ
                 const gainNode = audioCtx.createGain();
                 gainNode.gain.setValueAtTime(0.0001, startTime);
-                // 素早いアタック
+                // アタック
                 gainNode.gain.exponentialRampToValueAtTime(0.22, startTime + 0.012);
                 // 減衰
                 gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
 
-                // 出力先へ接続
+                // オーディオグラフ接続
                 oscSine.connect(gainNode);
                 oscTri.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
 
-                // 再生開始・停止
+                // 再生コントロール
                 oscSine.start(startTime);
                 oscTri.start(startTime);
 
@@ -463,7 +462,7 @@
                 this.size = Math.random() * 8 + 6;
                 this.speedY = Math.random() * 3 + 3;
                 this.speedX = Math.random() * 2 - 1;
-                // 和風の色彩（金、朱、白、桜色、緑、琥珀）
+                // 和風の色彩（金、朱、白、桜色、翡翠、琥珀）
                 const colors = ['#d4af37', '#e63946', '#f8fafc', '#ffb7c5', '#10b981', '#f59e0b'];
                 this.color = colors[Math.floor(Math.random() * colors.length)];
                 this.rotation = Math.random() * 360;
@@ -534,6 +533,10 @@
         const kaminokuText = document.getElementById('kaminoku-text');
         const optionsContainer = document.getElementById('options-container');
         const kuZentaiModal = document.getElementById('ku-zentai-modal');
+        
+        const modalStatusBadge = document.getElementById('modal-status-badge');
+        const modalStatusIcon = document.getElementById('modal-status-icon');
+        const modalStatusText = document.getElementById('modal-status-text');
         
         const kuLine1 = document.getElementById('ku-line-1');
         const kuLine2 = document.getElementById('ku-line-2');
@@ -610,23 +613,27 @@
             if (isAnswered) return;
             isAnswered = true;
 
-            if (selectedOpt.shimonoku === correctOpt.shimonoku) {
+            const isCorrect = (selectedOpt.shimonoku === correctOpt.shimonoku);
+
+            if (isCorrect) {
                 // 正解
                 score++;
                 buttonEl.classList.remove('option-card');
                 buttonEl.classList.add('bg-accentemerald/20', 'border-accentemerald', 'text-amber-200');
 
-                // 音と紙吹雪
+                // ファンファーレ音 & 紙吹雪
                 playCorrectSound();
                 triggerConfetti();
 
-                // 要求仕様の形式で ku-zentai トーストモーダル表示
-                showKuZentaiModal(correctOpt);
+                // トーストモーダルの結果バッジ（正解）
+                modalStatusBadge.className = "inline-flex items-center space-x-2 px-4 py-1.5 rounded-full border border-accentemerald/30 bg-accentemerald/10 text-accentemerald";
+                modalStatusIcon.className = "fa-solid fa-circle-check text-lg";
+                modalStatusText.textContent = "正解！";
             } else {
                 // 不正解
                 buttonEl.classList.add('border-red-500', 'bg-red-950/30', 'animate-shake');
                 
-                // 正解のカードを強調表示
+                // 正解のボタンを強調表示
                 const buttons = optionsContainer.querySelectorAll('button');
                 buttons.forEach(btn => {
                     if (btn.textContent.includes(correctOpt.shimonoku)) {
@@ -634,27 +641,31 @@
                     }
                 });
 
-                // 不正解時は1.2秒後に自動で次へ
-                setTimeout(() => {
-                    nextQuestion();
-                }, 1200);
+                // トーストモーダルの結果バッジ（不正解）
+                modalStatusBadge.className = "inline-flex items-center space-x-2 px-4 py-1.5 rounded-full border border-red-500/30 bg-red-500/10 text-red-400";
+                modalStatusIcon.className = "fa-solid fa-circle-xmark text-lg";
+                modalStatusText.textContent = "不正解...";
             }
+
+            // 正解・不正解どちらでも要求仕様に従い「ku-zentai」をトーストモーダルで表示
+            showKuZentaiModal(correctOpt, isCorrect);
         }
 
         /**
          * 仕様要求通りに ku-zentai をフォーマット表示
-         * １行目： kaminoku & " " & 2banme & " " & 3banme （改行しないよう十分な横幅確保）
+         * １行目： kaminoku & " " & 2banme & " " & 3banme （改行しないよう横幅確保）
          * ２行目： shimonoku & " " & 5banme
          */
-        function showKuZentaiModal(item) {
+        function showKuZentaiModal(item, isCorrect) {
             // 1行目: kaminoku & " " & 2banme & " " & 3banme
             kuLine1.textContent = `${item.kaminoku}　${item.banme2}　${item.banme3}`;
             // 2行目: shimonoku & " " & 5banme
             kuLine2.textContent = `${item.shimonoku}　${item.banme5}`;
 
+            const delay = isCorrect ? 250 : 600;
             setTimeout(() => {
                 kuZentaiModal.classList.remove('hidden');
-            }, 200);
+            }, delay);
         }
 
         // 次の問題へ進む
@@ -677,19 +688,19 @@
 
             finalScore.textContent = score;
 
-            // ランク評価
+            // ランク評価メッセージ
             if (score === 10) {
-                resultRank.textContent = "全問正解！ 見事な記憶力です！";
+                resultRank.textContent = "全問正解！ 見事な歌人です！";
             } else if (score >= 7) {
                 resultRank.textContent = "素晴らしい！ かなりの実力です";
             } else if (score >= 4) {
                 resultRank.textContent = "あともう一歩！ 繰り返し練習しましょう";
             } else {
-                resultRank.textContent = "百人一首に慣れていきましょう！";
+                resultRank.textContent = "百人一首に少しずつ慣れていきましょう！";
             }
         }
 
-        // イベント登録
+        // イベントリスナー
         startBtn.onclick = startGame;
         restartBtn.onclick = () => {
             resultScreen.classList.add('hidden');
@@ -697,7 +708,7 @@
         };
         nextQuestionBtn.onclick = nextQuestion;
 
-        // モーダル外側クリック時のケア
+        // モーダル外側クリック時の操作
         kuZentaiModal.onclick = (e) => {
             if (e.target === kuZentaiModal) {
                 nextQuestion();
