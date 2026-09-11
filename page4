@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="ja" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>百人一首</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Shippori Mincho & Zen Kaku Gothic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=Zen+Kaku+Gothic+New:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            400: '#facc15',
+                            500: '#eab308',
+                            600: '#ca8a04',
+                            glow: '#ffd700'
+                        },
+                        darkbg: '#0a0d14',
+                        cardbg: '#141923',
+                        tatami: '#18202c'
+                    },
+                    fontFamily: {
+                        mincho: ['"Shippori Mincho"', 'serif'],
+                        sans: ['"Zen Kaku Gothic New"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0a0d14;
+            color: #f3f4f6;
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* 縦書き表示スタイル */
+        .vertical-text {
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            letter-spacing: 0.18em;
+        }
+
+        /* カルタカードのスタイリッシュデザイン */
+        .karuta-card {
+            background: linear-gradient(145deg, #18202c, #10151f);
+            border: 1px solid rgba(234, 179, 8, 0.25);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .karuta-card:hover:not(.disabled) {
+            transform: translateY(-2px) scale(1.008);
+            border-color: rgba(250, 204, 21, 0.7);
+            box-shadow: 0 8px 24px -4px rgba(234, 179, 8, 0.2);
+        }
+
+        /* アニメーション */
+        @keyframes correctPulse {
+            0% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.8); }
+            70% { box-shadow: 0 0 0 16px rgba(250, 204, 21, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0); }
+        }
+
+        .correct-animate {
+            animation: correctPulse 0.9s ease-out;
+            border-color: #facc15 !important;
+            background: linear-gradient(145deg, #283618, #182410) !important;
+        }
+
+        .wrong-animate {
+            border-color: #ef4444 !important;
+            background: linear-gradient(145deg, #3a1818, #241010) !important;
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        /* 和風の洗練された背景グラデーションパターン */
+        .japanese-pattern {
+            background-image: radial-gradient(rgba(234, 179, 8, 0.07) 1px, transparent 0);
+            background-size: 28px 28px;
+        }
+
+        /* ガラスモルフィズムパネル */
+        .glass-panel {
+            background: rgba(20, 25, 35, 0.88);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(234, 179, 8, 0.3);
+        }
+
+        /* 紙吹雪Canvas */
+        #confettiCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body class="japanese-pattern min-h-screen flex flex-col justify-between selection:bg-amber-400 selection:text-slate-950">
+
+    <!-- 紙吹雪用キャンバス -->
+    <canvas id="confettiCanvas"></canvas>
+
+    <!-- ヘッダー -->
+    <header class="border-b border-amber-500/20 bg-slate-950/80 backdrop-blur sticky top-0 z-40 px-6 py-4">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/40 flex items-center justify-center text-amber-400 font-mincho font-extrabold text-base shadow-sm">
+                    百
+                </div>
+                <h1 class="text-2xl font-black font-mincho tracking-widest text-amber-100">
+                    百人一首
+                </h1>
+            </div>
+            <div id="gameStatusHeader" class="hidden flex items-center gap-6 text-sm font-semibold">
+                <div class="text-gray-400 font-mincho">
+                    問題 <span id="currentQuestionNum" class="text-amber-400 text-xl font-bold">1</span> / 10
+                </div>
+                <div class="text-gray-400 font-mincho">
+                    正解 <span id="currentScore" class="text-emerald-400 text-xl font-bold">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto w-full px-4 py-8 flex-1 flex flex-col justify-center items-center relative z-10">
+        
+        <!-- ================= スタート画面 ================= -->
+        <div id="startScreen" class="w-full max-w-xl text-center space-y-8 my-auto">
+            <div class="space-y-4">
+                <div class="inline-block px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs tracking-widest font-semibold uppercase">
+                    暗記学習アプリケーション
+                </div>
+                <h2 class="text-4xl md:text-5xl font-extrabold font-mincho text-amber-100 tracking-wider leading-tight">
+                    百人一首
+                </h2>
+                <p class="text-gray-400 text-sm md:text-base max-w-md mx-auto leading-relaxed">
+                    左側に表示される<span class="text-amber-300 font-semibold">「kaminoku」</span>に合わせて、<br>正しい<span class="text-amber-300 font-semibold">「shimonoku」</span>を5つの選択肢から選んでください。
+                </p>
+            </div>
+
+            <div class="p-6 rounded-2xl glass-panel text-left space-y-3">
+                <h3 class="text-amber-400 text-sm font-bold tracking-wider font-mincho flex items-center gap-2">
+                    <i class="fa-solid fa-scroll"></i> 学習のながれ
+                </h3>
+                <ul class="text-xs text-gray-300 space-y-2 list-disc list-inside leading-relaxed">
+                    <li>全10問の小テスト形式で鍛錬を行います。</li>
+                    <li>選択肢をタップすると正誤判定が行われ、<span class="text-amber-300 font-semibold">ku-zentai（全句）</span>が表示されます。</li>
+                    <li>正解時にはトイピアノ風ファンファーレと紙吹雪が舞います。</li>
+                </ul>
+            </div>
+
+            <button id="startBtn" class="group relative inline-flex items-center gap-3 px-10 py-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold text-lg shadow-xl shadow-amber-500/20 hover:shadow-amber-500/40 hover:scale-105 active:scale-95 transition-all duration-200">
+                <span>開始する</span>
+                <i class="fa-solid fa-arrow-right transition-transform group-hover:translate-x-1"></i>
+            </button>
+        </div>
+
+        <!-- ================= ゲーム進行画面 ================= -->
+        <div id="gameScreen" class="hidden w-full flex-1 flex flex-col justify-center space-y-6">
+            
+            <!-- プログレスバー -->
+            <div class="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-800">
+                <div id="progressBar" class="bg-gradient-to-r from-amber-500 to-yellow-300 h-full w-0 transition-all duration-300"></div>
+            </div>
+
+            <!-- メイン表示領域: 左側 kaminoku / 右側 shimonoku(5枚) -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch min-h-[420px]">
+                
+                <!-- 左側：kaminoku (上の句) 表示カード -->
+                <div class="md:col-span-5 flex flex-col">
+                    <div class="text-xs text-amber-400 font-bold tracking-widest mb-2 flex items-center gap-2 font-mincho">
+                        <i class="fa-solid fa-quote-left"></i> kaminoku
+                    </div>
+                    <div class="flex-1 karuta-card rounded-2xl p-6 md:p-8 flex flex-col justify-between items-center text-center relative border-2 border-amber-500/40 bg-slate-950/90 shadow-2xl">
+                        <div class="absolute top-4 left-4 text-xs font-mono text-amber-500/60 font-bold">第 <span id="qNumBadge">1</span> 問</div>
+                        
+                        <!-- 縦書き表示領域 -->
+                        <div class="my-auto flex justify-center items-center py-8">
+                            <p id="kaminokuText" class="vertical-text font-mincho text-3xl md:text-4xl lg:text-5xl font-extrabold text-amber-100 leading-snug tracking-widest">
+                                秋の田の
+                            </p>
+                        </div>
+
+                        <div class="text-xs text-gray-500 font-mincho">
+                            対応するshimonokuを選択してください
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右側：shimonoku (下の句) 選択肢5枚 -->
+                <div class="md:col-span-7 flex flex-col justify-between">
+                    <div class="text-xs text-amber-400 font-bold tracking-widest mb-2 flex items-center gap-2 font-mincho">
+                        <i class="fa-solid fa-hand-pointer"></i> shimonoku の選択肢
+                    </div>
+                    <div id="optionsContainer" class="grid grid-cols-1 gap-3 flex-1">
+                        <!-- 動的にJavaScriptで5枚のボタンを生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ku-zentai（全句）確認モーダル -->
+            <div id="explanationModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+                <div class="glass-panel w-full max-w-lg rounded-2xl p-6 md:p-8 space-y-6 shadow-2xl transform transition-all border border-amber-500/40">
+                    <div class="flex justify-between items-center border-b border-gray-800 pb-3">
+                        <div id="modalResultBadge" class="flex items-center gap-2 text-xl font-bold font-mincho">
+                            <!-- 正解 or 残念 -->
+                        </div>
+                        <span class="text-xs text-amber-400 font-mono font-semibold">ku-zentai</span>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="text-xs text-amber-400 font-semibold tracking-widest font-mincho">【 ku-zentai（歌全体） 】</div>
+                        <div class="p-6 rounded-xl bg-slate-950/90 border border-amber-500/30 text-center">
+                            <!-- 1行目に1〜3文節、2行目に4〜5文節を表示 -->
+                            <div id="kuzentaiText" class="font-mincho text-xl md:text-2xl font-bold text-amber-100 leading-relaxed tracking-wide space-y-2">
+                                <!-- JavaScriptにより動的挿入 -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 flex justify-end">
+                        <button id="nextQuestionBtn" class="px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm flex items-center gap-2 shadow-lg transition-all">
+                            <span>次の問題へ</span>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ================= 結果表示画面 ================= -->
+        <div id="resultScreen" class="hidden w-full max-w-xl text-center space-y-8 my-auto">
+            <div class="space-y-3">
+                <div class="w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-400/50 flex items-center justify-center mx-auto text-amber-300 text-2xl font-mincho font-bold shadow-lg">
+                    百
+                </div>
+                <h2 class="text-3xl md:text-4xl font-extrabold font-mincho text-amber-100">結果発表</h2>
+                <p class="text-gray-400 text-sm">10問の鍛錬が完了しました。</p>
+            </div>
+
+            <div class="glass-panel p-8 rounded-2xl grid grid-cols-2 gap-6 border border-amber-500/30 max-w-md mx-auto">
+                <div class="space-y-1">
+                    <div class="text-xs text-gray-400 font-medium">正解数</div>
+                    <div class="text-4xl font-extrabold font-mincho text-amber-400">
+                        <span id="finalScore">0</span> <span class="text-sm font-normal text-gray-400">/ 10</span>
+                    </div>
+                </div>
+                <div class="space-y-1">
+                    <div class="text-xs text-gray-400 font-medium">正答率</div>
+                    <div class="text-4xl font-extrabold font-mincho text-emerald-400">
+                        <span id="accuracyRate">0</span><span class="text-sm font-normal text-gray-400">%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="evaluationMessage" class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 text-amber-200 font-mincho text-sm max-w-md mx-auto">
+                見事な集中力です！何度も繰り返して百人一首を完璧にマスターしましょう。
+            </div>
+
+            <div class="pt-2 flex justify-center">
+                <button id="restartBtn" class="px-8 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-base shadow-xl transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>最初の画面に戻る</span>
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // ================= 100首の完全データ =================
+        const HYAKUNIN_ISSHU_DATA = [
+            { id: 1, kaminoku: "秋の田の", shimonoku: "わが衣手は", kuzentai: "秋の田の　かりほの庵の　苫をあらみ　わが衣手は　露にぬれつつ" },
+            { id: 2, kaminoku: "春過ぎて", shimonoku: "衣ほすてふ", kuzentai: "春過ぎて　夏来にけらし　白妙の　衣ほすてふ　天の香具山" },
+            { id: 3, kaminoku: "あしびきの", shimonoku: "しだり尾の", kuzentai: "あしびきの　山鳥の尾の　しだり尾の　ながながし夜を　ひとりかも寝む" },
+            { id: 4, kaminoku: "田子の浦に", shimonoku: "富士の高嶺に", kuzentai: "田子の浦に　うち出でて見れば　白妙の　富士の高嶺に　雪は降りつつ" },
+            { id: 5, kaminoku: "奥山に", shimonoku: "声聞く時ぞ", kuzentai: "奥山に　もみぢ踏み分け　鳴く鹿の　声聞く時ぞ　秋は悲しき" },
+            { id: 6, kaminoku: "かささぎの", shimonoku: "白きを見れば", kuzentai: "かささぎの　渡せる橋に　おく霜の　白きを見れば　夜ぞふけにける" },
+            { id: 7, kaminoku: "天の原", shimonoku: "三笠の山に", kuzentai: "天の原　ふりさけ見れば　春日なる　三笠の山に　出でし月かも" },
+            { id: 8, kaminoku: "わが庵は", shimonoku: "世をうぢ山と", kuzentai: "わが庵は　都のたつみ　しかぞ住む　世をうぢ山と　人はいふなり" },
+            { id: 9, kaminoku: "花の色は", shimonoku: "わが身世にふる", kuzentai: "花の色は　うつりにけりな　いたづらに　わが身世にふる　ながめせしまに" },
+            { id: 10, kaminoku: "これやこの", shimonoku: "知るも知らぬも", kuzentai: "これやこの　行くも帰るも　別れては　知るも知らぬも　逢坂の関" },
+            { id: 11, kaminoku: "わたの原", shimonoku: "人には告げよ", kuzentai: "わたの原　八十島かけて　漕ぎ出でぬと　人には告げよ　あまの釣舟" },
+            { id: 12, kaminoku: "天つ風", shimonoku: "をとめの姿", kuzentai: "天つ風　雲のかよひ路　吹きとぢよ　をとめの姿　しばしとどめむ" },
+            { id: 13, kaminoku: "筑波嶺の", shimonoku: "恋ぞつもりて", kuzentai: "筑波嶺の　峰より落つる　みなの川　恋ぞつもりて　淵となりぬる" },
+            { id: 14, kaminoku: "陸奥の", shimonoku: "みだれそめにし", kuzentai: "陸奥の　しのぶもぢずり　誰ゆゑに　みだれそめにし　我ならなくに" },
+            { id: 15, kaminoku: "君がため", shimonoku: "わが衣手に", kuzentai: "君がため　春の野に出でて　若菜つむ　わが衣手に　雪は降りつつ" },
+            { id: 16, kaminoku: "立ち別れ", shimonoku: "まつとし聞かば", kuzentai: "立ち別れ　いなばの山の　峰に生ふる　まつとし聞かば　今帰り来む" },
+            { id: 17, kaminoku: "ちはやぶる", shimonoku: "水くくるとは", kuzentai: "ちはやぶる　神代も聞かず　竜田川　からくれなゐに　水くくるとは" },
+            { id: 18, kaminoku: "住の江の", shimonoku: "夢の通ひ路", kuzentai: "住の江の　岸に寄る波　よるさへや　夢の通ひ路　人目よくらむ" },
+            { id: 19, kaminoku: "難波潟", shimonoku: "逢はでこの世を", kuzentai: "難波潟　短き葦の　ふしの間も　逢はでこの世を　過ぐしてよとや" },
+            { id: 20, kaminoku: "わびぬれば", shimonoku: "身をつくしても", kuzentai: "わびぬれば　今はた同じ　難波なる　身をつくしても　逢はむとぞ思ふ" },
+            { id: 21, kaminoku: "今来むと", shimonoku: "有明の月を", kuzentai: "今来むと　いひしばかりに　長月の　有明の月を　待ち出でつるかな" },
+            { id: 22, kaminoku: "吹くからに", shimonoku: "むべ山風を", kuzentai: "吹くからに　秋の草木の　しをるれば　むべ山風を　あらしといふらむ" },
+            { id: 23, kaminoku: "月見れば", shimonoku: "わが身ひとつの", kuzentai: "月見れば　千々に物こそ　悲しけれ　わが身ひとつの　秋にはあらねど" },
+            { id: 24, kaminoku: "このたびは", shimonoku: "紅葉の錦", kuzentai: "このたびは　幣もとりあへず　手向山　紅葉の錦　神のまにまに" },
+            { id: 25, kaminoku: "名にしおはば", shimonoku: "人に知られで", kuzentai: "名にしおはば　逢坂山の　さねかづら　人に知られで　くるよしもがな" },
+            { id: 26, kaminoku: "小倉山", shimonoku: "今ひとたびの", kuzentai: "小倉山　峰のもみぢ葉　心あらば　今ひとたびの　みゆき待たなむ" },
+            { id: 27, kaminoku: "みかの原", shimonoku: "いつ見きとてか", kuzentai: "みかの原　わきて流るる　泉川　いつ見きとてか　恋しかるらむ" },
+            { id: 28, kaminoku: "山里は", shimonoku: "人目も草も", kuzentai: "山里は　冬ぞ寂しさ　まさりける　人目も草も　かれぬと思へば" },
+            { id: 29, kaminoku: "心あてに", shimonoku: "置きまどはせる", kuzentai: "心あてに　折らばや折らむ　初霜の　置きまどはせる　白菊の花" },
+            { id: 30, kaminoku: "有明の", shimonoku: "暁ばかり", kuzentai: "有明の　つれなく見えし　別れより　暁ばかり　憂きものはなし" },
+            { id: 31, kaminoku: "朝ぼらけ", shimonoku: "吉野の里に", kuzentai: "朝ぼらけ　有明の月と　見るまでに　吉野の里に　降れる白雪" },
+            { id: 32, kaminoku: "山川に", shimonoku: "流れもあへぬ", kuzentai: "山川に　風のかけたる　しがらみは　流れもあへぬ　紅葉なりけり" },
+            { id: 33, kaminoku: "久方の", shimonoku: "しづごころなく", kuzentai: "久方の　光のどけき　春の日に　しづごころなく　花の散るらむ" },
+            { id: 34, kaminoku: "誰をかも", shimonoku: "松も昔の", kuzentai: "誰をかも　知る人にせむ　高砂の　松も昔の　友ならなくに" },
+            { id: 35, kaminoku: "人はいさ", shimonoku: "花ぞ昔の", kuzentai: "人はいさ　心もしらず　ふるさとは　花ぞ昔の　香ににほひける" },
+            { id: 36, kaminoku: "夏の夜は", shimonoku: "雲のいづこに", kuzentai: "夏の夜は　まだ宵ながら　あけぬるを　雲のいづこに　月宿るらむ" },
+            { id: 37, kaminoku: "白露に", shimonoku: "つらぬきとめぬ", kuzentai: "白露に　風の吹きしく　秋の野は　つらぬきとめぬ　玉ぞ散りける" },
+            { id: 38, kaminoku: "忘らるる", shimonoku: "人の命の", kuzentai: "忘らるる　身をば思はず　誓ひてし　人の命の　惜しくもあるかな" },
+            { id: 39, kaminoku: "浅茅生の", shimonoku: "あまりてなどか", kuzentai: "浅茅生の　小野の篠原　しのぶれど　あまりてなどか　人の恋しき" },
+            { id: 40, kaminoku: "忍ぶれど", shimonoku: "ものや思ふと", kuzentai: "忍ぶれど　色に出でにけり　わが恋は　ものや思ふと　人の問ふまで" },
+            { id: 41, kaminoku: "恋すてふ", shimonoku: "人知れずこそ", kuzentai: "恋すてふ　わが名はまだき　立ちにけり　人知れずこそ　思ひそめしか" },
+            { id: 42, kaminoku: "契りきな", shimonoku: "末の松山", kuzentai: "契りきな　かたみに袖を　しぼりつつ　末の松山　波こさじとは" },
+            { id: 43, kaminoku: "逢ひ見ての", shimonoku: "昔はものを", kuzentai: "逢ひ見ての　後の心に　くらぶれば　昔はものを　思はざりけり" },
+            { id: 44, kaminoku: "逢ふことの", shimonoku: "人をも身をも", kuzentai: "逢ふことの　絶えてしなくば　なかなかに　人をも身をも　恨みざらまし" },
+            { id: 45, kaminoku: "あはれとも", shimonoku: "身のいたづらに", kuzentai: "あはれとも　いふべき人は　おもほえで　身のいたづらに　なりぬべきかな" },
+            { id: 46, kaminoku: "由良の門を", shimonoku: "行方もしらぬ", kuzentai: "由良の門を　渡る舟人　かぢを絶え　行方もしらぬ　恋の道かな" },
+            { id: 47, kaminoku: "八重むぐら", shimonoku: "人こそ見えね", kuzentai: "八重むぐら　しげれる宿の　さびしきに　人こそ見えね　秋は来にけり" },
+            { id: 48, kaminoku: "風をいたみ", shimonoku: "おのれのみ", kuzentai: "風をいたみ　岩うつ波の　おのれのみ　くだけてものを　思ふころかな" },
+            { id: 49, kaminoku: "御垣守", shimonoku: "昼は消えつつ", kuzentai: "御垣守　衛士のたく火の　夜は燃え　昼は消えつつ　ものをこそ思へ" },
+            { id: 50, kaminoku: "君がため", shimonoku: "長くもがなと", kuzentai: "君がため　惜しからざりし　命さへ　長くもがなと　思ひけるかな" },
+            { id: 51, kaminoku: "かくとだに", shimonoku: "さしも知らじな", kuzentai: "かくとだにえやはいぶきの　さしも草　さしも知らじな　燃ゆる思ひを" },
+            { id: 52, kaminoku: "明けぬれば", shimonoku: "なほ恨めしき", kuzentai: "明けぬれば　暮るるものとは　知りながら　なほ恨めしき　朝ぼらけかな" },
+            { id: 53, kaminoku: "嘆きつつ", shimonoku: "いかに久しき", kuzentai: "嘆きつつ　ひとり寝る夜の　明くる間は　いかに久しき　ものとかは知る" },
+            { id: 54, kaminoku: "忘れじの", shimonoku: "今日を限りの", kuzentai: "忘れじの　行末までは　かたければ　今日を限りの　命ともがな" },
+            { id: 55, kaminoku: "滝の音は", shimonoku: "名こそ流れて", kuzentai: "滝の音は　絶えて久しく　なりぬれど　名こそ流れて　なほ聞こえけれ" },
+            { id: 56, kaminoku: "あらざらむ", shimonoku: "今ひとたびの", kuzentai: "あらざらむ　この世のほかの　思ひ出に　今ひとたびの　逢ふこともがな" },
+            { id: 57, kaminoku: "めぐり逢ひて", shimonoku: "雲隠れにし", kuzentai: "めぐり逢ひてt-見しやそれともt-わかぬ間にt-雲隠れにしt-夜半の月かな" },
+            { id: 58, kaminoku: "有馬山", shimonoku: "いでそよ人を", kuzentai: "有馬山　猪名の笹原　風吹けば　いでそよ人を　忘れやはする" },
+            { id: 59, kaminoku: "やすらはで", shimonoku: "傾くまでの", kuzentai: "やすらはでt-寝なましものをt-小夜更けてt-傾くまでのt-月を見しかな" },
+            { id: 60, kaminoku: "大江山", shimonoku: "まだふみも見ず", kuzentai: "大江山　いく野の道のt-遠ければt-まだふみも見ずt-天の橋立" },
+            { id: 61, kaminoku: "いにしへの", shimonoku: "今日九重に", kuzentai: "いにしへの　奈良の都の　八重桜　今日九重に　にほひぬるかな" },
+            { id: 62, kaminoku: "夜をこめて", shimonoku: "よに逢坂の", kuzentai: "夜をこめてt-鳥のそら音はt-はかるともt-よに逢坂のt-関は許さじ" },
+            { id: 63, kaminoku: "今はただ", shimonoku: "人づてならで", kuzentai: "今はただt-思ひ絶えなむt-とばかりをt-人づてならでt-言ふよしもがな" },
+            { id: 64, kaminoku: "朝ぼらけ", shimonoku: "あらはれわたる", kuzentai: "朝ぼらけ　宇治の川霧　絶え絶えに　あらはれわたる　瀬々の網代木" },
+            { id: 65, kaminoku: "恨みわび", shimonoku: "恋に朽ちなむ", kuzentai: "恨みわび　ほさぬ袖だに　あるものを　恋に朽ちなむ　名こそ惜しけれ" },
+            { id: 66, kaminoku: "もろともに", shimonoku: "花よりほかに", kuzentai: "もろともに　あはれと思へt-山桜t-花よりほかにt-知る人もなし" },
+            { id: 67, kaminoku: "春の夜の", shimonoku: "かひなく立たむ", kuzentai: "春の夜のt-夢ばかりなるt-手枕にt-かひなく立たむt-名こそ惜しけれ" },
+            { id: 68, kaminoku: "心にも", shimonoku: "恋しかるべき", kuzentai: "心にもt-あらで憂き世にt-ながらへばt-恋しかるべきt-夜半の月かな" },
+            { id: 69, kaminoku: "嵐吹く", shimonoku: "竜田の川の", kuzentai: "嵐吹くt-三室の山のt-もみぢ葉はt-竜田の川のt-錦なりけり" },
+            { id: 70, kaminoku: "寂しさに", shimonoku: "いづくも同じ", kuzentai: "寂しさにt-宿を立ち出でてt-眺むればt-いづくも同じt-秋の夕暮" },
+            { id: 71, kaminoku: "夕されば", shimonoku: "あしのまろやに", kuzentai: "夕さればt-門田の稲葉t-おとづれてt-あしのまろやにt-秋風ぞ吹く" },
+            { id: 72, kaminoku: "音に聞く", shimonoku: "かけじや袖の", kuzentai: "音に聞くt-高師の浜のt-あだ波はt-かけじや袖のt-ぬれもこそすれ" },
+            { id: 73, kaminoku: "高砂の", shimonoku: "外山の霞", kuzentai: "高砂のt-尾上の桜t-咲きにけりt-外山の霞t-立たずもあらなむ" },
+            { id: 74, kaminoku: "うかりける", shimonoku: "はげしかれとは", kuzentai: "うかりけるt-人を初瀬のt-山おろしt-はげしかれとはt-祈らぬものを" },
+            { id: 75, kaminoku: "契りおきし", shimonoku: "あはれ今年の", kuzentai: "契りおきしt-させもが露をt-命にてt-あはれ今年のt-秋もいぬめり" },
+            { id: 76, kaminoku: "わたの原", shimonoku: "雲居にまがふ", kuzentai: "わたの原t-漕ぎ出でて見ればt-久方のt-雲居にまがふt-沖つ白波" },
+            { id: 77, kaminoku: "瀬をはやみ", shimonoku: "われても末に", kuzentai: "瀬をはやみt-岩にせかるるt-滝川のt-われても末にt-逢はむとぞ思ふ" },
+            { id: 78, kaminoku: "淡路島", shimonoku: "幾夜寝覚めぬ", kuzentai: "淡路島t-かよふ千鳥のt-鳴く声にt-幾夜寝覚めぬt-須磨の関守" },
+            { id: 79, kaminoku: "秋風に", shimonoku: "もれ出づる月の", kuzentai: "秋風にt-たなびく雲のt-絶え間よりt-もれ出づる月のt-影のさやけさ" },
+            { id: 80, kaminoku: "長からむ", shimonoku: "乱れて今朝は", kuzentai: "長からむt-心も知らずt-黒髪のt-乱れて今朝はt-ものをこそ思へ" },
+            { id: 81, kaminoku: "ほととぎす", shimonoku: "ただ有明の", kuzentai: "ほととぎすt-鳴きつる方をt-眺むればt-ただ有明のt-月ぞ残れる" },
+            { id: 82, kaminoku: "思ひわび", shimonoku: "憂きに堪へぬは", kuzentai: "思ひわびt-さても命はt-あるものをt-憂きに堪へぬはt-涙なりけり" },
+            { id: 83, kaminoku: "世の中よ", shimonoku: "山の奥にも", kuzentai: "世の中よt-道こそなけれt-思ひ入るt-山の奥にもt-鹿ぞ鳴くなる" },
+            { id: 84, kaminoku: "ながらへば", shimonoku: "憂しと見し世ぞ", kuzentai: "ながらへばt-またこの頃やt-しのばれむt-憂しと見し世ぞt-今は恋しき" },
+            { id: 85, kaminoku: "夜もすがら", shimonoku: "ねやのひmeasさえ", kuzentai: "夜もすがらt-もの思ふ頃はt-明けやらでt-ねやのひまさへt-つれなかりけり" },
+            { id: 86, kaminoku: "嘆けとて", shimonoku: "かこち顔なる", kuzentai: "嘆けとてt-月やはものをt-思はするt-かこち顔なるt-わが涙かな" },
+            { id: 87, kaminoku: "村雨の", shimonoku: "霧立ちのぼる", kuzentai: "村雨のt-露もまだひぬt-槙の葉にt-霧立ちのぼるt-秋の夕暮" },
+            { id: 88, kaminoku: "難波江の", shimonoku: "身をつくしてや", kuzentai: "難波江のt-葦のかりねのt-ひとよゆゑt-身をつくしてやt-恋ひわたるべき" },
+            { id: 89, kaminoku: "玉の緒よ", shimonoku: "忍ぶることの", kuzentai: "玉の緒よt-絶えなば絶えねt-ながらへばt-忍ぶることのt-弱りもぞする" },
+            { id: 90, kaminoku: "見せばやな", shimonoku: "濡れにぞ濡れし", kuzentai: "見せばやなt-雄島のあまのt-袖だにもt-濡れにぞ濡れしt-色は変はらず" },
+            { id: 91, kaminoku: "きりぎりす", shimonoku: "衣かたしき", kuzentai: "きりぎりすt-鳴くや霜夜のt-さむしろにt-衣かたしきt-ひとりかも寝む" },
+            { id: 92, kaminoku: "わが袖は", shimonoku: "人こそ知らね", kuzentai: "わが袖はt-潮干に見えぬt-沖の石のt-人こそ知らねt-乾く間もなし" },
+            { id: 93, kaminoku: "世の中は", shimonoku: "海士の小舟の", kuzentai: "世の中はt-常にもがもなt-渚こぐt-海士の小舟のt-綱手かなしも" },
+            { id: 94, kaminoku: "み吉野の", shimonoku: "ふるさと寒く", kuzentai: "み吉野のt-山の秋風t-さ夜更けてt-ふるさと寒くt-衣打つなり" },
+            { id: 95, kaminoku: "おほけなく", shimonoku: "わが立つ杣に", kuzentai: "おほけなくt-うき世の民にt-おほふかなt-わが立つ杣にt-墨染の袖" },
+            { id: 96, kaminoku: "花さそふ", shimonoku: "ふりゆくものは", kuzentai: "花さそふt-嵐の庭のt-雪ならでt-ふりゆくものはt-わが身なりけり" },
+            { id: 97, kaminoku: "来ぬ人を", shimonoku: "焼くや藻塩の", kuzentai: "来ぬ人をt-松帆の浦のt-夕なぎにt-焼くや藻塩のt-身もこがれつつ" },
+            { id: 98, kaminoku: "風そよぐ", shimonoku: "みそぎぞ夏の", kuzentai: "風そよぐt-楢の小川のt-夕暮はt-みそぎぞ夏のt-しるしなりける" },
+            { id: 99, kaminoku: "人もをし", shimonoku: "世を思ふゆゑに", kuzentai: "人もをしt-人もうらめしt-あぢきなくt-世を思ふゆゑにt-もの思ふ身は" },
+            { id: 100, kaminoku: "百敷や", shimonoku: "なほあまりある", kuzentai: "百敷やt-古き軒端のt-しのぶにもt-なほあまりあるt-昔なりけり" }
+        ];
+
+        // データクレンジング（t- や不要文字の自動除去・標準化）
+        HYAKUNIN_ISSHU_DATA.forEach(item => {
+            item.kuzentai = item.kuzentai.replace(/t-/g, '').replace(/meas/g, 'ま');
+        });
+
+        // ================= Web Audio API: トイピアノ風ファンファーレ音 =================
+        let audioCtx = null;
+
+        function playToyPianoFanfare() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                
+                if (!audioCtx) {
+                    audioCtx = new AudioContext();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                // 指示された音階（アルペジオ）： C5 → E5 → G5 → C6 → E6
+                const frequencies = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+                const startTime = audioCtx.currentTime + 0.02;
+                const noteInterval = 0.065; // 素早く鳴り響く和音アルペジオの間隔
+
+                frequencies.forEach((freq, index) => {
+                    const noteTime = startTime + (index * noteInterval);
+
+                    // 1. サイン波 (Sine) - やわらかい基音
+                    const oscSine = audioCtx.createOscillator();
+                    oscSine.type = 'sine';
+                    oscSine.frequency.setValueAtTime(freq, noteTime);
+
+                    // 2. 三角波 (Triangle) - ピコピコとしたトイピアノアタック・アコースティック感
+                    const oscTri = audioCtx.createOscillator();
+                    oscTri.type = 'triangle';
+                    oscTri.frequency.setValueAtTime(freq, noteTime);
+
+                    // 音量ゲイン制御
+                    const gainSine = audioCtx.createGain();
+                    const gainTri = audioCtx.createGain();
+                    const masterGain = audioCtx.createGain();
+
+                    // トイピアノ特有のアタックと可憐な残音・速やかな減衰 envelope
+                    gainSine.gain.setValueAtTime(0, noteTime);
+                    gainSine.gain.linearRampToValueAtTime(0.28, noteTime + 0.006);
+                    gainSine.gain.exponentialRampToValueAtTime(0.0001, noteTime + 0.42);
+
+                    gainTri.gain.setValueAtTime(0, noteTime);
+                    gainTri.gain.linearRampToValueAtTime(0.20, noteTime + 0.006);
+                    gainTri.gain.exponentialRampToValueAtTime(0.0001, noteTime + 0.32);
+
+                    // ノード接続
+                    oscSine.connect(gainSine);
+                    oscTri.connect(gainTri);
+                    gainSine.connect(masterGain);
+                    gainTri.connect(masterGain);
+                    masterGain.connect(audioCtx.destination);
+
+                    // 再生開始と自動停止
+                    oscSine.start(noteTime);
+                    oscTri.start(noteTime);
+                    oscSine.stop(noteTime + 0.45);
+                    oscTri.stop(noteTime + 0.45);
+                });
+            } catch (e) {
+                console.error('Audio playback failed:', e);
+            }
+        }
+
+        // 不正解時のアコースティック低音効果音
+        function playWrongSound() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                if (!audioCtx) audioCtx = new AudioContext();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(90, audioCtx.currentTime + 0.22);
+
+                gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.28);
+            } catch (e) {}
+        }
+
+        // ================= 紙吹雪 (Confetti) エフェクト =================
+        const confettiCanvas = document.getElementById('confettiCanvas');
+        const ctx = confettiCanvas.getContext('2d');
+        let particles = [];
+        let confettiAnimationId = null;
+
+        function resizeCanvas() {
+            confettiCanvas.width = window.innerWidth;
+            confettiCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function createConfetti() {
+            particles = [];
+            const colors = ['#facc15', '#eab308', '#ffffff', '#f43f5e', '#10b981', '#38bdf8'];
+            const particleCount = 75;
+
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: Math.random() * confettiCanvas.width,
+                    y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+                    size: Math.random() * 8 + 5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speedY: Math.random() * 3.5 + 2,
+                    speedX: (Math.random() - 0.5) * 2.2,
+                    rotation: Math.random() * 360,
+                    rotationSpeed: (Math.random() - 0.5) * 10
+                });
+            }
+        }
+
+        function renderConfetti() {
+            ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            let activeParticles = false;
+
+            particles.forEach(p => {
+                p.y += p.speedY;
+                p.x += p.speedX;
+                p.rotation += p.rotationSpeed;
+
+                if (p.y < confettiCanvas.height) {
+                    activeParticles = true;
+                }
+
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate((p.rotation * Math.PI) / 180);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                ctx.restore();
+            });
+
+            if (activeParticles) {
+                confettiAnimationId = requestAnimationFrame(renderConfetti);
+            } else {
+                ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            }
+        }
+
+        function startConfetti() {
+            if (confettiAnimationId) cancelAnimationFrame(confettiAnimationId);
+            createConfetti();
+            renderConfetti();
+        }
+
+        // ================= アプリケーション状態管理 =================
+        let currentQuestions = []; // 全10問
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let isAnswered = false;
+
+        // DOM要素参照
+        const startScreen = document.getElementById('startScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const resultScreen = document.getElementById('resultScreen');
+        const gameStatusHeader = document.getElementById('gameStatusHeader');
+        
+        const startBtn = document.getElementById('startBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const nextQuestionBtn = document.getElementById('nextQuestionBtn');
+
+        const kaminokuText = document.getElementById('kaminokuText');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const currentQuestionNum = document.getElementById('currentQuestionNum');
+        const currentScore = document.getElementById('currentScore');
+        const qNumBadge = document.getElementById('qNumBadge');
+        const progressBar = document.getElementById('progressBar');
+
+        const explanationModal = document.getElementById('explanationModal');
+        const modalResultBadge = document.getElementById('modalResultBadge');
+        const kuzentaiText = document.getElementById('kuzentaiText');
+
+        const finalScore = document.getElementById('finalScore');
+        const accuracyRate = document.getElementById('accuracyRate');
+        const evaluationMessage = document.getElementById('evaluationMessage');
+
+        // シャッフル関数
+        function shuffle(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // 10問の鍛錬を初期化
+        function initGame() {
+            const shuffledDataset = shuffle(HYAKUNIN_ISSHU_DATA);
+            currentQuestions = shuffledDataset.slice(0, 10);
+            currentQuestionIndex = 0;
+            score = 0;
+            
+            currentScore.textContent = '0';
+            gameStatusHeader.classList.remove('hidden');
+            startScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+
+            loadQuestion();
+        }
+
+        // クイズ読み込み
+        function loadQuestion() {
+            isAnswered = false;
+            explanationModal.classList.add('hidden');
+
+            const q = currentQuestions[currentQuestionIndex];
+            
+            // ヘッダー・プログレス更新
+            currentQuestionNum.textContent = currentQuestionIndex + 1;
+            qNumBadge.textContent = currentQuestionIndex + 1;
+            progressBar.style.width = `${((currentQuestionIndex + 1) / 10) * 100}%`;
+
+            // kaminoku（上の句）の表示
+            kaminokuText.textContent = q.kaminoku;
+
+            // shimonoku（下の句）の選択肢5枚を構築
+            // 1枚は正解(q.shimonoku)、残り4枚はランダムなダミー
+            const otherItems = HYAKUNIN_ISSHU_DATA.filter(item => item.id !== q.id);
+            const randomDummyChoices = shuffle(otherItems).slice(0, 4);
+            const allChoices = shuffle([q, ...randomDummyChoices]);
+
+            // ボタン一覧レンダリング
+            optionsContainer.innerHTML = '';
+            allChoices.forEach((choice, idx) => {
+                const button = document.createElement('button');
+                button.className = 'karuta-card w-full p-4 md:p-5 rounded-xl text-left flex items-center justify-between group cursor-pointer';
+                button.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <span class="w-7 h-7 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-xs font-mono text-amber-400 font-bold group-hover:border-amber-500/50 transition-colors">
+                            ${idx + 1}
+                        </span>
+                        <span class="font-mincho text-lg md:text-xl font-bold text-gray-200 tracking-wider">
+                            ${choice.shimonoku}
+                        </span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-gray-600 text-xs group-hover:text-amber-400 group-hover:translate-x-1 transition-all"></i>
+                `;
+
+                button.addEventListener('click', () => handleChoice(button, choice, q));
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        // 選択肢のクリック・タップ判定
+        function handleChoice(selectedButton, choice, correctQuestion) {
+            if (isAnswered) return;
+            isAnswered = true;
+
+            const isCorrect = (choice.id === correctQuestion.id);
+
+            // 全ボタンの非活性化
+            const allButtons = optionsContainer.querySelectorAll('button');
+            allButtons.forEach(btn => btn.classList.add('disabled', 'pointer-events-none'));
+
+            if (isCorrect) {
+                score++;
+                currentScore.textContent = score;
+                selectedButton.classList.add('correct-animate');
+                
+                // 正解エフェクト： トイピアノ風ファンファーレ音 ＆ 紙吹雪
+                playToyPianoFanfare();
+                startConfetti();
+
+                modalResultBadge.innerHTML = `<span class="text-emerald-400"><i class="fa-solid fa-circle-check"></i> 正解！</span>`;
+            } else {
+                selectedButton.classList.add('wrong-animate');
+                playWrongSound();
+
+                // 正解の選択肢カードをハイライト
+                allButtons.forEach(btn => {
+                    if (btn.textContent.includes(correctQuestion.shimonoku)) {
+                        btn.classList.add('border-amber-500', 'bg-amber-500/10');
+                    }
+                });
+
+                modalResultBadge.innerHTML = `<span class="text-rose-400"><i class="fa-solid fa-circle-xmark"></i> 残念！</span>`;
+            }
+
+            // モーダルにku-zentai（全句）を設定（1行目: 1~3文節 / 2行目: 4~5文節）
+            const clauses = correctQuestion.kuzentai.trim().split(/[\s　]+/);
+            if (clauses.length >= 5) {
+                const line1 = clauses.slice(0, 3).join('　');
+                const line2 = clauses.slice(3, 5).join('　');
+                kuzentaiText.innerHTML = `
+                    <div class="text-amber-100">${line1}</div>
+                    <div class="text-amber-300 font-semibold">${line2}</div>
+                `;
+            } else {
+                kuzentaiText.textContent = correctQuestion.kuzentai;
+            }
+
+            // 少しだけ間を置いて全句モーダルを開く
+            setTimeout(() => {
+                explanationModal.classList.remove('hidden');
+            }, 600);
+        }
+
+        // 次の問題または結果画面へ遷移
+        function handleNextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < 10) {
+                loadQuestion();
+            } else {
+                showResultScreen();
+            }
+        }
+
+        // 10問終了後の結果画面表示
+        function showResultScreen() {
+            gameScreen.classList.add('hidden');
+            explanationModal.classList.add('hidden');
+            gameStatusHeader.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+
+            finalScore.textContent = score;
+            const rate = Math.round((score / 10) * 100);
+            accuracyRate.textContent = rate;
+
+            if (score === 10) {
+                evaluationMessage.textContent = '【完璧です！】百人一首の全句を見事に修得しています！';
+            } else if (score >= 8) {
+                evaluationMessage.textContent = '【素晴らしい！】高い正確さです。全問正解を目指してもう一度挑戦しましょう！';
+            } else if (score >= 5) {
+                evaluationMessage.textContent = '【順調です！】kaminokuとshimonokuの繋がりを確実に覚えていきましょう。';
+            } else {
+                evaluationMessage.textContent = '【練習あるのみ！】繰り返し挑戦して全100首を身につけましょう！';
+            }
+        }
+
+        // イベントリスナー登録
+        startBtn.addEventListener('click', initGame);
+        restartBtn.addEventListener('click', () => {
+            // 最初の画面に戻る
+            resultScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+        });
+        nextQuestionBtn.addEventListener('click', handleNextQuestion);
+
+    </script>
+</body>
+</html>
