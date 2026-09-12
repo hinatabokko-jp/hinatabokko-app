@@ -1,35 +1,261 @@
+```html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>計算トレーニング</title>
+
 <!-- confetti.js for celebration effects -->
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script> 
-<style> 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; } 
-body { 
-  margin: 0; min-height: 100vh; font-family: "Segoe UI", "Noto Sans JP", -apple-system, sans-serif; 
-  background: #10131a; color: #f2f4f8; display: flex; justify-content: center; align-items: center; 
-  padding: 16px; touch-action: manipulation; user-select: none;
-} 
-.app { 
-  width: min(780px, 100%); background: #191e27; border: 1px solid #2d3442; border-radius: 24px; 
-  padding: 24px; box-shadow: 0 18px 50px rgba(0,0,0,.4); position: relative; overflow: hidden;
-} 
-h1 { margin: 0 0 8px; text-align: center; font-size: clamp(24px, 5vw, 32px); letter-spacing: .04em; } 
-.subtitle { text-align: center; color: #9da6b6; margin-bottom: 20px; font-size: 14px; } 
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
-.progress-wrap { margin-bottom: 18px; } 
-.progress-info { display: flex; justify-content: space-between; color: #aeb7c6; font-size: 14px; margin-bottom: 8px; font-weight: 600; } 
-.bar { height: 10px; background: #292f3a; border-radius: 99px; overflow: hidden; } 
-.bar span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #657dff, #8b5cf6); transition: width .3s ease; } 
+<style>
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
 
-.category-wrap { text-align: center; }
-.category { 
-  display: inline-block; padding: 6px 14px; border-radius: 999px; background: #252c39; 
-  color: #b9c2ff; font-size: 13px; font-weight: 700; margin-bottom: 14px; border: 1px solid rgba(185,194,255,0.15);
-} 
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Segoe UI", "Noto Sans JP", -apple-system, sans-serif;
+  background: #10131a;
+  color: #f2f4f8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+/* ========================================
+   ハンバーガーメニュー
+======================================== */
+
+.menu-button {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  z-index: 1200;
+
+  width: 48px;
+  height: 48px;
+
+  border: 1px solid #394252;
+  border-radius: 14px;
+  background: #191e27;
+  color: #f2f4f8;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+
+  transition: background .15s ease, transform .15s ease;
+}
+
+.menu-button:hover {
+  background: #252c37;
+}
+
+.menu-button:active {
+  transform: scale(.95);
+}
+
+.menu-button span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  border-radius: 2px;
+  background: #f2f4f8;
+  transition: transform .2s ease, opacity .2s ease;
+}
+
+/* メニューが開いているとき */
+.menu-button.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.menu-button.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-button.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* サイドバー */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1100;
+
+  width: min(320px, 85vw);
+  height: 100vh;
+
+  background: #191e27;
+  border-right: 1px solid #2d3442;
+
+  padding: 84px 18px 24px;
+
+  transform: translateX(-100%);
+  transition: transform .25s ease;
+
+  box-shadow: 18px 0 50px rgba(0,0,0,.45);
+}
+
+.sidebar.open {
+  transform: translateX(0);
+}
+
+.sidebar-title {
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0 8px 18px;
+  color: #ffffff;
+}
+
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar-link {
+  display: block;
+
+  padding: 14px 16px;
+
+  border: 1px solid #303847;
+  border-radius: 12px;
+
+  background: #252c37;
+  color: #e8ebf2;
+
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 700;
+
+  transition:
+    background .15s ease,
+    border-color .15s ease,
+    transform .15s ease;
+}
+
+.sidebar-link:hover {
+  background: #303846;
+  border-color: #4a566d;
+}
+
+.sidebar-link:active {
+  transform: scale(.98);
+}
+
+.sidebar-link.current {
+  background: #2b3450;
+  border-color: rgba(101,125,255,.5);
+  color: #b9c5ff;
+}
+
+/* サイドバー展開時の背景 */
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(2px);
+
+  opacity: 0;
+  visibility: hidden;
+
+  transition: opacity .25s ease, visibility .25s ease;
+}
+
+.menu-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+
+/* ========================================
+   メインアプリ
+======================================== */
+
+.app {
+  width: min(780px, 100%);
+  background: #191e27;
+  border: 1px solid #2d3442;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.4);
+  position: relative;
+  overflow: hidden;
+}
+
+h1 {
+  margin: 0 0 8px;
+  text-align: center;
+  font-size: clamp(24px, 5vw, 32px);
+  letter-spacing: .04em;
+}
+
+.subtitle {
+  text-align: center;
+  color: #9da6b6;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.progress-wrap {
+  margin-bottom: 18px;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  color: #aeb7c6;
+  font-size: 14px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.bar {
+  height: 10px;
+  background: #292f3a;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #657dff, #8b5cf6);
+  transition: width .3s ease;
+}
+
+.category-wrap {
+  text-align: center;
+}
+
+.category {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #252c39;
+  color: #b9c2ff;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  border: 1px solid rgba(185,194,255,0.15);
+}
 
 .quiz-layout {
   display: flex;
@@ -37,7 +263,8 @@ h1 { margin: 0 0 8px; text-align: center; font-size: clamp(24px, 5vw, 32px); let
   gap: 16px;
 }
 
-.pane-left, .pane-right {
+.pane-left,
+.pane-right {
   width: 100%;
   max-width: 380px;
   margin: 0 auto;
@@ -49,11 +276,11 @@ h1 { margin: 0 0 8px; text-align: center; font-size: clamp(24px, 5vw, 32px); let
   justify-content: center;
 }
 
-/* パソコン等の画面幅でテンキーを画面右側に配置 */
 @media (min-width: 640px) {
   .app {
     max-width: 760px;
   }
+
   .quiz-layout {
     flex-direction: row;
     align-items: center;
@@ -61,11 +288,13 @@ h1 { margin: 0 0 8px; text-align: center; font-size: clamp(24px, 5vw, 32px); let
     gap: 28px;
     margin-top: 10px;
   }
+
   .pane-left {
     flex: 1;
     max-width: 360px;
     margin: 0;
   }
+
   .pane-right {
     flex: 1;
     max-width: 320px;
@@ -73,499 +302,1356 @@ h1 { margin: 0 0 8px; text-align: center; font-size: clamp(24px, 5vw, 32px); let
   }
 }
 
-/* 問題文と入力ボックスを一体化（イコールの右側に答え） */
-.question-container { 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
+.question-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-wrap: wrap;
-  gap: 10px; 
-  margin: 8px 0 16px; 
-} 
+  gap: 10px;
+  margin: 8px 0 16px;
+}
 
 .q-text {
-  font-size: clamp(32px, 7vw, 48px); 
-  font-weight: 800; 
-  letter-spacing: .04em; 
-  color: #ffffff; 
+  font-size: clamp(32px, 7vw, 48px);
+  font-weight: 800;
+  letter-spacing: .04em;
+  color: #ffffff;
   text-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
-.answer { 
-  min-width: 110px; 
-  padding: 4px 16px; 
-  min-height: 64px; 
-  font-size: clamp(34px, 7vw, 46px); 
-  font-weight: 800; 
-  text-align: center; 
-  color: #8096ff; 
-  background: #10131a; 
-  border: 2px solid #4a566d; 
-  border-radius: 16px; 
-  outline: none; 
-  font-variant-numeric: tabular-nums; 
-  display: inline-flex; 
-  align-items: center; 
-  justify-content: center; 
+.answer {
+  min-width: 110px;
+  padding: 4px 16px;
+  min-height: 64px;
+  font-size: clamp(34px, 7vw, 46px);
+  font-weight: 800;
+  text-align: center;
+  color: #8096ff;
+  background: #10131a;
+  border: 2px solid #4a566d;
+  border-radius: 16px;
+  outline: none;
+  font-variant-numeric: tabular-nums;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   box-shadow: inset 0 2px 6px rgba(0,0,0,0.5);
   transition: border-color .15s ease;
-} 
+}
 
-.keypad { width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; } 
-.key { 
-  min-height: 56px; border: 1px solid #394252; border-radius: 14px; background: #252c37; 
-  color: #f5f7fb; font-size: 24px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 0 #151820; 
+.keypad {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.key {
+  min-height: 56px;
+  border: 1px solid #394252;
+  border-radius: 14px;
+  background: #252c37;
+  color: #f5f7fb;
+  font-size: 24px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #151820;
   transition: all .1s ease;
-} 
-.key:active { transform: translateY(3px); box-shadow: 0 1px 0 #151820; } 
-.key.action { background: #303846; font-size: 18px; color: #d0d7e5; } 
-.key.zero { grid-column: span 2; } 
-.decide { 
-  display: block; width: 100%; margin: 12px auto 0; padding: 14px; border: 0; 
-  border-radius: 14px; background: linear-gradient(135deg, #657dff, #5b6eff); color: #fff; font-size: 20px; font-weight: 800; 
-  cursor: pointer; box-shadow: 0 4px 15px rgba(101,125,255,0.35); transition: filter .15s;
-} 
-.decide:hover { filter: brightness(1.1); } 
-.decide:active { transform: translateY(2px); } 
-.decide:disabled, .key:disabled { opacity: .4; cursor: default; transform: none; box-shadow: none; } 
-.feedback { min-height: 48px; text-align: center; margin-top: 10px; font-size: 18px; font-weight: 800; } 
-.correct { color: #5ed6a0; } .wrong { color: #ff7b7b; } 
+}
 
-.start, .result { text-align: center; padding: 10px 0; } 
-.start p, .result p { color: #adb5c4; line-height: 1.7; font-size: 15px; } 
-.start button, .result button { 
-  display: block; width: 100%; max-width: 380px; margin: 14px auto 0; padding: 16px; border: 0; 
-  border-radius: 14px; font-size: 19px; font-weight: 800; cursor: pointer; transition: filter .15s;
-} 
-.btn-primary { background: linear-gradient(135deg, #657dff, #5b6eff); color: #fff; box-shadow: 0 4px 15px rgba(101,125,255,0.3); }
-.btn-primary:hover { filter: brightness(1.1); }
-.btn-secondary { background: #2e3646; color: #d0d7e5; border: 1px solid #414b5d !important; }
-.btn-secondary:hover { background: #384255; }
-.score { font-size: 58px; font-weight: 900; color: #657dff; margin: 12px 0; } 
+.key:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #151820;
+}
 
-.modal-overlay { 
-  position: fixed; inset: 0; background: rgba(0,0,0,.78); display: flex; align-items: center; 
-  justify-content: center; padding: 20px; z-index: 1000; backdrop-filter: blur(6px); 
-} 
-.modal { 
-  width: min(460px, 100%); background: #1b212c; border: 1px solid #414b5d; border-radius: 24px; 
-  padding: 28px 22px; text-align: center; box-shadow: 0 25px 80px rgba(0,0,0,.6); 
-  animation: modalIn .22s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-} 
-@keyframes modalIn { from { opacity: 0; transform: scale(.88) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } } 
-.modal-title { font-size: 26px; font-weight: 800; color: #ff7b7b; margin-bottom: 8px; } 
-.modal-title.celebrate { color: #ffd15c; }
-.modal-question { font-size: 24px; color: #c0c7d3; margin: 12px 0; font-weight: 700; } 
-.modal-label { font-size: 14px; color: #8f99aa; margin-top: 12px; } 
-.modal-answer { 
-  font-size: clamp(52px, 14vw, 76px); font-weight: 900; line-height: 1.1; 
-  color: #fff; margin: 6px 0 20px; letter-spacing: .04em; 
-} 
-.modal-button { 
-  width: 100%; padding: 15px; border: 0; border-radius: 14px; background: linear-gradient(135deg, #657dff, #5b6eff); color: #fff; 
-  font-size: 18px; font-weight: 800; cursor: pointer; margin-top: 8px; box-shadow: 0 4px 15px rgba(101,125,255,0.3);
-} 
-.modal-button.sub { background: #2e3646; color: #d0d7e5; border: 1px solid #414b5d; box-shadow: none; }
+.key.action {
+  background: #303846;
+  font-size: 18px;
+  color: #d0d7e5;
+}
 
-@media(max-width:480px){ 
-  body { padding: 10px; } .app { padding: 18px 14px; border-radius: 20px; } 
-  .key { min-height: 52px; font-size: 22px; } .question { margin-bottom: 12px; } .answer { font-size: 38px; min-height: 64px; } 
-  .modal { padding: 24px 18px; } 
-} 
-</style> 
-</head> 
-<body> 
-<div class="app"><div id="screen"></div></div> 
+.key.zero {
+  grid-column: span 2;
+}
 
-<script> 
+.decide {
+  display: block;
+  width: 100%;
+  margin: 12px auto 0;
+  padding: 14px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #657dff, #5b6eff);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(101,125,255,0.35);
+  transition: filter .15s;
+}
+
+.decide:hover {
+  filter: brightness(1.1);
+}
+
+.decide:active {
+  transform: translateY(2px);
+}
+
+.decide:disabled,
+.key:disabled {
+  opacity: .4;
+  cursor: default;
+  transform: none;
+  box-shadow: none;
+}
+
+.feedback {
+  min-height: 48px;
+  text-align: center;
+  margin-top: 10px;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.correct {
+  color: #5ed6a0;
+}
+
+.wrong {
+  color: #ff7b7b;
+}
+
+.start,
+.result {
+  text-align: center;
+  padding: 10px 0;
+}
+
+.start p,
+.result p {
+  color: #adb5c4;
+  line-height: 1.7;
+  font-size: 15px;
+}
+
+.start button,
+.result button {
+  display: block;
+  width: 100%;
+  max-width: 380px;
+  margin: 14px auto 0;
+  padding: 16px;
+  border: 0;
+  border-radius: 14px;
+  font-size: 19px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: filter .15s;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #657dff, #5b6eff);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(101,125,255,0.3);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.1);
+}
+
+.btn-secondary {
+  background: #2e3646;
+  color: #d0d7e5;
+  border: 1px solid #414b5d !important;
+}
+
+.btn-secondary:hover {
+  background: #384255;
+}
+
+.score {
+  font-size: 58px;
+  font-weight: 900;
+  color: #657dff;
+  margin: 12px 0;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+  backdrop-filter: blur(6px);
+}
+
+.modal {
+  width: min(460px, 100%);
+  background: #1b212c;
+  border: 1px solid #414b5d;
+  border-radius: 24px;
+  padding: 28px 22px;
+  text-align: center;
+  box-shadow: 0 25px 80px rgba(0,0,0,.6);
+  animation: modalIn .22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(.88) translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #ff7b7b;
+  margin-bottom: 8px;
+}
+
+.modal-title.celebrate {
+  color: #ffd15c;
+}
+
+.modal-question {
+  font-size: 24px;
+  color: #c0c7d3;
+  margin: 12px 0;
+  font-weight: 700;
+}
+
+.modal-label {
+  font-size: 14px;
+  color: #8f99aa;
+  margin-top: 12px;
+}
+
+.modal-answer {
+  font-size: clamp(52px, 14vw, 76px);
+  font-weight: 900;
+  line-height: 1.1;
+  color: #fff;
+  margin: 6px 0 20px;
+  letter-spacing: .04em;
+}
+
+.modal-button {
+  width: 100%;
+  padding: 15px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #657dff, #5b6eff);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  margin-top: 8px;
+  box-shadow: 0 4px 15px rgba(101,125,255,0.3);
+}
+
+.modal-button.sub {
+  background: #2e3646;
+  color: #d0d7e5;
+  border: 1px solid #414b5d;
+  box-shadow: none;
+}
+
+@media(max-width:480px) {
+  body {
+    padding: 10px;
+  }
+
+  .app {
+    padding: 18px 14px;
+    border-radius: 20px;
+  }
+
+  .key {
+    min-height: 52px;
+    font-size: 22px;
+  }
+
+  .question {
+    margin-bottom: 12px;
+  }
+
+  .answer {
+    font-size: 38px;
+    min-height: 64px;
+  }
+
+  .modal {
+    padding: 24px 18px;
+  }
+
+  .menu-button {
+    top: 12px;
+    left: 12px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ========================================
+     ハンバーガーメニュー
+======================================== -->
+
+<button
+  id="menu-button"
+  class="menu-button"
+  aria-label="メニューを開く"
+  aria-expanded="false"
+  type="button"
+>
+  <span></span>
+  <span></span>
+  <span></span>
+</button>
+
+<!-- サイドバー -->
+<nav id="sidebar" class="sidebar" aria-label="サイトメニュー">
+
+  <div class="sidebar-title">メニュー</div>
+
+  <div class="sidebar-menu">
+
+    <a
+      class="sidebar-link"
+      href="https://hinatabokko-jp.github.io/hinatabokko-app/"
+    >
+      漢字テスト（１）
+    </a>
+
+    <a
+      class="sidebar-link"
+      href="https://hinatabokko-jp.github.io/hinatabokko-app/page3"
+    >
+      漢字小テスト復習
+    </a>
+
+    <a
+      class="sidebar-link current"
+      href="https://hinatabokko-jp.github.io/hinatabokko-app/page2"
+    >
+      計算トレーニング
+    </a>
+
+    <a
+      class="sidebar-link"
+      href="https://hinatabokko-jp.github.io/hinatabokko-app/page2"
+    >
+      百人一首
+    </a>
+
+  </div>
+</nav>
+
+<!-- サイドバーの背景 -->
+<div id="menu-overlay" class="menu-overlay"></div>
+
+
+<!-- ========================================
+     メインアプリ
+======================================== -->
+
+<div class="app">
+  <div id="screen"></div>
+</div>
+
+
+<script>
+
 let audioCtx = null;
+
+
+/* ========================================
+   ハンバーガーメニュー
+======================================== */
+
+const menuButton = document.getElementById("menu-button");
+const sidebar = document.getElementById("sidebar");
+const menuOverlay = document.getElementById("menu-overlay");
+
+function toggleMenu() {
+  const isOpen = sidebar.classList.toggle("open");
+
+  menuOverlay.classList.toggle("open", isOpen);
+  menuButton.classList.toggle("open", isOpen);
+
+  menuButton.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  menuButton.setAttribute(
+    "aria-label",
+    isOpen ? "メニューを閉じる" : "メニューを開く"
+  );
+}
+
+function closeMenu() {
+  sidebar.classList.remove("open");
+  menuOverlay.classList.remove("open");
+  menuButton.classList.remove("open");
+
+  menuButton.setAttribute("aria-expanded", "false");
+  menuButton.setAttribute("aria-label", "メニューを開く");
+}
+
+menuButton.addEventListener("click", toggleMenu);
+
+menuOverlay.addEventListener("click", closeMenu);
+
+
+/* ========================================
+   オーディオ
+======================================== */
 
 function initAudio() {
   if (!audioCtx) {
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (AudioContextClass) audioCtx = new AudioContextClass();
+    const AudioContextClass =
+      window.AudioContext || window.webkitAudioContext;
+
+    if (AudioContextClass) {
+      audioCtx = new AudioContextClass();
+    }
   }
+
   if (audioCtx && audioCtx.state === "suspended") {
     audioCtx.resume();
   }
 }
 
+
 // 正解効果音（トイピアノ風ファンファーレ）
 function playCorrectSound() {
+
   try {
+
     initAudio();
+
     if (!audioCtx) return;
+
     const now = audioCtx.currentTime;
 
     const notes = [
-      [523.25, 0.00, 0.12, 0.22], // C5
-      [659.25, 0.08, 0.12, 0.22], // E5
-      [783.99, 0.16, 0.14, 0.25], // G5
-      [1046.50, 0.26, 0.50, 0.30], // C6
-      [1318.51, 0.26, 0.50, 0.20]  // E6
+      [523.25, 0.00, 0.12, 0.22],
+      [659.25, 0.08, 0.12, 0.22],
+      [783.99, 0.16, 0.14, 0.25],
+      [1046.50, 0.26, 0.50, 0.30],
+      [1318.51, 0.26, 0.50, 0.20]
     ];
 
     notes.forEach(([freq, startOffset, duration, vol]) => {
+
       const startTime = now + startOffset;
       const stopTime = startTime + duration;
 
       const osc1 = audioCtx.createOscillator();
       const gain1 = audioCtx.createGain();
+
       osc1.type = "sine";
       osc1.frequency.setValueAtTime(freq, startTime);
+
       gain1.gain.setValueAtTime(vol, startTime);
       gain1.gain.exponentialRampToValueAtTime(0.001, stopTime);
+
       osc1.connect(gain1);
       gain1.connect(audioCtx.destination);
+
       osc1.start(startTime);
       osc1.stop(stopTime);
 
+
       const osc2 = audioCtx.createOscillator();
       const gain2 = audioCtx.createGain();
+
       osc2.type = "triangle";
       osc2.frequency.setValueAtTime(freq, startTime);
+
       gain2.gain.setValueAtTime(vol * 0.4, startTime);
       gain2.gain.exponentialRampToValueAtTime(0.001, stopTime);
+
       osc2.connect(gain2);
       gain2.connect(audioCtx.destination);
+
       osc2.start(startTime);
       osc2.stop(stopTime);
+
     });
+
   } catch (e) {}
+
 }
 
-const TOTAL = 18; 
-let questions = [], current = 0, score = 0, answered = false; 
-let keyListener = null; 
-let modalKeyListener = null; 
 
-function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; } 
+/* ========================================
+   ゲーム本体
+======================================== */
+
+const TOTAL = 18;
+
+let questions = [];
+let current = 0;
+let score = 0;
+let answered = false;
+
+let keyListener = null;
+let modalKeyListener = null;
+
+
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 
 function shuffle(array) {
+
   for (let i = array.length - 1; i > 0; i--) {
+
     const j = Math.floor(Math.random() * (i + 1));
+
     [array[i], array[j]] = [array[j], array[i]];
+
   }
+
   return array;
 }
 
-function makeQuestions() { 
-  const q = []; 
+
+function makeQuestions() {
+
+  const q = [];
+
 
   // 1. 1桁同士の足し算・引き算（5問）
+
   const b1 = [];
-  while(b1.length < 5) {
+
+  while (b1.length < 5) {
+
     const isPlus = Math.random() < 0.5;
-    if(isPlus) {
-      // +1 を除外（足す数・足される数はどちらも 2〜9）
-      const a = rand(2, 9), b = rand(2, 9);
-      b1.push({ text: `${a} ＋ ${b} ＝`, answer: a + b, type: "１桁 ＋ １桁" });
+
+    if (isPlus) {
+
+      const a = rand(2, 9);
+      const b = rand(2, 9);
+
+      b1.push({
+        text: `${a} ＋ ${b} ＝`,
+        answer: a + b,
+        type: "１桁 ＋ １桁"
+      });
+
     } else {
-      // -1 を除外（引く数は 2 以上、かつ引き算の答えが 1 になる問題も除外）
+
       const a = rand(4, 9);
       const b = rand(2, a - 2);
+
       if (a - b === 1) continue;
-      b1.push({ text: `${a} − ${b} ＝`, answer: a - b, type: "１桁 − １桁" });
+
+      b1.push({
+        text: `${a} − ${b} ＝`,
+        answer: a - b,
+        type: "１桁 − １桁"
+      });
+
     }
+
   }
+
   q.push(...shuffle(b1));
 
+
   // 2. 掛け算（5問）
+
   const b2 = [];
-  for(let i = 0; i < 5; i++) {
-    const a = rand(2, 9), b = rand(2, 9);
-    b2.push({ text: `${a} × ${b} ＝`, answer: a * b, type: "１桁 × １桁" });
+
+  for (let i = 0; i < 5; i++) {
+
+    const a = rand(2, 9);
+    const b = rand(2, 9);
+
+    b2.push({
+      text: `${a} × ${b} ＝`,
+      answer: a * b,
+      type: "１桁 × １桁"
+    });
+
   }
+
   q.push(...shuffle(b2));
 
+
   // 3. 2桁と1桁の足し算・引き算（5問）
+
   const b3 = [];
-  while(b3.length < 5) {
+
+  while (b3.length < 5) {
+
     const isPlus = Math.random() < 0.5;
-    if(isPlus) {
-      // +1 を除外（足す数は 2〜9）
-      const a = rand(10, 99), b = rand(2, 9);
-      b3.push({ text: `${a} ＋ ${b} ＝`, answer: a + b, type: "２桁 ＋ １桁" });
+
+    if (isPlus) {
+
+      const a = rand(10, 99);
+      const b = rand(2, 9);
+
+      b3.push({
+        text: `${a} ＋ ${b} ＝`,
+        answer: a + b,
+        type: "２桁 ＋ １桁"
+      });
+
     } else {
-      // -1 を除外（引く数は 2〜9、かつ答えが 1 になるケースも除外）
-      const a = rand(10, 99), b = rand(2, 9);
+
+      const a = rand(10, 99);
+      const b = rand(2, 9);
+
       if (a - b === 1) continue;
-      b3.push({ text: `${a} − ${b} ＝`, answer: a - b, type: "２桁 − １桁" });
+
+      b3.push({
+        text: `${a} − ${b} ＝`,
+        answer: a - b,
+        type: "２桁 − １桁"
+      });
+
     }
+
   }
+
   q.push(...shuffle(b3));
 
+
   // 4. 2桁同士の足し算・引き算（3問）
+
   const b4 = [];
-  while(b4.length < 3) {
+
+  while (b4.length < 3) {
+
     const isPlus = Math.random() < 0.5;
-    if(isPlus) {
-      const a = rand(10, 99), b = rand(10, 99);
-      b4.push({ text: `${a} ＋ ${b} ＝`, answer: a + b, type: "２桁 ＋ ２桁" });
+
+    if (isPlus) {
+
+      const a = rand(10, 99);
+      const b = rand(10, 99);
+
+      b4.push({
+        text: `${a} ＋ ${b} ＝`,
+        answer: a + b,
+        type: "２桁 ＋ ２桁"
+      });
+
     } else {
-      const a = rand(10, 99), b = rand(10, a);
+
+      const a = rand(10, 99);
+      const b = rand(10, a);
+
       if (a - b === 1) continue;
-      b4.push({ text: `${a} − ${b} ＝`, answer: a - b, type: "２桁 − ２桁" });
+
+      b4.push({
+        text: `${a} − ${b} ＝`,
+        answer: a - b,
+        type: "２桁 − ２桁"
+      });
+
     }
+
   }
+
   q.push(...shuffle(b4));
 
-  return q; 
-} 
+  return q;
+}
 
-function showStart() { 
-  removeKeyListener(); 
-  document.getElementById("screen").innerHTML = ` 
-    <div class="start"> 
-      <h1>計算トレーニング</h1> 
-      <div class="subtitle">全部で ${TOTAL} 問に挑戦！</div> 
-      <p>段階的に難易度が上がります：<br>
-      1. 1桁の足し算・引き算 (5問)<br>
-      2. 掛け算 (5問)<br>
-      3. 2桁と1桁の計算 (5問)<br>
-      4. 2桁同士の計算 (3問)</p> 
-      <button id="btn-start" class="btn-primary">スタート</button> 
-    </div>`; 
-  document.getElementById("btn-start").addEventListener("click", () => {
-    initAudio();
-    startGame();
-  }); 
-} 
 
-function startGame() { 
-  questions = makeQuestions(); 
-  current = 0; 
-  score = 0; 
-  answered = false; 
-  renderQuestion(); 
-} 
+/* ========================================
+   スタート画面
+======================================== */
 
-function removeKeyListener() { 
-  if (keyListener) { 
-    window.removeEventListener("keydown", keyListener); 
-    keyListener = null; 
-  } 
-  if (modalKeyListener) { 
-    window.removeEventListener("keydown", modalKeyListener); 
-    modalKeyListener = null; 
-  } 
-} 
+function showStart() {
 
-function renderQuestion() { 
-  removeKeyListener(); 
-  const q = questions[current]; 
-  document.getElementById("screen").innerHTML = ` 
-    <h1>計算トレーニング</h1> 
+  removeKeyListener();
+
+  document.getElementById("screen").innerHTML = `
+
+    <div class="start">
+
+      <h1>計算トレーニング</h1>
+
+      <div class="subtitle">
+        全部で ${TOTAL} 問に挑戦！
+      </div>
+
+      <p>
+        段階的に難易度が上がります：<br>
+        1. 1桁の足し算・引き算 (5問)<br>
+        2. 掛け算 (5問)<br>
+        3. 2桁と1桁の計算 (5問)<br>
+        4. 2桁同士の計算 (3問)
+      </p>
+
+      <button id="btn-start" class="btn-primary">
+        スタート
+      </button>
+
+    </div>
+  `;
+
+  document
+    .getElementById("btn-start")
+    .addEventListener("click", () => {
+
+      initAudio();
+      startGame();
+
+    });
+
+}
+
+
+/* ========================================
+   ゲーム開始
+======================================== */
+
+function startGame() {
+
+  questions = makeQuestions();
+
+  current = 0;
+  score = 0;
+  answered = false;
+
+  renderQuestion();
+}
+
+
+/* ========================================
+   キーボードイベント解除
+======================================== */
+
+function removeKeyListener() {
+
+  if (keyListener) {
+
+    window.removeEventListener("keydown", keyListener);
+
+    keyListener = null;
+
+  }
+
+  if (modalKeyListener) {
+
+    window.removeEventListener("keydown", modalKeyListener);
+
+    modalKeyListener = null;
+
+  }
+
+}
+
+
+/* ========================================
+   問題表示
+======================================== */
+
+function renderQuestion() {
+
+  removeKeyListener();
+
+  const q = questions[current];
+
+  document.getElementById("screen").innerHTML = `
+
+    <h1>計算トレーニング</h1>
+
     <div class="quiz-layout">
+
       <div class="pane-left">
-        <div class="progress-wrap"> 
-          <div class="progress-info"><span>第 ${current+1} 問 / ${TOTAL} 問</span><span>正解 ${score} 問</span></div> 
-          <div class="bar"><span style="width:${(current/TOTAL)*100}%"></span></div> 
-        </div> 
-        <div class="category-wrap"><span class="category">${q.type}</span></div> 
+
+        <div class="progress-wrap">
+
+          <div class="progress-info">
+
+            <span>
+              第 ${current + 1} 問 / ${TOTAL} 問
+            </span>
+
+            <span>
+              正解 ${score} 問
+            </span>
+
+          </div>
+
+          <div class="bar">
+            <span style="width:${(current / TOTAL) * 100}%"></span>
+          </div>
+
+        </div>
+
+
+        <div class="category-wrap">
+
+          <span class="category">
+            ${q.type}
+          </span>
+
+        </div>
+
+
         <div class="question-container">
-          <span class="q-text">${q.text}</span>
-          <span id="answer" class="answer" aria-label="答え"></span>
-        </div> 
+
+          <span class="q-text">
+            ${q.text}
+          </span>
+
+          <span
+            id="answer"
+            class="answer"
+            aria-label="答え"
+          ></span>
+
+        </div>
+
+
         <div id="feedback" class="feedback"></div>
+
       </div>
+
+
       <div class="pane-right">
-        <div class="keypad" id="keypad"> 
-          <button class="key" data-key="1">1</button><button class="key" data-key="2">2</button><button class="key" data-key="3">3</button> 
-          <button class="key" data-key="4">4</button><button class="key" data-key="5">5</button><button class="key" data-key="6">6</button> 
-          <button class="key" data-key="7">7</button><button class="key" data-key="8">8</button><button class="key" data-key="9">9</button> 
-          <button class="key action zero" data-key="0">0</button><button class="key action" data-key="back">⌫</button> 
-        </div> 
-        <button class="decide" id="submit">決定</button> 
+
+        <div class="keypad" id="keypad">
+
+          <button class="key" data-key="1">1</button>
+          <button class="key" data-key="2">2</button>
+          <button class="key" data-key="3">3</button>
+
+          <button class="key" data-key="4">4</button>
+          <button class="key" data-key="5">5</button>
+          <button class="key" data-key="6">6</button>
+
+          <button class="key" data-key="7">7</button>
+          <button class="key" data-key="8">8</button>
+          <button class="key" data-key="9">9</button>
+
+          <button class="key action zero" data-key="0">0</button>
+          <button class="key action" data-key="back">⌫</button>
+
+        </div>
+
+
+        <button class="decide" id="submit">
+          決定
+        </button>
+
       </div>
-    </div>`; 
 
-  let value = ""; 
-  const display = document.getElementById("answer"); 
-  const keys = document.querySelectorAll(".key"); 
-  const btn = document.getElementById("submit"); 
+    </div>
+  `;
 
-  const inputKey = k => { 
+
+  let value = "";
+
+  const display = document.getElementById("answer");
+  const keys = document.querySelectorAll(".key");
+  const btn = document.getElementById("submit");
+
+
+  const inputKey = k => {
+
     initAudio();
-    if (answered) return; 
-    if (k === "back") value = value.slice(0, -1); 
-    else { 
-      if (value.length >= 4) return; 
-      value += k; 
-    } 
-    display.textContent = value; 
-  }; 
 
-  keys.forEach(key => key.addEventListener("click", () => inputKey(key.dataset.key))); 
+    if (answered) return;
 
-  keyListener = e => { 
-    if (answered) return; 
-    if (e.key >= "0" && e.key <= "9") inputKey(e.key); 
-    else if (e.key === "Backspace") inputKey("back"); 
-    else if (e.key === "Enter") checkAnswer(value, display, keys, btn); 
-  }; 
-  window.addEventListener("keydown", keyListener); 
+    if (k === "back") {
+
+      value = value.slice(0, -1);
+
+    } else {
+
+      if (value.length >= 4) return;
+
+      value += k;
+
+    }
+
+    display.textContent = value;
+
+  };
+
+
+  keys.forEach(key => {
+
+    key.addEventListener("click", () => {
+
+      inputKey(key.dataset.key);
+
+    });
+
+  });
+
+
+  keyListener = e => {
+
+    if (answered) return;
+
+    if (e.key >= "0" && e.key <= "9") {
+
+      inputKey(e.key);
+
+    } else if (e.key === "Backspace") {
+
+      inputKey("back");
+
+    } else if (e.key === "Enter") {
+
+      checkAnswer(value, display, keys, btn);
+
+    }
+
+  };
+
+
+  window.addEventListener("keydown", keyListener);
+
+
   btn.addEventListener("click", () => {
+
     initAudio();
+
     checkAnswer(value, display, keys, btn);
-  }); 
-} 
 
-function celebrate(isLarge = false) { 
-  if (typeof confetti === "function") { 
-    try { 
+  });
+
+}
+
+
+/* ========================================
+   正解時の紙吹雪
+======================================== */
+
+function celebrate(isLarge = false) {
+
+  if (typeof confetti === "function") {
+
+    try {
+
       const count = isLarge ? 160 : 100;
-      confetti({ particleCount: count, spread: 80, startVelocity: 35, origin: { y: .65 } }); 
-      setTimeout(() => confetti({ particleCount: Math.round(count * 0.7), spread: 120, startVelocity: 28, origin: { x: .15, y: .7 } }), 120); 
-      setTimeout(() => confetti({ particleCount: Math.round(count * 0.7), spread: 120, startVelocity: 28, origin: { x: .85, y: .7 } }), 220); 
-    } catch(e) {} 
-  } 
-} 
 
-function checkAnswer(value, display, keys, btn) { 
-  if (answered) return; 
-  const feedback = document.getElementById("feedback"); 
-  if (value === "") { 
-    feedback.innerHTML = "答えを入力してください。"; 
-    feedback.className = "feedback wrong"; 
-    return; 
-  } 
-  answered = true; 
-  keys.forEach(k => k.disabled = true); 
-  btn.disabled = true; 
+      confetti({
+        particleCount: count,
+        spread: 80,
+        startVelocity: 35,
+        origin: { y: .65 }
+      });
 
-  if (Number(value) === questions[current].answer) { 
-    score++; 
-    feedback.innerHTML = "🎉 正解！すごい！"; 
-    feedback.className = "feedback correct"; 
-    
-    playCorrectSound(); 
-    celebrate(false); 
-    
-    setTimeout(nextQuestion, 1300); 
-  } else { 
-    feedback.innerHTML = "不正解"; 
-    feedback.className = "feedback wrong"; 
-    showWrongModal(value); 
-  } 
-} 
+      setTimeout(() => {
 
-function showWrongModal(userAnswer) { 
-  removeKeyListener(); 
-  const q = questions[current]; 
-  const overlay = document.createElement("div"); 
-  overlay.className = "modal-overlay"; 
-  overlay.innerHTML = ` 
-    <div class="modal" role="dialog" aria-modal="true"> 
-      <div class="modal-title">❌ 不正解</div> 
-      <div class="modal-question">${q.text}</div> 
-      <div class="modal-label">正しい答え</div> 
-      <div class="modal-answer">${q.answer}</div> 
-      <button class="modal-button" id="modal-next">次の問題へ (Enter)</button> 
-    </div>`; 
-  document.body.appendChild(overlay); 
+        confetti({
+          particleCount: Math.round(count * 0.7),
+          spread: 120,
+          startVelocity: 28,
+          origin: { x: .15, y: .7 }
+        });
 
-  const closeModal = () => { 
-    removeKeyListener(); 
-    overlay.remove(); 
-    nextQuestion(); 
-  }; 
+      }, 120);
 
-  const nextBtn = overlay.querySelector("#modal-next"); 
-  nextBtn.addEventListener("click", closeModal); 
+      setTimeout(() => {
 
-  modalKeyListener = e => { 
-    if (e.key === "Enter" || e.key === " ") { 
-      e.preventDefault(); 
-      closeModal(); 
-    } 
-  }; 
-  window.addEventListener("keydown", modalKeyListener); 
+        confetti({
+          particleCount: Math.round(count * 0.7),
+          spread: 120,
+          startVelocity: 28,
+          origin: { x: .85, y: .7 }
+        });
 
-  try { nextBtn.focus(); } catch(e) {} 
-} 
+      }, 220);
+
+    } catch(e) {}
+
+  }
+
+}
+
+
+/* ========================================
+   答え合わせ
+======================================== */
+
+function checkAnswer(value, display, keys, btn) {
+
+  if (answered) return;
+
+  const feedback = document.getElementById("feedback");
+
+
+  if (value === "") {
+
+    feedback.innerHTML = "答えを入力してください。";
+    feedback.className = "feedback wrong";
+
+    return;
+
+  }
+
+
+  answered = true;
+
+  keys.forEach(k => k.disabled = true);
+
+  btn.disabled = true;
+
+
+  if (Number(value) === questions[current].answer) {
+
+    score++;
+
+    feedback.innerHTML = "🎉 正解！すごい！";
+    feedback.className = "feedback correct";
+
+    playCorrectSound();
+
+    celebrate(false);
+
+    setTimeout(nextQuestion, 1300);
+
+  } else {
+
+    feedback.innerHTML = "不正解";
+    feedback.className = "feedback wrong";
+
+    showWrongModal(value);
+
+  }
+
+}
+
+
+/* ========================================
+   不正解モーダル
+======================================== */
+
+function showWrongModal(userAnswer) {
+
+  removeKeyListener();
+
+  const q = questions[current];
+
+  const overlay = document.createElement("div");
+
+  overlay.className = "modal-overlay";
+
+  overlay.innerHTML = `
+
+    <div class="modal" role="dialog" aria-modal="true">
+
+      <div class="modal-title">
+        ❌ 不正解
+      </div>
+
+      <div class="modal-question">
+        ${q.text}
+      </div>
+
+      <div class="modal-label">
+        正しい答え
+      </div>
+
+      <div class="modal-answer">
+        ${q.answer}
+      </div>
+
+      <button class="modal-button" id="modal-next">
+        次の問題へ (Enter)
+      </button>
+
+    </div>
+  `;
+
+
+  document.body.appendChild(overlay);
+
+
+  const closeModal = () => {
+
+    removeKeyListener();
+
+    overlay.remove();
+
+    nextQuestion();
+
+  };
+
+
+  const nextBtn = overlay.querySelector("#modal-next");
+
+  nextBtn.addEventListener("click", closeModal);
+
+
+  modalKeyListener = e => {
+
+    if (e.key === "Enter" || e.key === " ") {
+
+      e.preventDefault();
+
+      closeModal();
+
+    }
+
+  };
+
+
+  window.addEventListener("keydown", modalKeyListener);
+
+
+  try {
+    nextBtn.focus();
+  } catch(e) {}
+
+}
+
+
+/* ========================================
+   完走モーダル
+======================================== */
 
 function showCompletionModal() {
-  removeKeyListener(); 
-  const overlay = document.createElement("div"); 
-  overlay.className = "modal-overlay"; 
-  overlay.innerHTML = ` 
-    <div class="modal" role="dialog" aria-modal="true"> 
-      <div class="modal-title celebrate">🎉 がんばったね！</div> 
-      <div style="font-size:22px; font-weight:800; color:#f2f4f8; margin:14px 0 8px;">おつかれさまでした！</div> 
-      <div style="color:#adb5c4; font-size:15px; line-height:1.6; margin-bottom:20px;">
+
+  removeKeyListener();
+
+  const overlay = document.createElement("div");
+
+  overlay.className = "modal-overlay";
+
+  overlay.innerHTML = `
+
+    <div class="modal" role="dialog" aria-modal="true">
+
+      <div class="modal-title celebrate">
+        🎉 がんばったね！
+      </div>
+
+      <div style="
+        font-size:22px;
+        font-weight:800;
+        color:#f2f4f8;
+        margin:14px 0 8px;
+      ">
+        おつかれさまでした！
+      </div>
+
+      <div style="
+        color:#adb5c4;
+        font-size:15px;
+        line-height:1.6;
+        margin-bottom:20px;
+      ">
+
         全 ${TOTAL} 問のトレーニングを完走しました！<br>
-        最終結果: <strong style="color:#657dff; font-size:24px;">${score} / ${TOTAL}</strong> 問正解
-      </div> 
-      <button class="modal-button" id="modal-result-btn">結果を見る (Enter)</button> 
-    </div>`; 
-  document.body.appendChild(overlay); 
+
+        最終結果:
+        <strong style="
+          color:#657dff;
+          font-size:24px;
+        ">
+          ${score} / ${TOTAL}
+        </strong>
+        問正解
+
+      </div>
+
+      <button class="modal-button" id="modal-result-btn">
+        結果を見る (Enter)
+      </button>
+
+    </div>
+  `;
+
+
+  document.body.appendChild(overlay);
+
 
   playCorrectSound();
   celebrate(true);
 
-  const resultBtn = overlay.querySelector("#modal-result-btn"); 
-  const closeModal = () => { 
-    removeKeyListener(); 
-    overlay.remove(); 
-    showResult(); 
-  }; 
 
-  resultBtn.addEventListener("click", closeModal); 
+  const resultBtn =
+    overlay.querySelector("#modal-result-btn");
 
-  modalKeyListener = e => { 
-    if (e.key === "Enter" || e.key === " ") { 
-      e.preventDefault(); 
-      closeModal(); 
-    } 
-  }; 
-  window.addEventListener("keydown", modalKeyListener); 
-  try { resultBtn.focus(); } catch(e) {}
+
+  const closeModal = () => {
+
+    removeKeyListener();
+
+    overlay.remove();
+
+    showResult();
+
+  };
+
+
+  resultBtn.addEventListener("click", closeModal);
+
+
+  modalKeyListener = e => {
+
+    if (e.key === "Enter" || e.key === " ") {
+
+      e.preventDefault();
+
+      closeModal();
+
+    }
+
+  };
+
+
+  window.addEventListener("keydown", modalKeyListener);
+
+
+  try {
+    resultBtn.focus();
+  } catch(e) {}
+
 }
 
-function nextQuestion() { 
-  current++; 
+
+/* ========================================
+   次の問題
+======================================== */
+
+function nextQuestion() {
+
+  current++;
+
   if (current >= TOTAL) {
+
     showCompletionModal();
-  } else { 
-    answered = false; 
-    renderQuestion(); 
-  } 
-} 
 
-function showResult() { 
-  removeKeyListener(); 
-  const totalPlayed = Math.min(current, TOTAL);
-  const percent = Math.round((score / totalPlayed) * 100); 
-  const message = percent === 100 ? "🏆 パーフェクト！すばらしい！" : percent >= 80 ? "🌟 よくできました！すごい！" : percent >= 60 ? "👏 がんばったね！" : "💪 もう一度チャレンジしてみよう！"; 
-  
-  document.getElementById("screen").innerHTML = ` 
-    <div class="result"> 
-      <h1>トレーニング終了！</h1>
-      <div class="score">${score} / ${totalPlayed}</div> 
-      <div class="subtitle">正解率 ${percent}%</div>
-      <p>${message}</p> 
-      <button id="btn-restart" class="btn-primary">もう一度挑戦</button> 
-      <button id="btn-end" class="btn-secondary">最初にもどる</button> 
-    </div>`; 
+  } else {
 
-  document.getElementById("btn-restart").addEventListener("click", () => {
-    initAudio();
-    startGame();
-  }); 
-  document.getElementById("btn-end").addEventListener("click", () => {
-    initAudio();
-    showStart();
-  }); 
-  
-  if (score === totalPlayed && totalPlayed > 0) {
-    playCorrectSound();
-    celebrate(true); 
+    answered = false;
+
+    renderQuestion();
+
   }
-} 
 
-if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", showStart); 
-else showStart(); 
-</script> 
-</body> 
+}
+
+
+/* ========================================
+   結果画面
+======================================== */
+
+function showResult() {
+
+  removeKeyListener();
+
+  const totalPlayed = Math.min(current, TOTAL);
+
+  const percent =
+    Math.round((score / totalPlayed) * 100);
+
+
+  const message =
+    percent === 100
+      ? "🏆 パーフェクト！すばらしい！"
+      : percent >= 80
+      ? "🌟 よくできました！すごい！"
+      : percent >= 60
+      ? "👏 がんばったね！"
+      : "💪 もう一度チャレンジしてみよう！";
+
+
+  document.getElementById("screen").innerHTML = `
+
+    <div class="result">
+
+      <h1>
+        トレーニング終了！
+      </h1>
+
+      <div class="score">
+        ${score} / ${totalPlayed}
+      </div>
+
+      <div class="subtitle">
+        正解率 ${percent}%
+      </div>
+
+      <p>
+        ${message}
+      </p>
+
+      <button id="btn-restart" class="btn-primary">
+        もう一度挑戦
+      </button>
+
+      <button id="btn-end" class="btn-secondary">
+        最初にもどる
+      </button>
+
+    </div>
+  `;
+
+
+  document
+    .getElementById("btn-restart")
+    .addEventListener("click", () => {
+
+      initAudio();
+      startGame();
+
+    });
+
+
+  document
+    .getElementById("btn-end")
+    .addEventListener("click", () => {
+
+      initAudio();
+      showStart();
+
+    });
+
+
+  if (score === totalPlayed && totalPlayed > 0) {
+
+    playCorrectSound();
+    celebrate(true);
+
+  }
+
+}
+
+
+/* ========================================
+   初期表示
+======================================== */
+
+if (document.readyState === "loading") {
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    showStart
+  );
+
+} else {
+
+  showStart();
+
+}
+
+</script>
+
+</body>
 </html>
+```
