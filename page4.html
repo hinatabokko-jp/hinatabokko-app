@@ -82,7 +82,7 @@
 
 /*★★★ハンバーガーメニュー★★★*/
 
-/* ハンバーガーボタンのスタイル (画面左上に固定) */
+/* ハンバーガーボタン */
 .hamburger-btn {
   position: fixed;
   top: 12px;
@@ -92,7 +92,7 @@
   height: 44px;
   background: rgba(24, 29, 40, 0.85);
   backdrop-filter: blur(8px);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border, #333);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -100,54 +100,66 @@
   align-items: center;
   gap: 5px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  transition: transform 0.2s, background-color 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s, background-color 0.2s, border-color 0.2s;
 }
 
-#hamburger-btn span {
+.hamburger-btn:hover {
+  background: var(--panel-light, #2a3245);
+  border-color: var(--accent, #657dff);
+}
+
+.hamburger-btn:active {
+  transform: scale(0.95);
+}
+
+/* ハンバーガー内の3本線 */
+.hamburger-btn span {
   display: block;
-  width: 24px;
-  height: 3px;
-  background-color: #fff;
+  width: 22px;
+  height: 2px;
+  background-color: var(--text, #fff);
   border-radius: 2px;
   transition: 0.3s;
 }
 
 /* 背景を暗くするオーバーレイ */
-#sidebar-overlay {
+.sidebar-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s, visibility 0.3s;
   z-index: 1001;
 }
 
-#sidebar-overlay.active {
+.sidebar-overlay.active {
   opacity: 1;
   visibility: visible;
 }
 
-/* サイドバー本体のスタイル */
-#sidebar {
+/* サイドバー本体 */
+.sidebar {
   position: fixed;
   top: 0;
-  left: -280px; /* 初期状態は画面外に隠す */
-  width: 280px;
+  left: -280px; /* 初期状態は画面外 */
+  width: min(280px, 80vw);
   height: 100vh;
-  background-color: #ffffff;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-  transition: left 0.3s ease;
+  background-color: var(--panel, #181d28);
+  border-right: 1px solid var(--border, #2a3245);
+  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+  transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 1002;
   display: flex;
   flex-direction: column;
 }
 
-#sidebar.active {
+.sidebar.active {
   left: 0; /* 開いたときに画面左から出現 */
 }
 
@@ -156,53 +168,68 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 20px;
-  border-bottom: 1px solid #eee;
-  background-color: #f8f9fa;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border, #2a3245);
+  background-color: rgba(255, 255, 255, 0.02);
 }
 
-.sidebar-header h2 {
+.sidebar-title {
   margin: 0;
-  font-size: 1.2rem;
-  color: #333;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text, #ffffff);
 }
 
-#close-btn {
+.close-btn {
   background: none;
   border: none;
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   cursor: pointer;
-  color: #666;
+  color: var(--sub, #a0aec0);
   line-height: 1;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color 0.2s, background-color 0.2s;
 }
 
-/* メニューリスト */
-.sidebar-links {
-  list-style: none;
-  padding: 0;
+.close-btn:hover {
+  color: var(--text, #ffffff);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* メニューナビゲーション */
+.sidebar-nav {
+  padding: 16px 12px;
   margin: 0;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column; /* 縦並びを強制 */
+  gap: 8px; /* 各リンクの間隔 */
 }
 
-.sidebar-links li {
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.sidebar-links a {
-  display: block;
-  padding: 16px 20px;
-  color: #333;
+/* メニューリンク */
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  color: var(--text, #ffffff);
+  background: var(--panel-light, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  border-radius: 10px;
   text-decoration: none;
-  font-size: 1rem;
-  font-weight: 500;
-  transition: background-color 0.2s, color 0.2s;
+  font-size: 0.95rem;
+  font-weight: 600;
+  white-space: nowrap; /* 勝手な改行を防止 */
+  transition: all 0.2s ease;
 }
 
-.sidebar-links a:hover {
-  background-color: #f0f4f8;
-  color: #0056b3;
+.sidebar-link:hover {
+  background-color: rgba(101, 125, 255, 0.15);
+  border-color: var(--accent, #657dff);
+  color: var(--accent, #657dff);
+  transform: translateX(4px);
 }
-/*ハンバーガーメニューここまで*/
+/*★★★ハンバーガーメニューここまで★★★*/
 
 
 
@@ -212,27 +239,33 @@
 
 
     
-<!--ハンバーガーメニュー-->
-    <!-- ハンバーガーボタン -->
-<button class="hamburger-btn" id="openSidebarBtn" aria-label="メニューを開く">☰</button>
+<!--★★★ハンバーガーメニュー2★★★-->
+<body>
+  <!-- 1. サイドバー関連の要素（最上部に配置） -->
+  <button class="hamburger-btn" id="openSidebarBtn" aria-label="メニューを開く">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2 class="sidebar-title">メニュー</h2>
+      <button class="close-btn" id="closeSidebarBtn" aria-label="メニューを閉じる">&times;</button>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="https://hinatabokko-jp.github.io/hinatabokko-app/" class="sidebar-link">漢字テスト（１）</a>
+      <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page3" class="sidebar-link">漢字小テスト復習</a>
+      <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page2" class="sidebar-link">計算トレーニング</a>
+      <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page4" class="sidebar-link">百人一首 前編</a>
+      <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page5" class="sidebar-link">百人一首 後編</a>
+    </nav>
+  </aside>
 
-<!-- 背景オーバーレイ -->
-<div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-<!-- サイドバー本体 -->
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-header">
-    <h2 class="sidebar-title">メニュー</h2>
-    <button class="close-btn" id="closeSidebarBtn" aria-label="メニューを閉じる">&times;</button>
-  </div>
-  <nav class="sidebar-nav">
-    <a href="https://hinatabokko-jp.github.io/hinatabokko-app/" class="sidebar-link">漢字テスト（１）</a>
-    <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page3" class="sidebar-link">漢字小テスト復習</a>
-    <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page2" class="sidebar-link">計算トレーニング</a>
-    <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page4" class="sidebar-link">百人一首 前編</a>
-    <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page5" class="sidebar-link">百人一首 後編</a>
-  </nav>
-</aside>
+  <!-- 2. canvas やメインのコンテンツ -->
+  <canvas id="myCanvas"></canvas>
+  
+  
 
 <!--★★★ハンバーガーメニューここまで★★★-->
 
@@ -869,33 +902,26 @@
 
  <!--★★★ハンバーガーメニュー3★★★-->
 <script>
+  const openBtn = document.getElementById('openSidebarBtn');
+  const closeBtn = document.getElementById('closeSidebarBtn');
   const sidebar = document.getElementById('sidebar');
-  const sidebarOverlay = document.getElementById('sidebarOverlay');
-  const openSidebarBtn = document.getElementById('openSidebarBtn');
-  const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+  const overlay = document.getElementById('sidebarOverlay');
 
-  // メニューを開く処理
   function openMenu() {
     sidebar.classList.add('active');
-    sidebarOverlay.classList.add('active');
+    overlay.classList.add('active');
   }
 
-  // メニューを閉じる処理
   function closeMenu() {
     sidebar.classList.remove('active');
-    sidebarOverlay.classList.remove('active');
+    overlay.classList.remove('active');
   }
 
-  openSidebarBtn.addEventListener('click', openMenu);
-  closeSidebarBtn.addEventListener('click', closeMenu);
-  sidebarOverlay.addEventListener('click', closeMenu);
-
-  // ESCキーでも閉じられるように設定
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeMenu();
-  });
+  openBtn.addEventListener('click', openMenu);
+  closeBtn.addEventListener('click', closeMenu);
+  overlay.addEventListener('click', closeMenu);
 </script>
-    <!--ハンバーガーメニューここまで-->
+    <!--★★★ハンバーガーメニューここまで★★★-->
 
 
 
