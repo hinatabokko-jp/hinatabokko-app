@@ -1,351 +1,602 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>元素記号マスター - 第4周期（1〜36）</title>
-    <style>
-        :root {
-            --bg-color: #0b0f19;
-            --panel-bg: rgba(23, 32, 54, 0.6);
-            --text-main: #f0f4f8;
-            --text-sub: #94a3b8;
-            --accent-cyan: #38bdf8;
-            --accent-blue: #6366f1;
-            
-            /* 分類別カラー (スタイリッシュなネオン調) */
-            --nonmetal: #38bdf8;
-            --noble-gas: #f43f5e;
-            --alkali-metal: #fb923c;
-            --alkaline-earth: #facc15;
-            --transition-metal: #a855f7;
-            --post-transition: #4ade80;
-            --metalloid: #2dd4bf;
-            --halogen: #ec4899;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            user-select: none;
-        }
-
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            background-image: 
-                radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 85% 85%, rgba(56, 189, 248, 0.12) 0%, transparent 40%);
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-
-        h1 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            letter-spacing: 2px;
-            background: linear-gradient(135deg, #fff 30%, var(--accent-cyan));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
-        }
-
-        p.subtitle {
-            color: var(--text-sub);
-            font-size: 0.95rem;
-            letter-spacing: 1px;
-        }
-
-        /* 制御ボタン領域 */
-        .controls {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .btn {
-            background: var(--panel-bg);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--text-main);
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        .btn:hover {
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
-            transform: translateY(-2px);
-        }
-
-        /* 周期表グリッドコンテナ (横長レイアウト) */
-        .periodic-table {
-            display: grid;
-            grid-template-columns: repeat(18, minmax(60px, 1fr));
-            grid-template-rows: repeat(4, minmax(85px, 1fr));
-            gap: 10px;
-            width: 100%;
-            max-width: 1400px;
-            padding: 24px;
-            background: var(--panel-bg);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            backdrop-filter: blur(16px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-        }
-
-        /* フリップカード全体のスタイル */
-        .card-container {
-            perspective: 1000px;
-            aspect-ratio: 4 / 5;
-            cursor: pointer;
-        }
-
-        .card {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 10px;
-        }
-
-        .card-container.flipped .card {
-            transform: rotateY(180deg);
-        }
-
-        .card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(15, 23, 42, 0.8);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-
-        .card-container:hover .card-face {
-            border-color: var(--category-color, var(--accent-cyan));
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
-        }
-
-        /* 表（表面）: 記号のみ */
-        .card-front {
-            /* スタイリング */
-        }
-
-        .card-front .symbol {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #ffffff;
-            letter-spacing: 1px;
-            text-shadow: 0 0 10px var(--category-color, transparent);
-        }
-
-        .card-front .number {
-            position: absolute;
-            top: 6px;
-            left: 8px;
-            font-size: 0.75rem;
-            color: var(--text-sub);
-            font-weight: 500;
-        }
-
-        /* 裏（裏面）: 記号 + 改行 + 日本語名 */
-        .card-back {
-            transform: rotateY(180deg);
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
-            border-color: var(--category-color, var(--accent-cyan));
-        }
-
-        .card-back .symbol {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--text-sub);
-            margin-bottom: 2px;
-        }
-
-        .card-back .name {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #ffffff;
-            text-shadow: 0 0 8px var(--category-color, transparent);
-        }
-
-        /* 凡例 (カテゴリインジケーター) */
-        .legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            margin-top: 24px;
-            justify-content: center;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.8rem;
-            color: var(--text-sub);
-        }
-
-        .legend-color {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-        }
-
-        /* レスポンシブ調整（タブレット縦方向など狭い画面用） */
-        @media (max-width: 1024px) {
-            .periodic-table {
-                gap: 6px;
-                padding: 12px;
+    <title>百人一首 【後編】</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['"Shippori Mincho"', 'serif'],
+                        sans: ['"Zen Kaku Gothic New"', 'sans-serif'],
+                    },
+                    colors: {
+                        jp: {
+                            dark: '#0f1117',
+                            card: '#1a1d26',
+                            border: '#2a2f3d',
+                            accent: '#3b82f6', // 後編はテーマ色を爽やかな青紫系アクセントに変化
+                            gold: '#d97706',
+                            goldLight: '#fef3c7',
+                            text: '#f3f4f6',
+                            subtext: '#9ca3af'
+                        }
+                    }
+                }
             }
-            .card-front .symbol { font-size: 1.4rem; }
-            .card-back .symbol { font-size: 1rem; }
-            .card-back .name { font-size: 0.85rem; }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f1117;
+            color: #f3f4f6;
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(217, 119, 6, 0.05) 0%, transparent 40%);
+        }
+
+        .waka-card {
+            background: linear-gradient(145deg, #1e222d, #161822);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .option-card:hover {
+            border-color: #d97706;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 20px -5px rgba(217, 119, 6, 0.2);
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 100;
         }
     </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col justify-between selection:bg-jp-accent selection:text-white">
+    <canvas id="confetti-canvas"></canvas>
 
-    <header>
-        <h1>PERIODIC TABLE</h1>
-        <p class="subtitle">元素周期表 Flashcards (第1周期 〜 第4周期)</p>
+    <header class="border-b border-jp-border bg-jp-card/60 backdrop-blur-md sticky top-0 z-30 px-4 py-3">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="showSelectScreen()">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-jp-gold flex items-center justify-center font-serif font-bold text-white shadow-lg">
+                    後
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-serif font-bold tracking-wider text-white">百人一首 <span class="text-xs font-sans px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded border border-blue-500/30">後編 (41〜100)</span></h1>
+                </div>
+            </div>
+            <div id="header-progress" class="hidden text-sm font-medium text-jp-subtext">
+                第 <span id="current-q-num" class="text-jp-gold font-bold text-base">1</span> / 10 問
+            </div>
+        </div>
     </header>
 
-    <div class="controls">
-        <button class="btn" onclick="flipAll(false)">すべて表にする</button>
-        <button class="btn" onclick="flipAll(true)">すべて裏にする</button>
-    </div>
+    <main class="flex-grow flex items-center justify-center p-4 sm:p-6">
+        <div class="w-full max-w-4xl mx-auto">
 
-    <!-- 周期表カード配置エリア -->
-    <div class="periodic-table" id="periodicTable"></div>
+            <!-- 選択画面 -->
+            <section id="select-screen" class="space-y-6">
+                <div class="text-center space-y-2">
+                    <h2 class="text-2xl sm:text-3xl font-serif font-bold text-white tracking-wide">
+                        後編（第41首 ～ 第100首）
+                    </h2>
+                    <p class="text-jp-subtext text-sm sm:text-base">
+                        取り組むグループを選択してください（1回10問）
+                    </p>
+                </div>
 
-    <!-- 凡例 -->
-    <div class="legend">
-        <div class="legend-item"><div class="legend-color" style="background: var(--nonmetal)"></div>非金属</div>
-        <div class="legend-item"><div class="legend-color" style="background: var(--noble-gas)"></div>希ガス</div>
-        <div class="legend-item"><div class="legend-color" style="background: var(--alkali-metal)"></div>アルカリ金属</div>
-        <div class="legend-item"><div class="legend-color" style="background: var(--alkaline-earth)"></div>アルカリ土類金属</div>
-        <div class="legend-item"><div class="legend-color" style="background: var(--transition-metal)"></div>遷移金属</div>
-        <div class="legend-item"><div class="legend-color" style="background: var(--metalloid)"></div>半金属</div>
-        <div class="legend-item"><div class="legend-color" style="background: var(--halogen)"></div>ハロゲン</div>
-        <div class="legend-item"><div class="legend-color" style="background: var(--post-transition)"></div>元素（その他）</div>
-    </div>
+                <div id="group-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pt-4">
+                    <!-- JSで動的生成 -->
+                </div>
+            </section>
 
-    <script>
-        // 1番〜36番（第4周期まで）の元素データ
-        const elements = [
-            // 第1周期
-            { num: 1, symbol: 'H', name: '水素', col: 1, row: 1, cat: 'nonmetal' },
-            { num: 2, symbol: 'He', name: 'ヘリウム', col: 18, row: 1, cat: 'noble-gas' },
-            
-            // 第2周期
-            { num: 3, symbol: 'Li', name: 'リチウム', col: 1, row: 2, cat: 'alkali-metal' },
-            { num: 4, symbol: 'Be', name: 'ベリリウム', col: 2, row: 2, cat: 'alkaline-earth' },
-            { num: 5, symbol: 'B', name: 'ホウ素', col: 13, row: 2, cat: 'metalloid' },
-            { num: 6, symbol: 'C', name: '炭素', col: 14, row: 2, cat: 'nonmetal' },
-            { num: 7, symbol: 'N', name: '窒素', col: 15, row: 2, cat: 'nonmetal' },
-            { num: 8, symbol: 'O', name: '酸素', col: 16, row: 2, cat: 'nonmetal' },
-            { num: 9, symbol: 'F', name: 'フッ素', col: 17, row: 2, cat: 'halogen' },
-            { num: 10, symbol: 'Ne', name: 'ネオン', col: 18, row: 2, cat: 'noble-gas' },
+            <!-- クイズ画面 -->
+            <section id="quiz-screen" class="hidden space-y-6">
+                <div class="w-full bg-jp-border h-2 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="bg-gradient-to-r from-blue-500 to-jp-gold h-full transition-all duration-300" style="width: 10%;"></div>
+                </div>
 
-            // 第3周期
-            { num: 11, symbol: 'Na', name: 'ナトリウム', col: 1, row: 3, cat: 'alkali-metal' },
-            { num: 12, symbol: 'Mg', name: 'マグネシウム', col: 2, row: 3, cat: 'alkaline-earth' },
-            { num: 13, symbol: 'Al', name: 'アルミニウム', col: 13, row: 3, cat: 'post-transition' },
-            { num: 14, symbol: 'Si', name: 'ケイ素', col: 14, row: 3, cat: 'metalloid' },
-            { num: 15, symbol: 'P', name: 'リン', col: 15, row: 3, cat: 'nonmetal' },
-            { num: 16, symbol: 'S', name: '硫黄', col: 16, row: 3, cat: 'nonmetal' },
-            { num: 17, symbol: 'Cl', name: '塩素', col: 17, row: 3, cat: 'halogen' },
-            { num: 18, symbol: 'Ar', name: 'アルゴン', col: 18, row: 3, cat: 'noble-gas' },
-
-            // 第4周期
-            { num: 19, symbol: 'K', name: 'カリウム', col: 1, row: 4, cat: 'alkali-metal' },
-            { num: 20, symbol: 'Ca', name: 'カルシウム', col: 2, row: 4, cat: 'alkaline-earth' },
-            { num: 21, symbol: 'Sc', name: 'スカンジウム', col: 3, row: 4, cat: 'transition-metal' },
-            { num: 22, symbol: 'Ti', name: 'チタン', col: 4, row: 4, cat: 'transition-metal' },
-            { num: 23, symbol: 'V', name: 'バナジウム', col: 5, row: 4, cat: 'transition-metal' },
-            { num: 24, symbol: 'Cr', name: 'クロム', col: 6, row: 4, cat: 'transition-metal' },
-            { num: 25, symbol: 'Mn', name: 'マンガン', col: 7, row: 4, cat: 'transition-metal' },
-            { num: 26, symbol: 'Fe', name: '鉄', col: 8, row: 4, cat: 'transition-metal' },
-            { num: 27, symbol: 'Co', name: 'コバルト', col: 9, row: 4, cat: 'transition-metal' },
-            { num: 28, symbol: 'Ni', name: 'ニッケル', col: 10, row: 4, cat: 'transition-metal' },
-            { num: 29, symbol: 'Cu', name: '銅', col: 11, row: 4, cat: 'transition-metal' },
-            { num: 30, symbol: 'Zn', name: '亜鉛', col: 12, row: 4, cat: 'transition-metal' },
-            { num: 31, symbol: 'Ga', name: 'ガリウム', col: 13, row: 4, cat: 'post-transition' },
-            { num: 32, symbol: 'Ge', name: 'ゲルマニウム', col: 14, row: 4, cat: 'metalloid' },
-            { num: 33, symbol: 'As', name: 'ヒ素', col: 15, row: 4, cat: 'metalloid' },
-            { num: 34, symbol: 'Se', name: 'セレン', col: 16, row: 4, cat: 'nonmetal' },
-            { num: 35, symbol: 'Br', name: '臭素', col: 17, row: 4, cat: 'halogen' },
-            { num: 36, symbol: 'Kr', name: 'クリプトン', col: 18, row: 4, cat: 'noble-gas' }
-        ];
-
-        const container = document.getElementById('periodicTable');
-
-        // カードの生成と周期表へのバインド
-        elements.forEach(elem => {
-            const cardContainer = document.createElement('div');
-            cardContainer.className = 'card-container';
-            // CSS Gridの座標を指定して周期表の形に配置
-            cardContainer.style.gridColumn = elem.col;
-            cardContainer.style.gridRow = elem.row;
-            cardContainer.style.setProperty('--category-color', `var(--${elem.cat})`);
-
-            cardContainer.innerHTML = `
-                <div class="card">
-                    <div class="card-face card-front">
-                        <span class="number">${elem.num}</span>
-                        <span class="symbol">${elem.symbol}</span>
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    <div class="lg:col-span-5 flex flex-col items-center">
+                        <div class="w-full waka-card rounded-2xl p-6 sm:p-8 text-center relative overflow-hidden group border-l-4 border-l-blue-500">
+                            <span class="text-xs uppercase tracking-widest text-blue-400 font-semibold mb-2 block">上の句 (kaminoku)</span>
+                            <div id="question-kaminoku" class="text-2xl sm:text-3xl font-serif font-bold text-white py-6 tracking-widest leading-relaxed"></div>
+                            <div class="text-xs text-jp-subtext mt-2 flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-circle-info"></i> 正しい下の句を選んでください
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-face card-back">
-                        <span class="symbol">${elem.symbol}</span>
-                        <span class="name">${elem.name}</span>
+
+                    <div class="lg:col-span-7 space-y-3">
+                        <span class="text-xs uppercase tracking-widest text-jp-gold font-semibold mb-1 block px-1">下の句を選択 (shimonoku)</span>
+                        <div id="options-container" class="space-y-3"></div>
                     </div>
                 </div>
-            `;
 
-            // クリック/タップで反転
-            cardContainer.addEventListener('click', () => {
-                cardContainer.classList.toggle('flipped');
-            });
+                <div id="answer-result-box" class="hidden waka-card rounded-2xl p-5 border border-jp-gold/40 bg-jp-card relative">
+                    <div id="result-badge" class="mb-3 inline-flex items-center px-3 py-1 rounded-full text-xs font-bold gap-1.5"></div>
 
-            container.appendChild(cardContainer);
-        });
+                    <div class="w-full space-y-3 text-left">
+                        <div class="w-full overflow-x-auto no-scrollbar py-1">
+                            <p id="ans-line1" class="text-base sm:text-lg font-serif font-semibold text-jp-goldLight whitespace-nowrap"></p>
+                        </div>
+                        <div>
+                            <p id="ans-line2" class="text-base sm:text-lg font-serif font-semibold text-white"></p>
+                        </div>
+                        <div class="pt-2 border-t border-jp-border/60">
+                            <p id="ans-line3" class="text-xs sm:text-sm text-jp-subtext leading-relaxed"></p>
+                        </div>
+                    </div>
 
-        // 一括反転機能
-        function flipAll(toBack) {
-            const cards = document.querySelectorAll('.card-container');
-            cards.forEach(card => {
-                if (toBack) {
-                    card.classList.add('flipped');
-                } else {
-                    card.classList.remove('flipped');
+                    <div class="mt-5 flex justify-end">
+                        <button id="next-btn" onclick="nextQuestion()" class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-800 text-white font-bold rounded-xl shadow-lg transition duration-200 flex items-center gap-2">
+                            <span>次の問題へ</span>
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 結果画面 -->
+            <section id="result-screen" class="hidden text-center space-y-6 max-w-lg mx-auto py-8">
+                <div class="waka-card rounded-3xl p-8 space-y-6">
+                    <div class="w-20 h-20 mx-auto rounded-full bg-jp-gold/10 border-2 border-jp-gold flex items-center justify-center text-jp-gold text-3xl">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+
+                    <div class="space-y-2">
+                        <h2 class="text-2xl font-serif font-bold text-white">お疲れ様でした！</h2>
+                        <p class="text-jp-subtext text-sm">後編の練習結果</p>
+                    </div>
+
+                    <div class="py-4 bg-jp-dark/50 rounded-2xl border border-jp-border">
+                        <div class="text-4xl sm:text-5xl font-serif font-bold text-jp-gold">
+                            <span id="score-num">0</span> <span class="text-lg font-normal text-jp-subtext">/ 10 問正解</span>
+                        </div>
+                    </div>
+
+                    <div id="score-comment" class="text-sm font-medium text-jp-text"></div>
+
+                    <div class="pt-2 flex flex-col sm:flex-row gap-3">
+                        <button onclick="retryGroup()" class="flex-1 py-3 px-4 bg-jp-border hover:bg-slate-700 text-white font-bold rounded-xl transition">
+                            もう一度挑戦
+                        </button>
+                        <button onclick="showSelectScreen()" class="flex-1 py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-800 text-white font-bold rounded-xl transition">
+                            句の選択に戻る
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <footer class="border-t border-jp-border/40 py-4 text-center text-xs text-jp-subtext">
+        百人一首 練習アプリ 【後編 (41〜100首)】
+    </footer>
+
+    <script>
+        const allWakaData = [
+            { id: 41, kaminoku: "恋すてふ", banme2: "わが名はまだき", banme3: "立ちにけり", shimonoku: "人知れずこそ", banme5: "思ひそめしか", kuZentai: "恋すてふ　わが名はまだき　立ちにけり　人知れずこそ　思ひそめしか", kaisetu: "誰にも知られないように、ひそかに恋を始めたばかりなのに、もう「私が恋をしている」といううわさが広まってしまった。" },
+            { id: 42, kaminoku: "契りきな", banme2: "かたみに袖を", banme3: "しぼりつつ", shimonoku: "末の松山", banme5: "波こさじとは", kuZentai: "契りきな　かたみに袖を　しぼりつつ　末の松山　波こさじとは", kaisetu: "涙でぬれた服のそでをお互いにしぼりながら、絶対に心変わりしないと約束した。それなのに、あなたは約束を破ってしまった。" },
+            { id: 43, kaminoku: "逢ひ見ての", banme2: "後の心に", banme3: "くらぶれば", shimonoku: "昔はものを", banme5: "思はざりけり", kuZentai: "逢ひ見ての　後の心に　くらぶれば　昔はものを　思はざりけり", kaisetu: "あなたと実際に会ってからの恋しい気持ちと比べると、会う前に「恋しい」と思っていた気持ちなど、何も悩んでいなかったようなものだ。" },
+            { id: 44, kaminoku: "逢ふことの", banme2: "絶えてしなくば", banme3: "なかなかに", shimonoku: "人をも身をも", banme5: "恨みざらまし", kuZentai: "逢ふことの　絶えてしなくば　なかなかに　人をも身をも　恨みざらまし", kaisetu: "もし最初からあなたに会うことがなかったなら、こんなにつらい思いをしなくてすんだ。あなたのことも、自分自身のことも恨まずにいられただろう。" },
+            { id: 45, kaminoku: "あはれとも", banme2: "いふべき人は", banme3: "おもほえで", shimonoku: "身のいたづらに", banme5: "なりぬべきかな", kuZentai: "あはれとも　いふべき人は　おもほえで　身のいたづらに　なりぬべきかな", kaisetu: "私が死んでしまっても、悲しんでくれる人がいるとは思えない。私は誰にも思ってもらえないまま、むなしく終わってしまうのだろうか。" },
+            { id: 46, kaminoku: "由良の門を", banme2: "渡る舟人", banme3: "かぢを絶え", shimonoku: "行方もしらぬ", banme5: "恋の道かな", kuZentai: "由良の門を　渡る舟人　かぢを絶え　行方もしらぬ　恋の道かな", kaisetu: "由良の海峡を渡る船の人が、かじを失って行き先が分からなくなるように、私も恋をしてしまい、この先どうなるのか分からない。" },
+            { id: 47, kaminoku: "八重むぐら", banme2: "しげれる宿の", banme3: "さびしきに", shimonoku: "人こそ見えね", banme5: "秋は来にけり", kuZentai: "八重むぐら　しげれる宿の　さびしきに　人こそ見えね　秋は来にけり", kaisetu: "雑草が何重にも生い茂った、さびしい家には誰も訪ねてこない。でも、そんな場所にも秋はちゃんとやって来た。" },
+            { id: 48, kaminoku: "風をいたみ", banme2: "岩うつ波の", banme3: "おのれのみ", shimonoku: "くだけてものを", banme5: "思ふころかな", kuZentai: "風をいたみ　岩うつ波の　おのれのみ　くだけてものを　思ふころかな", kaisetu: "強い風で波が岩にぶつかって砕けるように、私だけが苦しんでいる。相手は何も気にしていないのに、私は恋に悩んでいる。" },
+            { id: 49, kaminoku: "御垣守", banme2: "衛士のたく火の", banme3: "夜は燃え", shimonoku: "昼は消えつつ", banme5: "ものをこそ思へ", kuZentai: "御垣守　衛士のたく火の　夜は燃え　昼は消えつつ　ものをこそ思へ", kaisetu: "門を守る人がたく火は、夜には燃え、昼には消える。その火のように、私の恋する気持ちも、夜には強く燃え、昼には消えそうになりながら、ずっとあなたを思っている。" },
+            { id: 50, kaminoku: "君がため", banme2: "惜しからざりし", banme3: "命さへ", shimonoku: "長くもがなと", banme5: "思ひけるかな", kuZentai: "君がため　惜しからざりし　命さへ　長くもがなと　思ひけるかな", kaisetu: "あなたに会えるなら、命なんて惜しくないと思っていた。でも、あなたと会うことができた今は、少しでも長く生きて、あなたと一緒にいたいと思うようになった。" },
+            { id: 51, kaminoku: "かくとだに", banme2: "えやはいぶきの", banme3: "さしも草", shimonoku: "さしも知らじな", banme5: "燃ゆる思ひを", kuZentai: "かくとだに　えやはいぶきの　さしも草　さしも知らじな　燃ゆる思ひを", kaisetu: "私がこれほどあなたを好きだということさえ、あなたには伝えられない。この胸の中で燃えているような恋心を、あなたは少しも知らないのだろう。" },
+            { id: 52, kaminoku: "明けぬれば", banme2: "暮るるものとは", banme3: "知りながら", shimonoku: "なほ恨めしき", banme5: "朝ぼらけかな", kuZentai: "明けぬれば　暮るるものとは　知りながら　なほ恨めしき　朝ぼらけかな", kaisetu: "朝になれば、また夜が来ることは分かっている。それでも、あなたと別れなければならない朝は、やっぱり恨めしくてつらい。" },
+            { id: 53, kaminoku: "嘆きつつ", banme2: "ひとり寝る夜の", banme3: "明くる間は", shimonoku: "いかに久しき", banme5: "ものとかは知る", kuZentai: "嘆きつつ　ひとり寝る夜の　明くる間は　いかに久しき　ものとかは知る", kaisetu: "あなたに会えず、悲しい気持ちでひとり眠る夜は、朝が来るまでが本当に長く感じる。あなたはこのつらさを分かっているだろうか。" },
+            { id: 54, kaminoku: "忘れじの", banme2: "行末までは", banme3: "かたければ", shimonoku: "今日を限りの", banme5: "命ともがな", kuZentai: "忘れじの　行末までは　かたければ　今日を限りの　命ともがな", kaisetu: "「いつまでも忘れない」というあなたの言葉が、これから先も本当かどうかは分からない。だから、今日この瞬間の幸せのまま、命が終わってもいいと思う。" },
+            { id: 55, kaminoku: "滝の音は", banme2: "絶えて久しく", banme3: "なりぬれど", shimonoku: "名こそ流れて", banme5: "なほ聞こえけれ", kuZentai: "滝の音は　絶えて久しく　なりぬれど　名こそ流れて　なほ聞こえけれ", kaisetu: "滝の水が流れる音は、ずっと前から聞こえなくなっている。でも、その滝のすばらしい名前や評判は今でも人々に伝わっている。" },
+            { id: 56, kaminoku: "あらざらむ", banme2: "この世のほかの", banme3: "思ひ出に", shimonoku: "今ひとたびの", banme5: "逢ふこともがな", kuZentai: "あらざらむ　この世のほかの　思ひ出に　今ひとたびの　逢ふこともがな", kaisetu: "私はもうすぐこの世を去るかもしれない。最後の思い出として、もう一度だけあなたに会いたい。" },
+            { id: 57, kaminoku: "めぐり逢ひて", banme2: "見しやそれとも", banme3: "わがぬ間に", shimonoku: "雲隠れにし", banme5: "夜半の月かな", kuZentai: "めぐり逢ひて　見しやそれとも　わかぬ間に　雲隠れにし　夜半の月かな", kaisetu: "久しぶりに会えたのに、「あの人だった」とちゃんと確かめる前に別れてしまった。それは、雲に隠れてしまった夜中の月のようだった。" },
+            { id: 58, kaminoku: "有馬山", banme2: "猪名の笹原", banme3: "風吹けば", shimonoku: "いでそよ人を", banme5: "忘れやはする", kuZentai: "有馬山　猪名の笹原　風吹けば　いでそよ人を　忘れやはする", kaisetu: "有馬山の笹原に風が吹くと、笹の葉がそよそよと音を立てる。そんな音を聞くと、私はあなたを忘れられるはずがないと思う。" },
+            { id: 59, kaminoku: "やすらはで", banme2: "寝なましものを", banme3: "小夜更けて", shimonoku: "傾くまでの", banme5: "月を見しかな", kuZentai: "やすらはで　寝なましものを　小夜更けて　傾くまでの　月を見しかな", kaisetu: "あなたが来ないと分かっていたなら、さっさと寝てしまえばよかった。でも、来るかもしれないと思って待っているうちに、月が西に傾くまで起きていた。" },
+            { id: 60, kaminoku: "大江山", banme2: "いく野の道の", banme3: "遠ければ", shimonoku: "まだふみも見ず", banme5: "天の橋立", kuZentai: "大江山　いく野の道の　遠ければ　まだふみも見ず　天の橋立", kaisetu: "大江山や生野を越えていく道は遠いので、私はまだ天の橋立へ行ったことがない。だから、そこから来たという手紙もまだ見ていない。" },
+            { id: 61, kaminoku: "いにしへの", banme2: "奈良の都の", banme3: "八重桜", shimonoku: "今日九重に", banme5: "にほひぬるかな", kuZentai: "いにしへの　奈良の都の　八重桜　今日九重に　にほひぬるかな", kaisetu: "昔の奈良の都に咲いていた八重桜が、今は京都の宮中で美しく咲いている。昔から今へ、花の美しさが受け継がれているようだ。" },
+            { id: 62, kaminoku: "夜をこめて", banme2: "鳥のそら音は", banme3: "はかるとも", shimonoku: "よに逢坂の", banme5: "関は許さじ", kuZentai: "夜をこめて　鳥のそら音は　はかるとも　よに逢坂の　関は許さじ", kaisetu: "夜明け前に鳥の鳴き声をまねしてだましても、逢坂の関を通ることは絶対に許さない。そんなうまいごまかしは通用しないよ。" },
+            { id: 63, kaminoku: "今はただ", banme2: "思ひ絶えなむ", banme3: "とばかりを", shimonoku: "人づてならで", banme5: "言ふよしもがな", kuZentai: "今はただ　思ひ絶えなむ　とばかりを　人づてならで　言ふよしもがな", kaisetu: "今はもう、あなたへの思いをあきらめようと思う。そのことだけでも、人づてではなく、直接あなたに伝える方法があればいいのに。" },
+            { id: 64, kaminoku: "朝ぼらけ", banme2: "宇治の川霧", banme3: "絶え絶えに", shimonoku: "あらはれわたる", banme5: "瀬々の網代木", kuZentai: "朝ぼらけ　宇治の川霧　絶え絶えに　あらはれわたる　瀬々の網代木", kaisetu: "夜が明け始めると、宇治川にかかっていた霧が少しずつ晴れていく。その向こうに、川のあちこちにある網代木が見えてくる。" },
+            { id: 65, kaminoku: "恨みわび", banme2: "ほさぬ袖だに", banme3: "あるものを", shimonoku: "恋に朽ちなむ", banme5: "名こそ惜しけれ", kuZentai: "恨みわび　ほさぬ袖だに　あるものを　恋に朽ちなむ　名こそ惜しけれ", kaisetu: "あなたを恨んで泣き続け、乾くことのないそでがある。それだけでもつらいのに、この恋のせいで悪いうわさまで残ってしまうのは、とても悲しい。" },
+            { id: 66, kaminoku: "もろともに", banme2: "あはれと思へ", banme3: "山桜", shimonoku: "花よりほかに", banme5: "知る人もなし", kuZentai: "もろともに　あはれと思へ　山桜　花よりほかに　知る人もなし", kaisetu: "山桜よ、私とお互いに「さびしいね」と思い合おう。私は山奥でひとり暮らしていて、花以外に私を知っているものはいないのだから。" },
+            { id: 67, kaminoku: "春の夜の", banme2: "夢ばかりなる", banme3: "手枕に", shimonoku: "かひなく立たむ", banme5: "名こそ惜しけれ", kuZentai: "春の夜の　夢ばかりなる　手枕に　かひなく立たむ　名こそ惜しけれ", kaisetu: "春の夜の夢のようにはかない、ほんの一度の恋だったのに、そのために悪いうわさが立ってしまうのは、とても残念だ。" },
+            { id: 68, kaminoku: "心にも", banme2: "あらで憂き世に", banme3: "ながらへば", shimonoku: "恋しかるべき", banme5: "夜半の月かな", kuZentai: "心にも　あらで憂き世に　ながらへば　恋しかるべき　夜半の月かな", kaisetu: "望んでいるわけではないのに、このつらい世の中で長く生きていくことになったら、きっと今の苦しい時代さえ懐かしく思うのだろう。そんな夜の月が見える。" },
+            { id: 69, kaminoku: "嵐吹く", banme2: "三室の山の", banme3: "もみぢ葉は", shimonoku: "竜田の川の", banme5: "錦なりけり", kuZentai: "嵐吹く　三室の山の　もみぢ葉は　竜田の川の　錦なりけり", kaisetu: "嵐で三室山の紅葉が散り、竜田川に流れている。その紅葉が川を美しい錦の布のように見せている。" },
+            { id: 70, kaminoku: "寂しさに", banme2: "宿を立ち出でて", banme3: "眺むれば", shimonoku: "いづくも同じ", banme5: "秋の夕暮", kuZentai: "寂しさに　宿を立ち出でて　眺むれば　いづくも同じ　秋の夕暮", kaisetu: "あまりにさびしいので家の外へ出て景色を見てみた。すると、どこを見ても同じようにさびしい秋の夕暮れの景色だった。" },
+            { id: 71, kaminoku: "夕されば", banme2: "門田の稲葉", banme3: "おとづれて", shimonoku: "あしのまろやに", banme5: "秋風ぞ吹く", kuZentai: "夕されば　門田の稲葉　おとづれて　あしのまろやに　秋風ぞ吹く", kaisetu: "夕方になると、家の門の近くの田んぼの稲の葉を秋風が揺らし、その風が粗末な家にも吹きこんでくる。" },
+            { id: 72, kaminoku: "音に聞く", banme2: "高師の浜の", banme3: "あだ波は", shimonoku: "かけじや袖の", banme5: "ぬれもこそすれ", kuZentai: "音に聞く　高師の浜の　あだ波は　かけじや袖の　ぬれもこそすれ", kaisetu: "高師の浜の、寄せてはすぐに引いていく波のような、あなたのように気まぐれな人には、決して心をかけたくない。泣いてそでをぬらすことになりそうだから。" },
+            { id: 73, kaminoku: "高砂の", banme2: "尾上の桜", banme3: "咲きにけり", shimonoku: "外山の霞", banme5: "立たずもあらなむ", kuZentai: "高砂の　尾上の桜　咲きにけり　外山の霞　立たずもあらなむ", kaisetu: "高砂の山の上に桜が美しく咲いた。近くの山の霞よ、どうか立たないでほしい。この美しい桜を隠さず、よく見せてほしい。" },
+            { id: 74, kaminoku: "うかりける", banme2: "人を初瀬の", banme3: "山おろし", shimonoku: "はげしかれとは", banme5: "祈らぬものを", kuZentai: "うかりける　人を初瀬の　山おろし　はげしかれとは　祈らぬものを", kaisetu: "私につれない人の心が、初瀬の山から吹く風のように激しく冷たくなるように、と神様にお願いしたわけではないのに、どうしてこんなに冷たくされるのだろう。" },
+            { id: 75, kaminoku: "契りおきし", banme2: "させもが露を", banme3: "命にて", shimonoku: "あはれ今年の", banme5: "秋もいぬめり", kuZentai: "契りおきし　させもが露を　命にて　あはれ今年の　秋もいぬめり", kaisetu: "「必ずあなたの願いをかなえよう」という約束を信じて、それを頼りにしてきた。でも、今年の秋ももう終わってしまいそうだ。約束はどうなったのだろう。" },
+            { id: 76, kaminoku: "わたの原", banme2: "漕ぎ出でて見れば", banme3: "久方の", shimonoku: "雲居にまがふ", banme5: "沖つ白波", kuZentai: "わたの原　漕ぎ出でて見れば　久方の　雲居にまがふ　沖つ白波", kaisetu: "大海原へ船をこぎ出して遠くを見ると、沖の白い波が、空の雲と見分けがつかないほど高く広がっている。" },
+            { id: 77, kaminoku: "瀬をはやみ", banme2: "岩にせかるる", banme3: "滝川の", shimonoku: "われても末に", banme5: "逢はむとぞ思ふ", kuZentai: "瀬をはやみ　岩にせかるる　滝川の　われても末に　逢はむとぞ思ふ", kaisetu: "流れの速い川が岩にぶつかって二つに分かれても、最後にはまた一つになる。それと同じように、私たちも今は別れていても、いつかきっと会いたい。" },
+            { id: 78, kaminoku: "淡路島", banme2: "かよふ千鳥の", banme3: "鳴く声に", shimonoku: "幾夜寝覚めぬ", banme5: "須磨の関守", kuZentai: "淡路島　かよふ千鳥の　鳴く声に　幾夜寝覚めぬ　須磨の関守", kaisetu: "淡路島から飛んでくる千鳥の鳴き声を聞いていると、私は何度も夜中に目を覚ました。須磨の関所を守りながら、さびしい夜を過ごしている。" },
+            { id: 79, kaminoku: "秋風に", banme2: "たなびく雲の", banme3: "絶え間より", shimonoku: "もれ出づる月の", banme5: "影のさやけさ", kuZentai: "秋風に　たなびく雲の　絶え間より　もれ出づる月の　影のさやけさ", kaisetu: "秋風に流される雲のすき間から月が顔を出している。その月の光が、とても明るく美しく見える。" },
+            { id: 80, kaminoku: "長からむ", banme2: "心も知らず", banme3: "黒髪の", shimonoku: "乱れて今朝は", banme5: "ものをこそ思へ", kuZentai: "長からむ　心も知らず　黒髪の　乱れて今朝は　ものをこそ思へ", kaisetu: "あなたの愛情がいつまで続くのか、私には分からない。あなたと別れた今朝は、黒髪が乱れているように、私の心も乱れて悩んでいる。" },
+            { id: 81, kaminoku: "ほととぎす", banme2: "鳴きつる方を", banme3: "眺むれば", shimonoku: "ただ有明の", banme5: "月ぞ残れる", kuZentai: "ほととぎす　鳴きつる方を　眺むれば　ただ有明の　月ぞ残れる", kaisetu: "ほととぎすの鳴き声がした方を見ると、鳥の姿はもうなく、そこには夜明けの空に残った月だけが見えている。" },
+            { id: 82, kaminoku: "思ひわび", banme2: "さても命は", banme3: "あるものを", shimonoku: "憂きに堪へぬは", banme5: "涙なりけり", kuZentai: "思ひわび　さても命は　あるものを　憂きに堪へぬは　涙なりけり", kaisetu: "恋に悩んで苦しんでいるけれど、命はまだ続いている。それなのに、このつらさに耐えられず、涙だけは止まらない。" },
+            { id: 83, kaminoku: "世の中よ", banme2: "道こそなけれ", banme3: "思ひ入る", shimonoku: "山の奥にも", banme5: "鹿ぞ鳴くなる", kuZentai: "世の中よ　道こそなけれ　思ひ入る　山の奥にも　鹿ぞ鳴くなる", kaisetu: "世の中のつらさから逃げる道はどこにもない。人里離れた山奥にまで来たのに、そこでも鹿が悲しそうに鳴いている。" },
+            { id: 84, kaminoku: "ながらへば", banme2: "またこの頃や", banme3: "しのばれむ", shimonoku: "憂しと見し世ぞ", banme5: "今は恋しき", kuZentai: "ながらへば　またこの頃や　しのばれむ　憂しと見し世ぞ　今は恋しき", kaisetu: "この先も生きていれば、今のこともいつか懐かしく思うのだろうか。昔はつらいと思っていたころが、今ではかえって恋しく感じられる。" },
+            { id: 85, kaminoku: "夜もすがら", banme2: "もの思ふ頃は", banme3: "明けやらで", shimonoku: "ねやのひまさへ", banme5: "つれなかりけり", kuZentai: "夜もすがら　もの思ふ頃は　明けやらで　ねやのひまさへ　つれなかりけり", kaisetu: "一晩中、あなたのことを考えていると、夜がなかなか明けてくれない。寝室の窓のすき間から入る朝の光さえ、私には冷たく感じられる。" },
+            { id: 86, kaminoku: "嘆けとて", banme2: "月やはものを", banme3: "思はする", shimonoku: "かこち顔なる", banme5: "わが涙かな", kuZentai: "嘆けとて　月やはものを　思はする　かこち顔なる　わが涙かな", kaisetu: "月が「悲しみなさい」と言っているわけではない。それなのに、月を見ていると悲しくなって、まるで月のせいであるかのように涙が流れてしまう。" },
+            { id: 87, kaminoku: "村雨の", banme2: "露もまだひぬ", banme3: "槙の葉に", shimonoku: "霧立ちのぼる", banme5: "秋の夕暮", kuZentai: "村雨の　露もまだひぬ　槙の葉に　霧立ちのぼる　秋の夕暮", kaisetu: "秋の夕暮れ、通り雨が降ったばかりで、まだ葉についた露も乾いていない。その葉の間から霧が立ちのぼっている。とても静かでさびしい景色だ。" },
+            { id: 88, kaminoku: "難波江の", banme2: "葦のかりねの", banme3: "ひとよゆゑ", shimonoku: "身をつくしてや", banme5: "恋ひわたるべき", kuZentai: "難波江の　葦のかりねの　ひとよゆゑ　身をつくしてや　恋ひわたるべき", kaisetu: "難波の葦の「一節」と、ほんの一晩の「一夜」を重ねている。たった一晩あなたと過ごしただけなのに、これから一生あなたを恋しく思い続けるのだろうか。" },
+            { id: 89, kaminoku: "玉の緒よ", banme2: "絶えなば絶えね", banme3: "ながらへば", shimonoku: "忍ぶることの", banme5: "弱りもぞする", kuZentai: "玉の緒よ　絶えなば絶えね　ながらへば　忍ぶることの　弱りもぞする", kaisetu: "命よ、もし終わるのなら終わってしまってもいい。このまま生き続けたら、恋する気持ちを隠していることに耐えられなくなってしまいそうだから。" },
+            { id: 90, kaminoku: "見せばやな", banme2: "雄島のあまの", banme3: "袖だにも", shimonoku: "濡れにぞ濡れし", banme5: "色は変はらず", kuZentai: "見せばやな　雄島のあまの　袖だにも　濡れにぞ濡れし　色は変はらず", kaisetu: "あなたに私の苦しみを見せたい。雄島の漁師でさえ、海水で何度もそでをぬらしているのに、私のそでは涙でぬれて、色まで変わってしまうほどなのだから。" },
+            { id: 91, kaminoku: "きりぎりす", banme2: "鳴くや霜夜の", banme3: "さむしろに", shimonoku: "衣かたしき", banme5: "ひとりかも寝む", kuZentai: "きりぎりす　鳴くや霜夜の　さむしろに　衣かたしき　ひとりかも寝む", kaisetu: "霜が降りる寒い夜に、こおろぎが鳴いている。私は冷たいむしろの上で、着物のそでを下に敷いて、今夜もひとりで寝るのだろうか。" },
+            { id: 92, kaminoku: "わが袖は", banme2: "潮干に見えぬ", banme3: "沖の石の", shimonoku: "人こそ知らね", banme5: "乾く間もなし", kuZentai: "わが袖は　潮干に見えぬ　沖の石の　人こそ知らね　乾く間もなし", kaisetu: "私のそでは、潮が引いたときにも海の中に隠れている沖の石のように、人には見えない。でも、涙でぬれていて、乾くことがない。" },
+            { id: 93, kaminoku: "世の中は", banme2: "常にもがもな", banme3: "渚こぐ", shimonoku: "海士の小舟の", banme5: "綱手かなしも", kuZentai: "世の中は　常にもがもな　渚こぐ　海士の小舟の　綱手かなしも", kaisetu: "この世の中が、ずっと変わらず平和であってほしい。海辺で漁師の小舟を引いていく綱が、ゆっくり動いている景色がとても心にしみる。" },
+            { id: 94, kaminoku: "み吉野の", banme2: "山の秋風", banme3: "さ夜更けて", shimonoku: "ふるさと寒く", banme5: "衣打つなり", kuZentai: "み吉野の　山の秋風　さ夜更けて　ふるさと寒く　衣打つなり", kaisetu: "夜が深くなると、吉野の山から冷たい秋風が吹いてくる。昔ながらの里では、寒さの中で衣を打つ音が聞こえてくる。" },
+            { id: 95, kaminoku: "おほけなく", banme2: "うき世の民に", banme3: "おほふかな", shimonoku: "わが立つ杣に", banme5: "墨染の袖", kuZentai: "おほけなく　うき世の民に　おほふかな　わが立つ杣に　墨染の袖", kaisetu: "私のような者が、世の中の人々を守ろうとしている。自分の立場に比べると大きすぎる願いだけれど、仏様に仕える者として、人々を守りたいと思っている。" },
+            { id: 96, kaminoku: "花さそふ", banme2: "嵐の庭の", banme3: "雪ならで", shimonoku: "ふりゆくものは", banme5: "わが身なりけり", kuZentai: "花さそふ　嵐の庭の　雪ならで　ふりゆくものは　わが身なりけり", kaisetu: "嵐に桜の花が散って、庭に雪のように積もっている。でも、本当に古くなっていくのは花ではなく、年を重ねていく私自身なのだ。" },
+            { id: 97, kaminoku: "来ぬ人を", banme2: "松帆の浦の", banme3: "夕なぎに", shimonoku: "焼くや藻塩の", banme5: "身もこがれつつ", kuZentai: "来ぬ人を　松帆の浦の　夕なぎに　焼くや藻塩の　身もこがれつつ", kaisetu: "来てくれないあなたを待ちながら、私は恋しくて苦しんでいる。海辺で藻塩を焼く火が熱いように、私の心も恋しさで焼けるようだ。" },
+            { id: 98, kaminoku: "風そよぐ", banme2: "楢の小川の", banme3: "夕暮は", shimonoku: "みそぎぞ夏の", banme5: "しるしなりける", kuZentai: "風そよぐ　楢の小川の　夕暮は　みそぎぞ夏の　しるしなりける", kaisetu: "楢の葉を風がそよそよと揺らしている夕暮れ。もう秋のように感じるけれど、川で身を清める「みそぎ」が行われているのを見ると、まだ夏なのだと分かる。" },
+            { id: 99, kaminoku: "人もをし", banme2: "人もうらめし", banme3: "あぢきなく", shimonoku: "世を思ふゆゑに", banme5: "もの思ふ身は", kuZentai: "人もをし　人もうらめし　あぢきなく　世を思ふゆゑに　もの思ふ身は", kaisetu: "人が好きだと思うこともあるし、人がいやになることもある。世の中が思い通りにならず、つまらなく感じるから、いろいろと悩んでしまうのだ。" },
+            { id: 100, kaminoku: "百敷や", banme2: "古き軒端の", banme3: "しのぶにも", shimonoku: "なほあまりある", banme5: "昔なりけり", kuZentai: "百敷や　古き軒端の　しのぶにも　なほあまりある　昔なりけり", kaisetu: "昔の宮殿の古い軒先に生えている忍草を見ると、昔の華やかな時代を思い出す。どれだけ思い出しても、昔のすばらしさにはまだ足りないほどだ。" }
+        ];
+
+        let groups = [];
+        let currentGroupIndex = 0;
+        let currentQuizQueue = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answered = false;
+
+        function playToyPianoFanfare() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+
+                const notes = [
+                    { freq: 523.25, time: 0.0 },
+                    { freq: 659.25, time: 0.08 },
+                    { freq: 783.99, time: 0.16 },
+                    { freq: 1046.50, time: 0.24 },
+                    { freq: 1318.51, time: 0.32 }
+                ];
+
+                notes.forEach(note => {
+                    const startTime = ctx.currentTime + note.time;
+                    const duration = 0.45;
+
+                    const oscSine = ctx.createOscillator();
+                    const gainSine = ctx.createGain();
+                    oscSine.type = 'sine';
+                    oscSine.frequency.setValueAtTime(note.freq, startTime);
+                    gainSine.gain.setValueAtTime(0.18, startTime);
+                    gainSine.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+                    oscSine.connect(gainSine);
+                    gainSine.connect(ctx.destination);
+
+                    const oscTri = ctx.createOscillator();
+                    const gainTri = ctx.createGain();
+                    oscTri.type = 'triangle';
+                    oscTri.frequency.setValueAtTime(note.freq, startTime);
+                    gainTri.gain.setValueAtTime(0.12, startTime);
+                    gainTri.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+                    oscTri.connect(gainTri);
+                    gainTri.connect(ctx.destination);
+
+                    oscSine.start(startTime);
+                    oscSine.stop(startTime + duration);
+                    oscTri.start(startTime);
+                    oscTri.stop(startTime + duration);
+                });
+            } catch (e) {}
+        }
+
+        function playIncorrectSound() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                const startTime = ctx.currentTime;
+                
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(220, startTime);
+                osc.frequency.exponentialRampToValueAtTime(140, startTime + 0.25);
+                gain.gain.setValueAtTime(0.15, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.25);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(startTime);
+                osc.stop(startTime + 0.25);
+            } catch(e) {}
+        }
+
+        const confettiCanvas = document.getElementById('confetti-canvas');
+        const ctx = confettiCanvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            confettiCanvas.width = window.innerWidth;
+            confettiCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function launchConfetti() {
+            particles = [];
+            const colors = ['#3b82f6', '#6366f1', '#d97706', '#fef3c7', '#ffffff', '#60a5fa'];
+            for (let i = 0; i < 90; i++) {
+                particles.push({
+                    x: window.innerWidth / 2,
+                    y: window.innerHeight / 2 - 50,
+                    vx: (Math.random() - 0.5) * 16,
+                    vy: (Math.random() - 0.7) * 18,
+                    size: Math.random() * 8 + 5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    rotation: Math.random() * 360,
+                    rSpeed: (Math.random() - 0.5) * 10,
+                    opacity: 1
+                });
+            }
+            animateConfetti();
+        }
+
+        let animationId = null;
+        function animateConfetti() {
+            if (animationId) cancelAnimationFrame(animationId);
+            ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+            let active = false;
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.35;
+                p.vx *= 0.98;
+                p.rotation += p.rSpeed;
+                p.opacity -= 0.012;
+
+                if (p.opacity > 0) {
+                    active = true;
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.rotation * Math.PI) / 180);
+                    ctx.globalAlpha = Math.max(0, p.opacity);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    ctx.restore();
                 }
             });
+
+            if (active) {
+                animationId = requestAnimationFrame(animateConfetti);
+            } else {
+                ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            }
         }
+
+        function initApp() {
+            groups = [];
+            for (let i = 0; i < allWakaData.length; i += 10) {
+                const chunk = allWakaData.slice(i, i + 10);
+                const startNum = chunk[0].id;
+                const endNum = chunk[chunk.length - 1].id;
+                groups.push({
+                    title: `第${startNum}首 ～ 第${endNum}首`,
+                    data: chunk
+                });
+            }
+
+            renderSelectScreen();
+        }
+
+        function renderSelectScreen() {
+            const container = document.getElementById('group-list');
+            container.innerHTML = '';
+
+            groups.forEach((group, index) => {
+                const btn = document.createElement('button');
+                btn.className = `waka-card option-card p-5 rounded-2xl text-left border border-jp-border flex flex-col justify-between group`;
+                btn.onclick = () => startQuizGroup(index);
+
+                btn.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-jp-gold bg-jp-gold/10 border border-jp-gold/30 px-2.5 py-0.5 rounded-full">
+                            グループ ${index + 1}
+                        </span>
+                        <i class="fa-solid fa-chevron-right text-jp-subtext group-hover:text-jp-gold transition-colors text-xs"></i>
+                    </div>
+                    <div class="text-lg font-serif font-bold text-white group-hover:text-jp-goldLight transition-colors">
+                        ${group.title}
+                    </div>
+                    <div class="text-xs text-jp-subtext mt-3 pt-2 border-t border-jp-border/50">
+                        10問演習
+                    </div>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        function showSelectScreen() {
+            document.getElementById('select-screen').classList.remove('hidden');
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('header-progress').classList.add('hidden');
+        }
+
+        function startQuizGroup(groupIndex) {
+            currentGroupIndex = groupIndex;
+            currentQuizQueue = [...groups[groupIndex].data].sort(() => Math.random() - 0.5);
+            currentQuestionIndex = 0;
+            score = 0;
+
+            document.getElementById('select-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('header-progress').classList.remove('hidden');
+
+            loadQuestion();
+        }
+
+        function retryGroup() {
+            startQuizGroup(currentGroupIndex);
+        }
+
+        function loadQuestion() {
+            answered = false;
+            const currentWaka = currentQuizQueue[currentQuestionIndex];
+
+            document.getElementById('current-q-num').textContent = currentQuestionIndex + 1;
+            const progressPercent = ((currentQuestionIndex + 1) / 10) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+            document.getElementById('question-kaminoku').textContent = currentWaka.kaminoku;
+
+            let dummyPool = allWakaData.filter(item => item.id !== currentWaka.id);
+            dummyPool.sort(() => Math.random() - 0.5);
+            
+            let options = [currentWaka, ...dummyPool.slice(0, 4)];
+            options.sort(() => Math.random() - 0.5);
+
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            options.forEach((opt, idx) => {
+                const optBtn = document.createElement('button');
+                optBtn.className = `w-full waka-card option-card p-4 sm:p-5 rounded-xl text-left border border-jp-border flex items-center justify-between transition-all duration-200 group`;
+                optBtn.dataset.id = opt.id;
+                optBtn.onclick = () => selectAnswer(opt, currentWaka, optBtn);
+
+                optBtn.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <span class="w-6 h-6 rounded-full bg-jp-border/60 text-jp-subtext text-xs flex items-center justify-center font-bold group-hover:bg-jp-gold group-hover:text-black transition">
+                            ${idx + 1}
+                        </span>
+                        <span class="text-base sm:text-lg font-serif font-semibold text-white tracking-wide">
+                            ${opt.shimonoku}
+                        </span>
+                    </div>
+                    <i class="fa-regular fa-circle text-jp-subtext/40 group-hover:text-jp-gold transition"></i>
+                `;
+                optionsContainer.appendChild(optBtn);
+            });
+
+            document.getElementById('answer-result-box').classList.add('hidden');
+        }
+
+        function selectAnswer(selectedWaka, correctWaka, clickedBtn) {
+            if (answered) return;
+            answered = true;
+
+            const isCorrect = selectedWaka.id === correctWaka.id;
+
+            const optionButtons = document.querySelectorAll('#options-container button');
+            optionButtons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.remove('option-card');
+                const btnId = parseInt(btn.dataset.id);
+                if (btnId === correctWaka.id) {
+                    btn.classList.add('border-emerald-500', 'bg-emerald-950/40');
+                    btn.querySelector('i').className = 'fa-solid fa-circle-check text-emerald-400 text-lg';
+                } else if (btn === clickedBtn && !isCorrect) {
+                    btn.classList.add('border-rose-500', 'bg-rose-950/40');
+                    btn.querySelector('i').className = 'fa-solid fa-circle-xmark text-rose-400 text-lg';
+                } else {
+                    btn.classList.add('opacity-40');
+                }
+            });
+
+            if (isCorrect) {
+                score++;
+                playToyPianoFanfare();
+                launchConfetti();
+            } else {
+                playIncorrectSound();
+            }
+
+            renderAnswerBox(isCorrect, correctWaka);
+        }
+
+        function renderAnswerBox(isCorrect, waka) {
+            const resultBox = document.getElementById('answer-result-box');
+            const badge = document.getElementById('result-badge');
+
+            if (isCorrect) {
+                badge.className = "mb-3 inline-flex items-center px-3 py-1 rounded-full text-xs font-bold gap-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+                badge.innerHTML = `<i class="fa-solid fa-circle-check"></i> 正解！`;
+            } else {
+                badge.className = "mb-3 inline-flex items-center px-3 py-1 rounded-full text-xs font-bold gap-1.5 bg-rose-500/20 text-rose-400 border border-rose-500/30";
+                badge.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> 残念...`;
+            }
+
+            const line1Text = `${waka.kaminoku} ${waka.banme2} ${waka.banme3}`;
+            document.getElementById('ans-line1').textContent = line1Text;
+
+            const line2Text = `${waka.shimonoku} ${waka.banme5}`;
+            document.getElementById('ans-line2').textContent = line2Text;
+
+            document.getElementById('ans-line3').textContent = waka.kaisetu;
+
+            resultBox.classList.remove('hidden');
+            resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < 10) {
+                loadQuestion();
+            } else {
+                showResultScreen();
+            }
+        }
+
+        function showResultScreen() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('header-progress').classList.add('hidden');
+
+            document.getElementById('score-num').textContent = score;
+
+            const commentEl = document.getElementById('score-comment');
+            if (score === 10) {
+                commentEl.textContent = "素晴らしい！全問正解です！後編も完全にマスターしていますね。";
+            } else if (score >= 7) {
+                commentEl.textContent = "惜しい！あと少しで全問正解です。この調子で練習を続けましょう！";
+            } else if (score >= 4) {
+                commentEl.textContent = "よく頑張りました！繰り返し練習して覚えていきましょう。";
+            } else {
+                commentEl.textContent = "焦らず少しずつ覚えていきましょう！繰り返し解くことが近道です。";
+            }
+        }
+
+        window.onload = function() {
+            initApp();
+        };
     </script>
 </body>
 </html>
