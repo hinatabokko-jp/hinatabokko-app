@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>小学５年生 漢字（１）</title>
+<title>小学５年生 漢字テスト</title>
 <!-- confetti.js library for celebration effects -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <style>
@@ -169,7 +169,36 @@ header{text-align:center;margin-bottom:12px;margin-top:8px;display:flex;align-it
 .progress{color:var(--sub);font-size:14px}.progress strong{color:var(--accent);font-size:20px}
 .badge-group{display:flex;gap:8px}.badge{color:var(--sub);font-size:12px;background:var(--panel-light);border:1px solid var(--border);padding:4px 10px;border-radius:20px}
 .tool-btn{background:var(--panel-light);border:1px solid var(--border);color:var(--text);border-radius:10px;cursor:pointer;padding:6px 12px;font-size:12px;font-weight:600}
-.question{text-align:center;font-size:clamp(18px,4vw,24px);line-height:1.6;font-weight:700;min-height:60px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;padding:8px 12px;background:rgba(15,18,25,.5);border-radius:12px;border:1px solid rgba(255,255,255,.05)}
+
+/* 問題文コンテナ：ふりがなと本文を上下に表示 */
+.question{
+  text-align:center;
+  font-size:clamp(18px,4vw,24px);
+  line-height:1.5;
+  font-weight:700;
+  min-height:60px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:8px 12px;
+  background:rgba(15,18,25,.5);
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.05);
+}
+.sentence-furigana{
+  font-size:13px;
+  font-weight:600;
+  color:#a5b4fc;
+  margin-bottom:4px;
+  letter-spacing:0.05em;
+}
+.sentence-main{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+}
 .reading{color:#a5b4fc;font-weight:700;white-space:nowrap}
 .question-note{text-align:center;color:var(--sub);font-size:11px;margin-top:6px;margin-bottom:10px}
 
@@ -326,11 +355,7 @@ canvas {
   <nav class="sidebar-nav">
     <a href="https://hinatabokko-jp.github.io/hinatabokko-app/" class="sidebar-link">
       <span class="sidebar-link-icon">📝</span>
-      <span>漢字テスト（１）</span>
-    </a>
-    <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page3" class="sidebar-link">
-      <span class="sidebar-link-icon">🔄</span>
-      <span>漢字小テスト復習</span>
+      <span>漢字テスト</span>
     </a>
     <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page2" class="sidebar-link">
       <span class="sidebar-link-icon">🧮</span>
@@ -345,7 +370,7 @@ canvas {
 
   
 <div class="app">
-<header><h1 class="title">小学５年生 漢字（１）</h1><div class="subtitle" id="headerSubtitle">第１章 〜 第１０章（問１〜問１０0）</div></header>
+<header><h1 class="title">小学５年生 漢字（１）</h1><div class="subtitle" id="headerSubtitle">第１章 〜 第１４章（問１〜問１３８）</div></header>
 
 <div id="sectionSelectArea"><div class="section-grid" id="sectionGrid"></div></div>
 
@@ -398,7 +423,7 @@ canvas {
 </div>
 
 <script>
-// 小学５年生 漢字（１）: 第1章〜第10章（問1〜問100）
+// 小学５年生 漢字（１）: 第1章〜（問1〜問138）
 const allQuestions=[
 {type:2,words:[{kanji:"許",reading:"きょ"},{kanji:"可",reading:"か"}],sentence:"{0}{1}を 得る。"},
 {type:2,words:[{kanji:"貿",reading:"ぼう"},{kanji:"易",reading:"えき"}],sentence:"{0}{1}が さかんだ。"},
@@ -499,7 +524,47 @@ const allQuestions=[
 {type:2,words:[{kanji:"俳",reading:"はい"},{kanji:"句",reading:"く"}],sentence:"{0}{1}を 詠む。"},
 {type:2,words:[{kanji:"序",reading:"じょ"},{kanji:"章",reading:"しょう"}],sentence:"それは {0}{1}に 過ぎなかった。"},
 {type:2,words:[{kanji:"武",reading:"ぶ"},{kanji:"士",reading:"し"}],sentence:"{0}{1}が 活躍する。"},
-{type:2,words:[{kanji:"資",reading:"し"},{kanji:"料",reading:"りょう"}],sentence:"それは 貴重な {0}{1}だ。"}
+{type:2,words:[{kanji:"資",reading:"し"},{kanji:"料",reading:"りょう"}],sentence:"それは 貴重な {0}{1}だ。"},
+
+// --- 追加された問題（問101〜問138） ---
+{type:2,words:[{kanji:"宿",reading:"しゅく"},{kanji:"舎",reading:"しゃ"}],sentence:"代表選手の {0}{1}。"},
+{type:2,words:[{kanji:"往",reading:"おう"},{kanji:"路",reading:"ろ"}],sentence:"目的地までの {0}{1}。"},
+{type:1,words:[{kanji:"罪",reading:"つみ"}],sentence:"{0}を 償う。",furigana:"つみを つぐなう"},
+{type:1,words:[{kanji:"防",reading:"ふせ"}],sentence:"落下を {0}ぐ。"},
+{type:2,words:[{kanji:"鉱",reading:"こう"},{kanji:"山",reading:"ざん"}],sentence:"金が とれる {0}{1}。",furigana:"きんが とれる こうざん"},
+{type:2,words:[{kanji:"成",reading:"せい"},{kanji:"績",reading:"せき"}],sentence:"{0}{1}が 上がる。"},
+{type:3,words:[{kanji:"志",reading:"し"},{kanji:"望",reading:"ぼう"},{kanji:"校",reading:"こう"}],sentence:"兄の {0}{1}{2}。"},
+{type:3,words:[{kanji:"航",reading:"こう"},{kanji:"空",reading:"くう"},{kanji:"機",reading:"き"}],sentence:"{0}{1}{2}で 運ぶ。"},
+{type:1,words:[{kanji:"険",reading:"けわ"}],sentence:"{0}しい 表情。"},
+{type:1,words:[{kanji:"断",reading:"ことわ"}],sentence:"要求を {0}る。"},
+{type:2,words:[{kanji:"心",reading:"しん"},{kanji:"境",reading:"きょう"}],sentence:"{0}{1}が 変化する。"},
+{type:1,words:[{kanji:"逆",reading:"さか"}],sentence:"風に {0}らう。"},
+{type:2,words:[{kanji:"得",reading:"とく"},{kanji:"意",reading:"い"}],sentence:"作文が {0}{1}だ。"},
+{type:2,words:[{kanji:"余",reading:"よ"},{kanji:"興",reading:"きょう"}],sentence:"{0}{1}で 手品をする。"},
+{type:1,words:[{kanji:"比",reading:"くら"}],sentence:"高さを {0}べる。"},
+{type:1,words:[{kanji:"示",reading:"しめ"}],sentence:"駅の 方向を {0}す。"},
+{type:2,words:[{kanji:"政",reading:"せい"},{kanji:"府",reading:"ふ"}],sentence:"{0}{1}は 予算案を 提出した。",furigana:"せいふは よさんあんを ていしゅつした"},
+{type:2,words:[{kanji:"興",reading:"こう"},{kanji:"行",reading:"ぎょう"}],sentence:"コンサートの {0}{1}を 行う。"},
+{type:1,words:[{kanji:"個",reading:"こ"}],sentence:"おにぎりを 三十{0} 作る。"},
+{type:1,words:[{kanji:"在",reading:"あ"}],sentence:"生活の {0}り方を 見直す。",furigana:"せいかつの ありかたを みなおす"},
+{type:2,words:[{kanji:"支",reading:"し"},{kanji:"流",reading:"りゅう"}],sentence:"川の {0}{1}に 沿って 歩く。",furigana:"かわの しりゅうに そってあるく"},
+{type:1,words:[{kanji:"張",reading:"は"}],sentence:"綱を ぴんと {0}る。",furigana:"つなを ぴんと はる"},
+{type:2,words:[{kanji:"独",reading:"どく"},{kanji:"身",reading:"しん"}],sentence:"兄は {0}{1}だ。"},
+{type:2,words:[{kanji:"実",reading:"じつ"},{kanji:"在",reading:"ざい"}],sentence:"{0}{1}の 人物だ。"},
+{type:1,words:[{kanji:"支",reading:"ささ"}],sentence:"生活を {0}える。"},
+{type:2,words:[{kanji:"主",reading:"しゅ"},{kanji:"張",reading:"ちょう"}],sentence:"私の {0}{1}が 認められる。"},
+{type:1,words:[{kanji:"独",reading:"ひと"}],sentence:"おやつを {0}り占めする。",furigana:"おやつを ひとりじめ する"},
+{type:1,words:[{kanji:"迷",reading:"まよ"}],sentence:"暗くて 道に {0}う。"},
+{type:1,words:[{kanji:"仏",reading:"ほとけ"}],sentence:"{0}の 道に 入る。"},
+{type:2,words:[{kanji:"寄",reading:"き"},{kanji:"生",reading:"せい"}],sentence:"{0}{1}植物について 調べる。"},
+{type:2,words:[{kanji:"余",reading:"よ"},{kanji:"力",reading:"りょく"}],sentence:"{0}{1}を 残す。"},
+{type:2,words:[{kanji:"仏",reading:"ぶつ"},{kanji:"像",reading:"ぞう"}],sentence:"{0}{1}を 写生する。",furigana:"ぶつぞうを しゃせいする"},
+{type:1,words:[{kanji:"寄",reading:"よ"}],sentence:"友達の 家に {0}る。"},
+{type:1,words:[{kanji:"寄",reading:"よ"}],sentence:"{0}り道をして 帰る。"},
+{type:1,words:[{kanji:"余",reading:"あま"}],sentence:"作りすぎて 料理が {0}る。"},
+{type:2,words:[{kanji:"提",reading:"てい"},{kanji:"案",reading:"あん"}],sentence:"学級会で 席替えを {0}{1}した。"},
+{type:2,words:[{kanji:"検",reading:"けん"},{kanji:"証",reading:"しょう"}],sentence:"現場{0}{1}が 行われる。",furigana:"げんばけんしょう が おこなわれる"},
+{type:2,words:[{kanji:"花",reading:"か"},{kanji:"弁",reading:"べん"}],sentence:"{0}{1}の 数を 数える。"}
 ];
 
 let questions=[],currentSectionIndex=0,currentIndex=0,answered=false,correctCount=0,userGraded=false;
@@ -661,7 +726,8 @@ function showMenu(){
  playSound("tap");
  mainCard.classList.add("hidden");
  sectionSelectArea.classList.remove("hidden");
- headerSubtitle.textContent="第１章 〜 第１０章（問１〜問１００）";
+ const totalChapters = Math.ceil(allQuestions.length / 10);
+ headerSubtitle.textContent=`第１章 〜 第${totalChapters}章（問１〜問${allQuestions.length}）`;
  scrollToTop();
 }
 
@@ -748,7 +814,18 @@ function stopDrawing(e,i){
 function clearCanvas(){strokes=[];redrawAll()}
 function undoLastStroke(){if(strokes.length){strokes.pop();redrawAll();playSound("tap")}}
 
-function createQuestionHTML(item){let text=item.sentence;item.words.forEach((w,i)=>text=text.replace(`{${i}}`,`<span class="reading">（${w.reading||""}）</span>`));return text}
+function createQuestionHTML(item){
+  let mainText = item.sentence;
+  item.words.forEach((w,i) => {
+    mainText = mainText.replace(`{${i}}`, `<span class="reading">（${w.reading||""}）</span>`);
+  });
+
+  if(item.furigana){
+    return `<div class="sentence-furigana">${item.furigana}</div><div class="sentence-main">${mainText}</div>`;
+  }else{
+    return `<div class="sentence-main">${mainText}</div>`;
+  }
+}
 
 function showQuestion(){
  const item=questions[currentIndex];
@@ -821,7 +898,11 @@ if(window.ResizeObserver){
  ro.observe(document.body);
 }
 
-window.onload=initSectionMenu;
+window.onload=()=>{
+  initSectionMenu();
+  const totalChapters = Math.ceil(allQuestions.length / 10);
+  headerSubtitle.textContent = `第１章 〜 第${totalChapters}章（問１〜問${allQuestions.length}）`;
+};
 </script>
 </body>
 </html>
