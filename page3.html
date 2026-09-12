@@ -48,23 +48,22 @@ button{font:inherit;outline:none}
   min-height: 44px;
 }
 .menu-trigger-btn {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  position: fixed;
+  left: 16px;
+  top: 12px;
   background: var(--panel-light);
   border: 1px solid var(--border);
   color: var(--text);
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  z-index: 10;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 .menu-trigger-btn:hover {
   background: var(--border);
@@ -72,7 +71,7 @@ button{font:inherit;outline:none}
   color: var(--accent);
 }
 .menu-trigger-btn:active {
-  transform: translateY(-50%) scale(0.95);
+  transform: scale(0.95);
 }
 .menu-trigger-btn svg {
   width: 22px;
@@ -357,10 +356,17 @@ canvas {
   .card{padding:10px;border-radius:14px}
   .writing-box{width: min(27vw, 110px);}
   .scroll-sidebar{width: 28px; font-size: 9px;}
+  .menu-trigger-btn{left: 8px; top: 8px;}
 }
 </style>
 </head>
 <body>
+
+<button class="menu-trigger-btn" id="openSidebarBtn" aria-label="メニューを開く">
+  <svg viewBox="0 0 24 24">
+    <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+  </svg>
+</button>
 
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
 <aside class="sidebar" id="sidebar">
@@ -404,7 +410,7 @@ canvas {
       </div>
       <span class="nav-arrow">➔</span>
     </a>
-        </nav>
+  </nav>
   <div class="sidebar-footer">
     ひなたぼっこ 学習アプリ シリーズ
   </div>
@@ -412,11 +418,6 @@ canvas {
 
 <div class="app">
   <div class="header-container">
-    <button class="menu-trigger-btn" id="openSidebarBtn" aria-label="メニューを開く">
-      <svg viewBox="0 0 24 24">
-        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-      </svg>
-    </button>
     <header>
       <h1 class="title">５年生漢字 小テスト復習</h1>
       <div class="subtitle" id="headerSubtitle">全19問</div>
