@@ -13,16 +13,209 @@
   -webkit-user-select:none;
   user-select:none;
 }
-:root{--bg:#0f1219;--panel:#181d28;--panel-light:#222836;--border:#323b4e;--text:#f5f7fa;--sub:#9da6b5;--accent:#657dff;--success:#4cd964;--danger:#ff3b30}
+:root{
+  --bg:#0f1219;
+  --panel:#181d28;
+  --panel-light:#222836;
+  --border:#323b4e;
+  --text:#f5f7fa;
+  --sub:#9da6b5;
+  --accent:#657dff;
+  --accent-hover:#4f67f5;
+  --success:#4cd964;
+  --danger:#ff3b30;
+}
 html,body{width:100%;margin:0;padding:0;background:var(--bg);scroll-behavior:smooth}
-body{min-height:100vh;background:radial-gradient(circle at 50% -10%,rgba(101,125,255,.15),transparent 50%),var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP","Yu Gothic",sans-serif;display:flex;justify-content:center;overflow-x:hidden}
+body{
+  min-height:100vh;
+  background:radial-gradient(circle at 50% -10%,rgba(101,125,255,.15),transparent 50%),var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP","Yu Gothic",sans-serif;
+  display:flex;
+  justify-content:center;
+  overflow-x:hidden;
+  position:relative;
+}
 button{font:inherit;outline:none}
-.app{width:min(860px,100%);padding:12px 16px}
+.app{width:min(860px,100%);padding:12px 16px;position:relative}
 
-/* 要望1: タイトル周りを小さくして横並びに配置 */
-header{text-align:center;margin-bottom:12px;display:flex;align-items:baseline;justify-content:center;gap:12px;flex-wrap:wrap}
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 12px;
+  min-height: 44px;
+}
+.menu-trigger-btn {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--panel-light);
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.menu-trigger-btn:hover {
+  background: var(--border);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.menu-trigger-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+.menu-trigger-btn svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+}
+
+header{
+  text-align:center;
+  display:flex;
+  align-items:baseline;
+  justify-content:center;
+  gap:12px;
+  flex-wrap:wrap;
+  padding: 0 44px;
+}
 .title{margin:0;font-size:clamp(16px,3.5vw,20px);font-weight:900;letter-spacing:.04em;background:linear-gradient(135deg,#fff,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .subtitle{margin:0;color:var(--sub);font-size:12px}
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.sidebar-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: min(300px, 80vw);
+  height: 100%;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  z-index: 1000;
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+}
+.sidebar.active {
+  transform: translateX(0);
+}
+
+.sidebar-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.02);
+}
+.sidebar-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sidebar-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--sub);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+.sidebar-close-btn:hover {
+  color: var(--text);
+}
+
+.sidebar-nav {
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  flex: 1;
+}
+.nav-link-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--panel-light);
+  border: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+.nav-link-item:hover {
+  border-color: var(--accent);
+  background: rgba(101, 125, 255, 0.12);
+  transform: translateX(4px);
+}
+.nav-link-item.current {
+  border-color: var(--accent);
+  background: rgba(101, 125, 255, 0.2);
+}
+.nav-link-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nav-icon {
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+}
+.nav-arrow {
+  color: var(--sub);
+  font-size: 12px;
+}
+
+.sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  color: var(--sub);
+  font-size: 11px;
+  text-align: center;
+}
 
 .section-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:12px}
 .section-card{background:var(--panel-light);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;cursor:pointer;transition:.2s}
@@ -40,7 +233,6 @@ header{text-align:center;margin-bottom:12px;display:flex;align-items:baseline;ju
 .reading{color:#a5b4fc;font-weight:700;white-space:nowrap}
 .question-note{text-align:center;color:var(--sub);font-size:11px;margin-top:6px;margin-bottom:10px}
 
-/* 手書きエリアとスクロールゾーンのコンテナ */
 .writing-container {
   display: flex;
   gap: 12px;
@@ -49,7 +241,6 @@ header{text-align:center;margin-bottom:12px;display:flex;align-items:baseline;ju
   width: 100%;
 }
 
-/* 横並び配置 */
 .writing-area {
   display: flex;
   flex-direction: row;
@@ -62,7 +253,6 @@ header{text-align:center;margin-bottom:12px;display:flex;align-items:baseline;ju
   overflow: visible;
 }
 
-/* スクロール補助用サイドバー */
 .scroll-sidebar {
   width: 40px;
   background: rgba(255, 255, 255, 0.04);
@@ -171,9 +361,67 @@ canvas {
 </style>
 </head>
 <body>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-title">
+      <span>📚 教材メニュー</span>
+    </div>
+    <button class="sidebar-close-btn" id="closeSidebarBtn" aria-label="閉じる">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="https://hinatabokko-jp.github.io/hinatabokko-app/" class="nav-link-item">
+      <div class="nav-link-content">
+        <span class="nav-icon">📝</span>
+        <span>漢字テスト（１）</span>
+      </div>
+      <span class="nav-arrow">➔</span>
+    </a>
+    <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page3" class="nav-link-item current">
+      <div class="nav-link-content">
+        <span class="nav-icon">✏️</span>
+        <span>漢字小テスト復習</span>
+      </div>
+      <span class="nav-arrow">➔</span>
+    </a>
+    <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page2" class="nav-link-item">
+      <div class="nav-link-content">
+        <span class="nav-icon">🧮</span>
+        <span>計算トレーニング</span>
+      </div>
+      <span class="nav-arrow">➔</span>
+    </a>
+    <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page4" class="nav-link-item">
+      <div class="nav-link-content">
+        <span class="nav-icon">🎴</span>
+        <span>百人一首</span>
+      </div>
+      <span class="nav-arrow">➔</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    ひなたぼっこ 学習アプリ シリーズ
+  </div>
+</aside>
+
 <div class="app">
-<!-- 要望1: タイトルとサブタイトルを並べて配置 -->
-<header><h1 class="title">５年生漢字 小テスト復習</h1><div class="subtitle" id="headerSubtitle">全19問</div></header>
+  <div class="header-container">
+    <button class="menu-trigger-btn" id="openSidebarBtn" aria-label="メニューを開く">
+      <svg viewBox="0 0 24 24">
+        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+      </svg>
+    </button>
+    <header>
+      <h1 class="title">５年生漢字 小テスト復習</h1>
+      <div class="subtitle" id="headerSubtitle">全19問</div>
+    </header>
+  </div>
 
 <div id="sectionSelectArea"><div class="section-grid" id="sectionGrid"></div></div>
 
@@ -184,10 +432,8 @@ canvas {
 </div>
 
 <section id="testArea">
-<!-- 要望2: QUESTIONラベル行を削除 -->
 <div class="question" id="question"></div>
 <div class="question-note">（読み仮名）の漢字を下の枠内に書いてください</div>
-<!-- 要望4: あなたの答え（手書き）ラベル行を削除 -->
 
 <div class="writing-container">
   <div class="writing-area" id="writingArea"></div>
@@ -203,7 +449,6 @@ canvas {
 <div class="buttons"><button class="btn btn-check" id="checkBtn">✓ 答え合わせ</button></div>
 
 <div class="answer-section">
-<!-- 要望5: 正解ラベル行を削除 -->
 <div class="answer-box"><span class="answer-placeholder" id="answerPlaceholder">「答え合わせ」を押すと正解が表示されます</span><div class="answer" id="answer"></div></div>
 <div class="self-grading" id="selfGrading">
 <button class="btn btn-correct" id="correctBtn">⭕ 合ってた！</button>
@@ -266,7 +511,27 @@ const clearBtn=$("clearBtn"),undoBtn=$("undoBtn"),checkBtn=$("checkBtn"),nextBtn
 const answer=$("answer"),answerPlaceholder=$("answerPlaceholder"),selfGrading=$("selfGrading"),correctBtn=$("correctBtn"),incorrectBtn=$("incorrectBtn");
 const testArea=$("testArea"),resultArea=$("resultArea"),restartBtn=$("restartBtn"),backToMenuBtn=$("backToMenuBtn"),finalScore=$("finalScore");
 
-// 要望3: 読み上げ機能は不使用（効果音のみ定義）
+// サイドバー要素
+const openSidebarBtn = $("openSidebarBtn");
+const closeSidebarBtn = $("closeSidebarBtn");
+const sidebar = $("sidebar");
+const sidebarOverlay = $("sidebarOverlay");
+
+function openSidebar() {
+  sidebar.classList.add("active");
+  sidebarOverlay.classList.add("active");
+  playSound("tap");
+}
+
+function closeSidebar() {
+  sidebar.classList.remove("active");
+  sidebarOverlay.classList.remove("active");
+}
+
+openSidebarBtn.addEventListener("click", openSidebar);
+closeSidebarBtn.addEventListener("click", closeSidebar);
+sidebarOverlay.addEventListener("click", closeSidebar);
+
 let audioCtx = null;
 function initAudio() {
   if(!audioCtx) {
