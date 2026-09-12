@@ -83,23 +83,25 @@
 
 
 /* ハンバーガーボタンのスタイル (画面左上に固定) */
-#hamburger-btn {
+.hamburger-btn {
   position: fixed;
-  top: 15px;
-  left: 15px;
+  top: 12px;
+  left: 12px;
+  z-index: 1000;
   width: 44px;
   height: 44px;
-  background-color: #333;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+  background: rgba(24, 29, 40, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 5px;
-  z-index: 1000;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: transform 0.2s, background-color 0.2s;
 }
 
 #hamburger-btn span {
