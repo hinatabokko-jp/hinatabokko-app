@@ -13,12 +13,148 @@
   -webkit-user-select:none;
   user-select:none;
 }
-:root{--bg:#0f1219;--panel:#181d28;--panel-light:#222836;--border:#323b4e;--text:#f5f7fa;--sub:#9da6b5;--accent:#657dff;--success:#4cd964;--danger:#ff3b30}
+:root{
+  --bg:#0f1219;
+  --panel:#181d28;
+  --panel-light:#222836;
+  --border:#323b4e;
+  --text:#f5f7fa;
+  --sub:#9da6b5;
+  --accent:#657dff;
+  --success:#4cd964;
+  --danger:#ff3b30;
+}
 html,body{width:100%;margin:0;padding:0;background:var(--bg);scroll-behavior:smooth}
 body{min-height:100vh;background:radial-gradient(circle at 50% -10%,rgba(101,125,255,.15),transparent 50%),var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP","Yu Gothic",sans-serif;display:flex;justify-content:center;overflow-x:hidden}
 button{font:inherit;outline:none}
-.app{width:min(860px,100%);padding:12px 16px}
-header{text-align:center;margin-bottom:12px;display:flex;align-items:baseline;justify-content:center;gap:12px;flex-wrap:wrap}
+.app{width:min(860px,100%);padding:12px 16px;position:relative}
+
+/* ハンバーガーボタン & サイドバー用スタイル */
+.hamburger-btn {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 1000;
+  width: 44px;
+  height: 44px;
+  background: rgba(24, 29, 40, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: transform 0.2s, background-color 0.2s;
+}
+.hamburger-btn:active {
+  transform: scale(0.95);
+}
+.hamburger-bar {
+  width: 20px;
+  height: 2px;
+  background-color: var(--text);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+/* サイドバー オーバーレイ */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1001;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.sidebar-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* サイドバー本体 */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: min(280px, 80vw);
+  height: 100vh;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  z-index: 1002;
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+  overflow-y: auto;
+}
+.sidebar.active {
+  transform: translateX(0);
+}
+.sidebar-header {
+  padding: 20px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sidebar-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sidebar-close {
+  background: transparent;
+  border: none;
+  color: var(--sub);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+}
+.sidebar-nav {
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  color: var(--text);
+  text-decoration: none;
+  border-radius: 10px;
+  background: var(--panel-light);
+  border: 1px solid var(--border);
+  font-weight: 600;
+  font-size: 14px;
+  transition: background-color 0.2s, transform 0.1s, border-color 0.2s;
+}
+.sidebar-link:hover {
+  border-color: var(--accent);
+  background: rgba(101, 125, 255, 0.15);
+}
+.sidebar-link:active {
+  transform: scale(0.98);
+}
+.sidebar-link-icon {
+  font-size: 18px;
+}
+
+header{text-align:center;margin-bottom:12px;margin-top:8px;display:flex;align-items:baseline;justify-content:center;gap:12px;flex-wrap:wrap}
 .title{margin:0;font-size:clamp(16px,3.5vw,20px);font-weight:900;letter-spacing:.04em;background:linear-gradient(135deg,#fff,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .subtitle{margin:0;color:var(--sub);font-size:12px}
 .section-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:12px}
@@ -168,6 +304,45 @@ canvas {
 </style>
 </head>
 <body>
+
+<!-- ハンバーガーボタン -->
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="メニューを開く">
+  <div class="hamburger-bar"></div>
+  <div class="hamburger-bar"></div>
+  <div class="hamburger-bar"></div>
+</button>
+
+<!-- サイドバーオーバーレイ -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- サイドバー -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-title">
+      <span>📚 学習アプリメニュー</span>
+    </div>
+    <button class="sidebar-close" id="sidebarCloseBtn" aria-label="閉じる">✕</button>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="https://hinatabokko-jp.github.io/hinatabokko-app/" class="sidebar-link">
+      <span class="sidebar-link-icon">📝</span>
+      <span>漢字テスト（１）</span>
+    </a>
+    <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page3" class="sidebar-link">
+      <span class="sidebar-link-icon">🔄</span>
+      <span>漢字小テスト復習</span>
+    </a>
+    <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page2" class="sidebar-link">
+      <span class="sidebar-link-icon">🧮</span>
+      <span>計算トレーニング</span>
+    </a>
+    <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page2" class="sidebar-link">
+      <span class="sidebar-link-icon">🎴</span>
+      <span>百人一首</span>
+    </a>
+  </nav>
+</aside>
+
 <div class="app">
 <header><h1 class="title">小学５年生 漢字（１）</h1><div class="subtitle" id="headerSubtitle">第１章 〜 第１０章（問１〜問１０0）</div></header>
 
@@ -338,6 +513,33 @@ const questionEl=$("question"),currentNumberEl=$("currentNumber"),totalNumberEl=
 const clearBtn=$("clearBtn"),undoBtn=$("undoBtn"),checkBtn=$("checkBtn"),nextBtn=$("nextBtn"),finishBtn=$("finishBtn");
 const answer=$("answer"),answerPlaceholder=$("answerPlaceholder"),selfGrading=$("selfGrading"),correctBtn=$("correctBtn"),incorrectBtn=$("incorrectBtn");
 const testArea=$("testArea"),resultArea=$("resultArea"),restartBtn=$("restartBtn"),backToMenuBtn=$("backToMenuBtn"),finalScore=$("finalScore");
+
+// サイドバー要素
+const hamburgerBtn = $("hamburgerBtn"), sidebar = $("sidebar"), sidebarOverlay = $("sidebarOverlay"), sidebarCloseBtn = $("sidebarCloseBtn");
+
+function toggleSidebar() {
+  playSound("tap");
+  const isActive = sidebar.classList.contains("active");
+  if (isActive) {
+    closeSidebar();
+  } else {
+    openSidebar();
+  }
+}
+
+function openSidebar() {
+  sidebar.classList.add("active");
+  sidebarOverlay.classList.add("active");
+}
+
+function closeSidebar() {
+  sidebar.classList.remove("active");
+  sidebarOverlay.classList.remove("active");
+}
+
+hamburgerBtn.addEventListener("click", toggleSidebar);
+sidebarOverlay.addEventListener("click", closeSidebar);
+sidebarCloseBtn.addEventListener("click", closeSidebar);
 
 let audioCtx = null;
 function initAudio() {
