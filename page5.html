@@ -6,6 +6,8 @@
   <title>ビジネス用語クイズ</title>
   <!-- 紙吹雪（クラッカー）用ライブラリ -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  
+  <!-- STREAMING_CHUNK:Styling the dark mode interface... -->
   <style>
     :root {
       --bg-color: #0f172a;
@@ -44,6 +46,7 @@
       padding: 28px;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
       border: 1px solid var(--border-color);
+      position: relative;
     }
 
     .header {
@@ -61,7 +64,7 @@
     }
 
     .progress {
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       font-weight: bold;
       color: var(--accent-color);
     }
@@ -179,51 +182,95 @@
       color: #e2e8f0;
     }
 
-    .next-btn {
+    .action-btn {
       display: none;
       width: 100%;
       background: var(--accent-gradient);
-      color: #000;
+      color: #0f172a;
       font-weight: bold;
       border: none;
       padding: 16px;
       border-radius: 10px;
       font-size: 1.1rem;
       cursor: pointer;
-      transition: opacity 0.2s;
+      transition: opacity 0.2s, transform 0.1s;
     }
 
-    .next-btn:hover {
-      opacity: 0.9;
+    .action-btn:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    /* 最終結果画面 */
+    .final-score-screen {
+      display: none;
+      text-align: center;
+      padding: 20px 0;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .final-score-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 16px;
+      color: var(--text-color);
+    }
+
+    .score-display {
+      font-size: 3rem;
+      font-weight: 800;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 16px 0;
+    }
+
+    .score-comment {
+      font-size: 1.1rem;
+      color: var(--text-sub);
+      margin-bottom: 28px;
+      line-height: 1.5;
     }
   </style>
 </head>
 <body>
 
+  <!-- STREAMING_CHUNK:Rendering HTML container... -->
   <div class="quiz-container">
     <div class="header">
       <div class="title">ビジネス用語マスター</div>
-      <div class="progress" id="progress">第 1 問</div>
+      <div class="progress" id="progress">第 1 / 10 問</div>
     </div>
 
-    <div class="question-box">
-      <div class="question-label">以下の文の言葉の意味として最も適切なものは？</div>
-      <div class="question-text" id="questionText"></div>
+    <!-- クイズ本体表示エリア -->
+    <div id="quizBody">
+      <div class="question-box">
+        <div class="question-label">以下の文の言葉の意味として最も適切なものは？</div>
+        <div class="question-text" id="questionText"></div>
+      </div>
+
+      <div class="options-grid" id="optionsContainer"></div>
+
+      <div class="result-box" id="resultBox">
+        <div class="result-status" id="resultStatus"></div>
+        <div class="explanation-title">【解説】</div>
+        <div class="explanation-text" id="explanationText"></div>
+      </div>
+
+      <button class="action-btn" id="nextBtn" onclick="nextQuestion()">次の問題へ</button>
     </div>
 
-    <div class="options-grid" id="optionsContainer"></div>
-
-    <div class="result-box" id="resultBox">
-      <div class="result-status" id="resultStatus"></div>
-      <div class="explanation-title">【解説】</div>
-      <div class="explanation-text" id="explanationText"></div>
+    <!-- 10問完了時の結果画面 -->
+    <div class="final-score-screen" id="finalScoreScreen">
+      <div class="final-score-title">🎯 クイズ結果 🎯</div>
+      <div class="score-display" id="finalScoreText">0 / 10</div>
+      <div class="score-comment" id="scoreComment"></div>
+      <button class="action-btn" id="restartBtn" style="display: block;" onclick="initQuiz()">もう一度挑戦する</button>
     </div>
-
-    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">次の問題へ</button>
   </div>
 
   <script>
-    // ビジネス用語データ
+    /* STREAMING_CHUNK:Defining business terms dataset... */
     const quizData = [
       { word: "アジェンダ", meaning: "議題", detail: "会議や打ち合わせで「何について話すのか」を整理したもの。普通に「議題」と言えばいいところを、あえてアジェンダと言うと一気にビジネス感が増す。", example: "今日のアジェンダを最初に共有しておきます。" },
       { word: "アサイン", meaning: "割り当て", detail: "仕事や役割を人に割り当てること。「担当してもらう」「任せる」という意味で使われる。", example: "この案件、誰をアサインするか決めておきましょう。" },
@@ -265,9 +312,12 @@
       { word: "アウフヘーベン", meaning: "対立するものを統合して新しい段階へ進むこと", detail: "哲学用語が由来で、対立する二つの考えを単純にどちらか選ぶのではなく、両方を活かしてより高い次元の考えにまとめること。", example: "コスト削減とサービス品質、この二つをアウフヘーベンできる方法を考えましょう。" }
     ];
 
+    const TOTAL_QUESTIONS_PER_ROUND = 10; // 1回の出題数
     let currentQuestionIndex = 0;
     let shuffledQuizList = [];
+    let correctCount = 0;
 
+    /* STREAMING_CHUNK:Configuring audio synthesized feedback... */
     // Web Audio API による「かわいい効果音」の再生
     function playCuteWinSound() {
       try {
@@ -310,10 +360,16 @@
       return arr;
     }
 
-    // 初期化
+    /* STREAMING_CHUNK:Initializing state and question handler... */
+    // 初期化（全体の全問題からランダムで10問のみピックアップ）
     function initQuiz() {
-      shuffledQuizList = shuffleArray(quizData);
+      shuffledQuizList = shuffleArray(quizData).slice(0, TOTAL_QUESTIONS_PER_ROUND);
       currentQuestionIndex = 0;
+      correctCount = 0;
+
+      document.getElementById('quizBody').style.display = 'block';
+      document.getElementById('finalScoreScreen').style.display = 'none';
+
       loadQuestion();
     }
 
@@ -322,7 +378,7 @@
       const q = shuffledQuizList[currentQuestionIndex];
       
       // 進捗表示
-      document.getElementById('progress').innerText = `第 ${currentQuestionIndex + 1} 問 / 全 ${shuffledQuizList.length} 問`;
+      document.getElementById('progress').innerText = `第 ${currentQuestionIndex + 1} / ${TOTAL_QUESTIONS_PER_ROUND} 問`;
 
       // 例文中のターゲット語句を強調表示に置換
       const highlightedExample = q.example.replace(
@@ -335,7 +391,7 @@
       document.getElementById('resultBox').style.display = 'none';
       document.getElementById('nextBtn').style.display = 'none';
 
-      // 選択肢の作成（正解1個 + 誤解4個 = 計5個）
+      // 選択肢の作成（正解1個 + 誤答4個 = 計5個）
       const otherMeanings = quizData
         .filter(item => item.word !== q.word)
         .map(item => item.meaning);
@@ -355,6 +411,7 @@
       });
     }
 
+    /* STREAMING_CHUNK:Handling option clicks and celebration... */
     // 選択肢クリック時の処理
     function selectOption(selected, currentQuiz) {
       const buttons = document.querySelectorAll('.option-btn');
@@ -366,6 +423,7 @@
       const explanationText = document.getElementById('explanationText');
 
       if (isCorrect) {
+        correctCount++;
         resultStatus.className = 'result-status correct';
         resultStatus.innerHTML = '🎉 正解！';
         
@@ -395,18 +453,47 @@
       // 解説の表示
       explanationText.innerHTML = `<strong>【${currentQuiz.word}】</strong> ${currentQuiz.meaning}<br><br>${currentQuiz.detail}`;
       resultBox.style.display = 'block';
-      document.getElementById('nextBtn').style.display = 'block';
+      
+      // ボタンテキストの決定
+      const nextBtn = document.getElementById('nextBtn');
+      if (currentQuestionIndex === TOTAL_QUESTIONS_PER_ROUND - 1) {
+        nextBtn.innerText = "結果を見る";
+      } else {
+        nextBtn.innerText = "次の問題へ";
+      }
+      nextBtn.style.display = 'block';
     }
 
-    // 次の問題へ
+    /* STREAMING_CHUNK:Managing quiz navigation and final screen... */
+    // 次の問題へ（または最終結果表示）
     function nextQuestion() {
       currentQuestionIndex++;
-      if (currentQuestionIndex < shuffledQuizList.length) {
+      if (currentQuestionIndex < TOTAL_QUESTIONS_PER_ROUND) {
         loadQuestion();
       } else {
-        // 全問終了時
-        alert('すべての問題が終了しました！最初に戻ります。');
-        initQuiz();
+        showFinalResults();
+      }
+    }
+
+    // 最終結果画面の表示
+    function showFinalResults() {
+      document.getElementById('quizBody').style.display = 'none';
+      document.getElementById('finalScoreScreen').style.display = 'block';
+      document.getElementById('progress').innerText = "完了！";
+
+      document.getElementById('finalScoreText').innerText = `${correctCount} / ${TOTAL_QUESTIONS_PER_ROUND}`;
+
+      const commentEl = document.getElementById('scoreComment');
+      if (correctCount === 10) {
+        commentEl.innerText = "パーフェクト！ビジネス用語マスターです👏";
+        // 10問全問正解時の大連鎖クラッカー
+        confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
+      } else if (correctCount >= 7) {
+        commentEl.innerText = "素晴らしい結果です！この調子で使いこなしていきましょう！";
+      } else if (correctCount >= 4) {
+        commentEl.innerText = "惜しい！繰り返し解いて定着させましょう。";
+      } else {
+        commentEl.innerText = "伸びしろタップリ！もう一度挑戦してみましょう。";
       }
     }
 
@@ -415,3 +502,4 @@
   </script>
 </body>
 </html>
+```eof
