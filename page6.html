@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="ja" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>統合型 時間＆勤務計算ツール</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js -->
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Roboto+Mono:wght@700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        wa: {
+                            indigo: '#0f172a',
+                            accent: '#3b82f6',
+                            gold: '#f59e0b',
+                            bg: '#090d16',
+                            card: '#1e293b',
+                            border: '#334155'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Noto Sans JP"', 'sans-serif'],
+                        mono: ['"Roboto Mono"', 'monospace'],
+                    }
+                }
+            }
+        };
+
+        function combinedApp() {
+            return {
+                // アクティブタブ ('work' または 'calc')
+                currentTab: 'work',
+
+                // 共通トースト
+                toast: {
+                    show: false,
+                    message: ''
+                },
+
+                showToast(msg) {
+                    this.toast.message = msg;
+                    this.toast.show = true;
+                    setTimeout(() => {
+                        this.toast.show = false;
+                    }, 2000);
+                },
+
+                copyText(text) {
+                    if (!text) return;
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    try {
+                        document.execCommand('copy');
+                        this.showToast(`コピーしました: ${text}`);
+                    } catch (err) {
+                        console.error('Copy failed', err);
+                    }
+                    document.body.removeChild(textarea);
+                },
+
+                // ==========================================
+                // 1. 勤務・残業時間計算 機能 State & Logic
+                // ==========================================
+                work: {
+                    startRaw: '0852',
+                    endRaw: '1607',
+                    breakMin: 45,
+                    otStartRaw: '1607',
+                    isNextDay: false,
+
+                    clearAll() {
+                        this.startRaw = '';
+                        this.endRaw = '';
+                        this.breakMin = 45;
+                        this.otStartRaw = '';
+                        this.isNextDay = false;
+                    }
+                },
+
+                // 4桁数字をHH:MMに整形
+                formatDisplay(val) {
+                    if (!val) return '';
+                    let str = val.toString().replace(/\D/g, '');
+                    if (str.length < 4) return str;
+                    
+                    let hh = parseInt(str.slice(0, 2), 10);
+                    let mm = parseInt(str.slice(2, 4), 10);
+
+                    if (hh > 23) hh = 23;
+                    if (mm > 59) mm = 59;
+
+                    const formattedHH = hh.toString().padStart(2, '0');
+                    const formattedMM = mm.toString().padStart(2, '0');
+
+                    return `${formattedHH}:${formattedMM}`;
+                },
+
+                // 分数を時間・分テキストに変換
+                minsToHM(mins) {
+                    if (mins <= 0) return '0分';
+                    const h = Math.floor(mins / 60);
+                    const m = mins % 60;
+                    if (h === 0) return `${m}分`;
+                    if (m === 0) return `${h}時間`;
+                    return `${h}時間${m}分`;
+                },
+
+                // 勤務時間計算結果の算出 getter
+                get workResult() {
+                    const startStr = this.formatDisplay(this.work.startRaw);
+                    const endStr = this.formatDisplay(this.work.endRaw);
+
+                    if (!/^\d{2}:\d{2}$/.test(startStr) || !/^\d{2}:\d{2}$/.test(endStr)) {
+                        return { valid: false, text: '出勤・退勤時刻を数字4桁で入力してください' };
+                    }
+
+                    const [sH, sM] = startStr.split(':').map(Number);
+                    const [eH, eM] = endStr.split(':').map(Number);
+
+                    let startMinVal = sH * 60 + sM;
+                    let endMinVal = eH * 60 + eM;
+
+                    if (this.work.isNextDay) {
+                        endMinVal += 1440;
+                    }
+
+                    let totalSpanMin = endMinVal - startMinVal;
+
+                    if (totalSpanMin < 0) {
+                        return { valid: false, text: '退勤時刻は出勤時刻より後の時間を指定してください（翌日の場合は「翌日」を選択）' };
+                    }
+
+                    const bMin = parseInt(this.work.breakMin, 10) || 0;
+                    let totalWorkMin = Math.max(0, totalSpanMin - bMin);
+
+                    let overtimeMin = 0;
+                    const otStr = this.formatDisplay(this.work.otStartRaw);
+                    
+                    if (/^\d{2}:\d{2}$/.test(otStr)) {
+                        const [otH, otM] = otStr.split(':').map(Number);
+                        let otMinVal = otH * 60 + otM;
+
+                        if (otMinVal < startMinVal && this.work.isNextDay) {
+                            otMinVal += 1440;
+                        }
+
+                        if (endMinVal > otMinVal) {
+                            overtimeMin = endMinVal - otMinVal;
+                        }
+                    }
+
+                    return {
+                        valid: true,
+                        totalWorkMin: totalWorkMin,
+                        totalWorkText: this.minsToHM(totalWorkMin),
+                        totalWorkDecimal: (totalWorkMin / 60).toFixed(2),
+                        overtimeMin: overtimeMin,
+                        overtimeText: this.minsToHM(overtimeMin),
+                        overtimeDecimal: (overtimeMin / 60).toFixed(2)
+                    };
+                },
+
+                // ==========================================
+                // 2. 時間計算機（ひっ算） 機能 State & Logic
+                // ==========================================
+                calc: {
+                    h1: '0',
+                    m1: '0',
+                    op: '+',
+                    h2: '0',
+                    m2: '0',
+                    activeField: 'h2',
+
+                    pressNum(num) {
+                        let val = this[this.activeField] || '';
+                        if (val === '0') val = '';
+
+                        if (this.activeField.startsWith('h')) {
+                            if (val.length < 3) this[this.activeField] = val + num.toString();
+                        } else {
+                            if (val.length < 2) this[this.activeField] = val + num.toString();
+                        }
+                    },
+
+                    setFocus(field) {
+                        this.activeField = field;
+                    },
+
+                    backspace() {
+                        let val = this[this.activeField] || '';
+                        if (val.length > 0) {
+                            this[this.activeField] = val.slice(0, -1);
+                        }
+                    },
+
+                    clearAll() {
+                        this.h1 = '0';
+                        this.m1 = '0';
+                        this.h2 = '0';
+                        this.m2 = '0';
+                        this.op = '+';
+                        this.activeField = 'h1';
+                    }
+                },
+
+                toMins(h, m) {
+                    const hours = parseInt(h, 10) || 0;
+                    const mins = parseInt(m, 10) || 0;
+                    return hours * 60 + mins;
+                },
+
+                formatMins(totalMins) {
+                    const isNegative = totalMins < 0;
+                    const absMins = Math.abs(totalMins);
+                    const h = Math.floor(absMins / 60);
+                    const m = absMins % 60;
+
+                    let str = '';
+                    if (h > 0) str += `${h}時間`;
+                    if (m > 0 || h === 0) str += `${m}分`;
+                    return isNegative ? `-${str}` : str;
+                },
+
+                get calcResult() {
+                    const mins1 = this.toMins(this.calc.h1, this.calc.m1);
+                    const mins2 = this.toMins(this.calc.h2, this.calc.m2);
+
+                    let total = 0;
+                    if (this.calc.op === '+') {
+                        total = mins1 + mins2;
+                    } else {
+                        total = mins1 - mins2;
+                    }
+
+                    return {
+                        totalMins: total,
+                        hmText: this.formatMins(total),
+                        decimalText: (total / 60).toFixed(2)
+                    };
+                }
+            };
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #0b0f19;
+            color: #f1f5f9;
+        }
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between" x-data="combinedApp()">
+
+    <div x-show="toast.show" 
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 transform -translate-y-4"
+         x-transition:enter-end="opacity-100 transform translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 transform translate-y-0"
+         x-transition:leave-end="opacity-0 transform -translate-y-4"
+         class="fixed top-4 right-4 z-50 bg-emerald-900 text-emerald-100 px-5 py-3 rounded-xl shadow-2xl flex items-center space-x-3 border border-emerald-500">
+        <i class="fa-solid fa-circle-check text-xl text-emerald-400"></i>
+        <span x-text="toast.message" class="text-sm font-bold"></span>
+    </div>
+
+    <header class="bg-slate-900 text-white shadow-lg border-b border-slate-800 sticky top-0 z-40">
+        <div class="max-w-2xl mx-auto px-4 py-3">
+            <div class="flex justify-between items-center mb-3">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-black text-lg shadow-md border border-indigo-400/30">
+                        <i class="fa-solid" :class="currentTab === 'work' ? 'fa-clock' : 'fa-calculator'"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg md:text-xl font-black tracking-wide text-slate-100" x-text="currentTab === 'work' ? '勤務・残業時間計算' : '時間計算機 (ひっ算)'"></h1>
+                        <p class="text-xs text-slate-400" x-text="currentTab === 'work' ? '数字4桁入力専用計算ツール' : '足し算・引き算ツール'"></p>
+                    </div>
+                </div>
+
+                <button @click="currentTab === 'work' ? work.clearAll() : calc.clearAll()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-3 py-1.5 rounded-lg border border-slate-700 transition flex items-center gap-1">
+                    <i class="fa-solid fa-rotate-left"></i> クリア
+                </button>
+            </div>
+
+            <!-- Tab Buttons -->
+            <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
+                <button @click="currentTab = 'work'" 
+                        :class="currentTab === 'work' ? 'bg-indigo-600 text-white font-bold shadow' : 'text-slate-400 hover:text-slate-200'"
+                        class="flex-1 py-2 rounded-lg text-xs md:text-sm transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-clock"></i>
+                    <span>勤務・残業計算</span>
+                </button>
+                <button @click="currentTab = 'calc'" 
+                        :class="currentTab === 'calc' ? 'bg-indigo-600 text-white font-bold shadow' : 'text-slate-400 hover:text-slate-200'"
+                        class="flex-1 py-2 rounded-lg text-xs md:text-sm transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-calculator"></i>
+                    <span>時間ひっ算</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-2xl mx-auto px-4 py-5 flex-grow w-full space-y-4">
+
+        <!-- ========================================== -->
+        <!-- TAB 1: 勤務・残業時間計算                      -->
+        <!-- ========================================== -->
+        <section x-show="currentTab === 'work'" x-transition:enter="transition duration-200 opacity-0" x-transition:enter-end="opacity-100" class="bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 overflow-hidden">
+            
+            <div class="bg-slate-950/90 text-slate-200 px-5 py-2.5 flex justify-between items-center border-b border-slate-800">
+                <span class="text-xs sm:text-sm font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-bolt text-indigo-400"></i> 数字4桁を入力 (例: 0852)
+                </span>
+                <span class="text-[11px] text-slate-400 font-mono">年月日不要</span>
+            </div>
+
+            <div class="p-4 sm:p-5 space-y-4">
+
+                <!-- 出勤時刻 & 退勤時刻 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    
+                    <!-- 出勤時刻 -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                1. 出勤時刻
+                            </label>
+                            <span class="text-xs font-mono font-bold text-indigo-400" x-text="formatDisplay(work.startRaw) ? '認識: ' + formatDisplay(work.startRaw) : ''"></span>
+                        </div>
+                        <div class="relative">
+                            <input type="number" 
+                                   inputmode="numeric" 
+                                   pattern="[0-9]*" 
+                                   x-model="work.startRaw" 
+                                   placeholder="0852" 
+                                   class="w-full bg-slate-950 font-bold text-white border border-slate-700 rounded-xl pl-4 pr-10 py-2.5 text-2xl font-mono focus:outline-none focus:border-indigo-500 transition shadow-inner placeholder-slate-700 tracking-wider">
+                            <button x-show="work.startRaw" @click="work.startRaw = ''" class="absolute right-3 top-3.5 text-slate-500 hover:text-slate-300">
+                                <i class="fa-solid fa-circle-xmark text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 退勤時刻 -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                2. 退勤時刻
+                            </label>
+
+                            <!-- 同日 / 翌日 タブ -->
+                            <div class="flex bg-slate-950 p-1 rounded-lg border border-slate-800">
+                                <button @click="work.isNextDay = false" 
+                                        :class="!work.isNextDay ? 'bg-indigo-600 text-white font-bold shadow' : 'text-slate-400 hover:text-slate-200'"
+                                        class="px-2.5 py-0.5 rounded text-xs transition">
+                                    同日
+                                </button>
+                                <button @click="work.isNextDay = true" 
+                                        :class="work.isNextDay ? 'bg-amber-600 text-white font-bold shadow' : 'text-slate-400 hover:text-slate-200'"
+                                        class="px-2.5 py-0.5 rounded text-xs transition flex items-center gap-1">
+                                    <span>翌日</span>
+                                    <span class="text-[9px] bg-amber-950 px-1 rounded border border-amber-500/30">+24h</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center mb-1">
+                            <span></span>
+                            <span class="text-xs font-mono font-bold text-indigo-400" x-text="formatDisplay(work.endRaw) ? '認識: ' + formatDisplay(work.endRaw) : ''"></span>
+                        </div>
+
+                        <div class="relative">
+                            <input type="number" 
+                                   inputmode="numeric" 
+                                   pattern="[0-9]*" 
+                                   x-model="work.endRaw" 
+                                   placeholder="1607" 
+                                   class="w-full bg-slate-950 font-bold text-white border border-slate-700 rounded-xl pl-4 pr-10 py-2.5 text-2xl font-mono focus:outline-none focus:border-indigo-500 transition shadow-inner placeholder-slate-700 tracking-wider">
+                            <button x-show="work.endRaw" @click="work.endRaw = ''" class="absolute right-3 top-3.5 text-slate-500 hover:text-slate-300">
+                                <i class="fa-solid fa-circle-xmark text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 休憩時間 (分) -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+                        3. 休憩時間 (分)
+                    </label>
+                    <div class="relative">
+                        <input type="number" 
+                               inputmode="numeric" 
+                               x-model="work.breakMin" 
+                               placeholder="45" 
+                               class="w-full bg-slate-950 font-bold text-white border border-slate-700 rounded-xl pl-4 pr-10 py-2 text-xl font-mono focus:outline-none focus:border-indigo-500 transition shadow-inner placeholder-slate-700">
+                        <span class="absolute right-4 top-2.5 text-slate-500 font-bold text-sm">分</span>
+                    </div>
+                </div>
+
+                <!-- 残業開始時刻 -->
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-xs font-bold text-indigo-400 uppercase tracking-wider">
+                            4. 残業開始時刻
+                        </label>
+                        <span class="text-xs font-mono font-bold text-indigo-400" x-text="formatDisplay(work.otStartRaw) ? '認識: ' + formatDisplay(work.otStartRaw) : ''"></span>
+                    </div>
+                    <div class="relative">
+                        <input type="number" 
+                               inputmode="numeric" 
+                               pattern="[0-9]*" 
+                               x-model="work.otStartRaw" 
+                               placeholder="1607" 
+                               class="w-full bg-slate-950 font-bold text-white border border-indigo-900/80 rounded-xl pl-4 pr-10 py-2.5 text-2xl font-mono focus:outline-none focus:border-indigo-500 transition shadow-inner placeholder-slate-700 tracking-wider">
+                        <button x-show="work.otStartRaw" @click="work.otStartRaw = ''" class="absolute right-3 top-3.5 text-slate-500 hover:text-slate-300">
+                            <i class="fa-solid fa-circle-xmark text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 計算結果エリア -->
+                <div class="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950/30 rounded-2xl p-4 sm:p-5 text-white shadow-2xl border border-slate-800 relative overflow-hidden mt-2">
+                    
+                    <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+                        <span class="bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 text-xs font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                            計算結果
+                        </span>
+
+                        <template x-if="workResult.valid">
+                            <button @click="copyText(`実労働: ${workResult.totalWorkText} (${workResult.totalWorkDecimal}h) / 残業: ${workResult.overtimeText} (${workResult.overtimeDecimal}h)`)" 
+                                    class="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition shadow flex items-center gap-1">
+                                <i class="fa-regular fa-copy"></i> 結果をコピー
+                            </button>
+                        </template>
+                    </div>
+
+                    <template x-if="!workResult.valid">
+                        <div class="text-slate-500 text-sm font-bold py-4 text-center" x-text="workResult.text"></div>
+                    </template>
+
+                    <template x-if="workResult.valid">
+                        <div class="pt-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                
+                                <div class="p-3.5 rounded-xl bg-amber-950/30 border border-amber-500/30">
+                                    <div class="text-xs font-bold text-amber-400 uppercase tracking-wider">残業時間</div>
+                                    <div class="text-3xl font-black font-mono mt-1 text-amber-300" x-text="workResult.overtimeText"></div>
+                                    <div class="text-xs text-amber-400/80 font-mono mt-0.5" x-text="`(${workResult.overtimeDecimal}時間)`"></div>
+                                </div>
+
+                                <div class="p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-500/30">
+                                    <div class="text-xs font-bold text-indigo-400 uppercase tracking-wider">実労働時間 (合計)</div>
+                                    <div class="text-3xl font-black font-mono mt-1 text-indigo-300" x-text="workResult.totalWorkText"></div>
+                                    <div class="text-xs text-indigo-400/80 font-mono mt-0.5" x-text="`(${workResult.totalWorkDecimal}時間)`"></div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </template>
+
+                    <div class="text-[11px] text-slate-400 border-t border-slate-800/80 pt-2 mt-3 flex justify-between items-center">
+                        <span>時刻は数字4桁で簡単入力</span>
+                        <span x-show="work.isNextDay" class="text-amber-400 font-bold">※ 翌日退勤適用中 (+24h)</span>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: 時間計算機（ひっ算）                   -->
+        <!-- ========================================== -->
+        <section x-show="currentTab === 'calc'" x-transition:enter="transition duration-200 opacity-0" x-transition:enter-end="opacity-100" class="max-w-md mx-auto space-y-4">
+
+            <!-- 筆算表示エリア -->
+            <div class="bg-slate-900 rounded-2xl p-4 sm:p-5 shadow-2xl border border-slate-800 space-y-3 relative">
+                
+                <div class="text-[11px] font-bold text-slate-400 flex justify-between items-center pb-1 border-b border-slate-800">
+                    <span><i class="fa-solid fa-pen-field text-indigo-400 mr-1"></i> 枠をタップして数字を入力</span>
+                    <span class="text-indigo-400 font-mono">時間計算</span>
+                </div>
+
+                <div class="py-2 space-y-2 font-mono">
+
+                    <!-- 1行目 -->
+                    <div class="flex items-center justify-end space-x-2">
+                        <span class="text-xs text-slate-500 font-sans mr-auto">（元の時間）</span>
+                        <button @click="calc.setFocus('h1')" 
+                                :class="calc.activeField === 'h1' ? 'border-indigo-500 bg-indigo-950/40 ring-2 ring-indigo-500/50' : 'border-slate-700 bg-slate-950'"
+                                class="px-3 py-2 rounded-xl border text-right min-w-[70px] transition">
+                            <span class="text-2xl font-black text-white" x-text="calc.h1 || '0'"></span>
+                        </button>
+                        <span class="text-sm font-bold text-slate-400 font-sans">時間</span>
+
+                        <button @click="calc.setFocus('m1')" 
+                                :class="calc.activeField === 'm1' ? 'border-indigo-500 bg-indigo-950/40 ring-2 ring-indigo-500/50' : 'border-slate-700 bg-slate-950'"
+                                class="px-3 py-2 rounded-xl border text-right min-w-[70px] transition">
+                            <span class="text-2xl font-black text-white" x-text="calc.m1 || '0'"></span>
+                        </button>
+                        <span class="text-sm font-bold text-slate-400 font-sans">分</span>
+                    </div>
+
+                    <!-- 2行目 -->
+                    <div class="flex items-center justify-end space-x-2">
+                        
+                        <div class="flex mr-auto bg-slate-950 p-1 rounded-xl border border-slate-800">
+                            <button @click="calc.op = '+'" 
+                                    :class="calc.op === '+' ? 'bg-indigo-600 text-white font-black' : 'text-slate-500 hover:text-slate-300'"
+                                    class="w-8 h-8 rounded-lg text-lg flex items-center justify-center transition">
+                                ＋
+                            </button>
+                            <button @click="calc.op = '-'" 
+                                    :class="calc.op === '-'" ? 'bg-indigo-600 text-white font-black' : 'text-slate-500 hover:text-slate-300'"
+                                    class="w-8 h-8 rounded-lg text-lg flex items-center justify-center transition">
+                                －
+                            </button>
+                        </div>
+
+                        <button @click="calc.setFocus('h2')" 
+                                :class="calc.activeField === 'h2' ? 'border-indigo-500 bg-indigo-950/40 ring-2 ring-indigo-500/50' : 'border-slate-700 bg-slate-950'"
+                                class="px-3 py-2 rounded-xl border text-right min-w-[70px] transition">
+                            <span class="text-2xl font-black text-white" x-text="calc.h2 || '0'"></span>
+                        </button>
+                        <span class="text-sm font-bold text-slate-400 font-sans">時間</span>
+
+                        <button @click="calc.setFocus('m2')" 
+                                :class="calc.activeField === 'm2' ? 'border-indigo-500 bg-indigo-950/40 ring-2 ring-indigo-500/50' : 'border-slate-700 bg-slate-950'"
+                                class="px-3 py-2 rounded-xl border text-right min-w-[70px] transition">
+                            <span class="text-2xl font-black text-white" x-text="calc.m2 || '0'"></span>
+                        </button>
+                        <span class="text-sm font-bold text-slate-400 font-sans">分</span>
+                    </div>
+
+                    <div class="border-b-2 border-slate-600 my-1"></div>
+
+                    <!-- 3行目 (結果) -->
+                    <div class="flex items-center justify-between pt-1">
+                        <span class="text-xl font-black text-amber-400 font-sans">＝</span>
+                        
+                        <div class="flex items-baseline space-x-2">
+                            <span class="text-3xl sm:text-4xl font-black text-amber-300" x-text="calcResult.hmText"></span>
+                            <span class="text-xs text-slate-400 font-sans" x-text="`(${calcResult.decimalText}時間)`"></span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="pt-2 border-t border-slate-800 flex justify-end">
+                    <button @click="copyText(`${calcResult.hmText} (${calcResult.decimalText}時間)`)" class="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-bold px-4 py-2 rounded-xl text-xs transition flex items-center gap-1.5 shadow">
+                        <i class="fa-regular fa-copy"></i> 計算結果をコピー
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- キーパッドエリア -->
+            <div class="bg-slate-900 rounded-2xl p-4 shadow-2xl border border-slate-800 space-y-3">
+                
+                <div class="grid grid-cols-3 gap-2">
+                    <button @click="calc.clearAll()" class="bg-rose-950/80 border border-rose-800/50 hover:bg-rose-900 text-rose-200 font-bold py-2.5 rounded-xl text-xs transition shadow">
+                        AC (クリア)
+                    </button>
+                    <button @click="calc.backspace()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 rounded-xl text-xs transition shadow flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-backspace"></i> 1文字消去
+                    </button>
+                    <button @click="calc.op = calc.op === '+' ? '-' : '+'" class="bg-indigo-900/60 hover:bg-indigo-800 text-indigo-200 font-bold py-2.5 rounded-xl text-xs transition shadow border border-indigo-500/30">
+                        符号切替 (＋ / －)
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2">
+                    <button @click="calc.pressNum(7)" class="bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white text-2xl font-black py-3.5 rounded-xl font-mono shadow transition">7</button>
+                    <button @click="calc.pressNum(8)" class="bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white text-2xl font-black py-3.5 rounded-xl font-mono shadow transition">8</button>
+                    <button @click="calc.pressNum(9)" class="bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white text-2xl font-black py-3.5 rounded-xl font-mono shadow transition">9</button>
+
+                    <button @click="calc.pressNum(4)" class="bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white text-2xl font-black py-3.5 rounded-xl font-mono shadow transition">4</button>
+                    <button @click="calc.pressNum(5)" class="bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white text-2xl font-black py-3.5 rounded-xl font-mono shadow transition">5</button>
+                    <button @click="calc.pressNum(6)" class="bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white text-2xl font-black py-3.5 rounded-xl font-mono shadow transition">6</button>
+
+                    <button @click="calc.pressNum(1)" class="bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white text-2xl font-black py-3.5 rounded-xl font-mono shadow transition">1</button>
+                    <button @click="calc.pressNum(2)" class="bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white text-2xl font-black py-3.5 rounded-xl font-mono shadow transition">2</button>
+                    <button @click="calc.pressNum(3)" class="bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white text-2xl font-black py-3.5 rounded-xl font-mono shadow transition">3</button>
+
+                    <button @click="calc.pressNum(0)" class="col-span-2 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white text-2xl font-black py-3.5 rounded-xl font-mono shadow transition">0</button>
+                    <button @click="calc.pressNum('00')" class="bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-white text-xl font-black py-3.5 rounded-xl font-mono shadow transition">00</button>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 text-slate-500 py-3 border-t border-slate-900 text-center text-xs">
+        統合型 時間＆勤務計算ツール - 業務効率化ツール
+    </footer>
+
+</body>
+</html>
