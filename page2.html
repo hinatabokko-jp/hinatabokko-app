@@ -4,23 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>計算トレーニング</title>
-  <!-- アプリのアイコン設定 (kurimanjuu.png) -->
-<link rel="icon" href="kurimanjuu.png" type="image/png">
-<link rel="apple-touch-icon" href="kurimanjuu.png">
+
 <!-- confetti.js for celebration effects -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
 <style>
-:root {
-  --bg: #0f1219;
-  --panel: #181d28;
-  --panel-light: #222836;
-  --border: #323b4e;
-  --text: #f5f7fa;
-  --sub: #9da6b5;
-  --accent: #657dff;
-}
-
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -30,8 +18,8 @@ body {
   margin: 0;
   min-height: 100vh;
   font-family: "Segoe UI", "Noto Sans JP", -apple-system, sans-serif;
-  background: var(--bg);
-  color: var(--text);
+  background: #10131a;
+  color: #f2f4f8;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -40,140 +28,168 @@ body {
   user-select: none;
 }
 
-.hamburger-btn {
+/* ========================================
+   ハンバーガーメニュー
+======================================== */
+
+.menu-button {
   position: fixed;
-  top: 12px;
-  left: 12px;
-  z-index: 1000;
-  width: 44px;
-  height: 44px;
-  background: rgba(24, 29, 40, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  top: 18px;
+  left: 18px;
+  z-index: 1200;
+
+  width: 48px;
+  height: 48px;
+
+  border: 1px solid #394252;
+  border-radius: 14px;
+  background: #191e27;
+  color: #f2f4f8;
+
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 5px;
+
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  transition: transform 0.2s, background-color 0.2s;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+
+  transition: background .15s ease, transform .15s ease;
 }
-.hamburger-btn:active {
-  transform: scale(0.95);
+
+.menu-button:hover {
+  background: #252c37;
 }
-.hamburger-bar {
-  width: 20px;
+
+.menu-button:active {
+  transform: scale(.95);
+}
+
+.menu-button span {
+  display: block;
+  width: 22px;
   height: 2px;
-  background-color: var(--text);
   border-radius: 2px;
-  transition: all 0.3s ease;
+  background: #f2f4f8;
+  transition: transform .2s ease, opacity .2s ease;
 }
 
-.sidebar-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  z-index: 1001;
+/* メニューが開いているとき */
+.menu-button.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.menu-button.open span:nth-child(2) {
   opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-.sidebar-overlay.active {
-  opacity: 1;
-  visibility: visible;
 }
 
+.menu-button.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* サイドバー */
 .sidebar {
   position: fixed;
   top: 0;
   left: 0;
-  width: min(280px, 80vw);
+  z-index: 1100;
+
+  width: min(320px, 85vw);
   height: 100vh;
-  background: var(--panel);
-  border-right: 1px solid var(--border);
-  z-index: 1002;
+
+  background: #191e27;
+  border-right: 1px solid #2d3442;
+
+  padding: 84px 18px 24px;
+
   transform: translateX(-100%);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  display: flex;
-  flex-direction: column;
-  box-shadow: 10px 0 30px rgba(0,0,0,0.5);
-  overflow-y: auto;
+  transition: transform .25s ease;
+
+  box-shadow: 18px 0 50px rgba(0,0,0,.45);
 }
-.sidebar.active {
+
+.sidebar.open {
   transform: translateX(0);
 }
-.sidebar-header {
-  padding: 20px 16px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
+
 .sidebar-title {
-  font-size: 16px;
-  font-weight: 800;
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.sidebar-close {
-  background: transparent;
-  border: none;
-  color: var(--sub);
   font-size: 20px;
-  cursor: pointer;
-  padding: 4px;
+  font-weight: 800;
+  margin: 0 8px 18px;
+  color: #ffffff;
 }
-.sidebar-nav {
-  padding: 16px 12px;
+
+.sidebar-menu {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
+
 .sidebar-link {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  color: var(--text);
+  display: block;
+
+  padding: 14px 16px;
+
+  border: 1px solid #303847;
+  border-radius: 12px;
+
+  background: #252c37;
+  color: #e8ebf2;
+
   text-decoration: none;
-  border-radius: 10px;
-  background: var(--panel-light);
-  border: 1px solid var(--border);
-  font-weight: 600;
-  font-size: 14px;
-  transition: background-color 0.2s, transform 0.1s, border-color 0.2s;
+  font-size: 15px;
+  font-weight: 700;
+
+  transition:
+    background .15s ease,
+    border-color .15s ease,
+    transform .15s ease;
 }
+
 .sidebar-link:hover {
-  border-color: var(--accent);
-  background: rgba(101, 125, 255, 0.15);
+  background: #303846;
+  border-color: #4a566d;
 }
+
 .sidebar-link:active {
-  transform: scale(0.98);
+  transform: scale(.98);
 }
-.sidebar-link-icon {
-  font-size: 18px;
-}
-/* アクティブリンク用スタイル補正 */
-.sidebar-link.active-page {
-  border-color: var(--accent);
-  background: rgba(101, 125, 255, 0.25);
+
+.sidebar-link.current {
+  background: #2b3450;
+  border-color: rgba(101,125,255,.5);
   color: #b9c5ff;
 }
 
+/* サイドバー展開時の背景 */
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(2px);
+
+  opacity: 0;
+  visibility: hidden;
+
+  transition: opacity .25s ease, visibility .25s ease;
+}
+
+.menu-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ========================================
+   メインアプリ
+======================================== */
+
 .app {
   width: min(780px, 100%);
-  background: var(--panel);
-  border: 1px solid var(--border);
+  background: #191e27;
+  border: 1px solid #2d3442;
   border-radius: 24px;
   padding: 24px;
   box-shadow: 0 18px 50px rgba(0,0,0,.4);
@@ -190,7 +206,7 @@ h1 {
 
 .subtitle {
   text-align: center;
-  color: var(--sub);
+  color: #9da6b6;
   margin-bottom: 20px;
   font-size: 14px;
 }
@@ -219,7 +235,7 @@ h1 {
   display: block;
   height: 100%;
   width: 0;
-  background: linear-gradient(90deg, var(--accent), #8b5cf6);
+  background: linear-gradient(90deg, #657dff, #8b5cf6);
   transition: width .3s ease;
 }
 
@@ -231,7 +247,7 @@ h1 {
   display: inline-block;
   padding: 6px 14px;
   border-radius: 999px;
-  background: var(--panel-light);
+  background: #252c39;
   color: #b9c2ff;
   font-size: 13px;
   font-weight: 700;
@@ -284,6 +300,28 @@ h1 {
   }
 }
 
+/* 分数表示スタイル */
+.fraction {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  padding: 0 4px;
+}
+
+.fraction .numerator {
+  border-bottom: 3px solid #ffffff;
+  padding: 0 8px 3px 8px;
+  text-align: center;
+  line-height: 1;
+}
+
+.fraction .denominator {
+  padding: 3px 8px 0 8px;
+  text-align: center;
+  line-height: 1;
+}
+
 .question-container {
   display: flex;
   align-items: center;
@@ -291,34 +329,53 @@ h1 {
   flex-wrap: wrap;
   gap: 10px;
   margin: 8px 0 16px;
+  min-height: 90px;
 }
 
 .q-text {
-  font-size: clamp(32px, 7vw, 48px);
+  font-size: clamp(28px, 6.5vw, 44px);
   font-weight: 800;
   letter-spacing: .04em;
   color: #ffffff;
   text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-.answer {
-  min-width: 110px;
-  padding: 4px 16px;
-  min-height: 64px;
-  font-size: clamp(34px, 7vw, 46px);
+.q-text.full-width {
+  width: 100%;
+  flex-basis: 100%;
+}
+
+/* 入力ボックス（標準・分数共通） */
+.answer-box {
+  min-width: 64px;
+  min-height: 54px;
+  padding: 4px 12px;
+  font-size: clamp(28px, 6.5vw, 42px);
   font-weight: 800;
   text-align: center;
   color: #8096ff;
-  background: var(--bg);
+  background: #10131a;
   border: 2px solid #4a566d;
-  border-radius: 16px;
+  border-radius: 14px;
   outline: none;
   font-variant-numeric: tabular-nums;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   box-shadow: inset 0 2px 6px rgba(0,0,0,0.5);
-  transition: border-color .15s ease;
+  cursor: pointer;
+  transition: border-color .15s ease, background .15s ease;
+}
+
+.answer-box.active {
+  border-color: #657dff;
+  background: #181f33;
+  box-shadow: 0 0 12px rgba(101,125,255,0.4), inset 0 2px 6px rgba(0,0,0,0.5);
 }
 
 .keypad {
@@ -330,10 +387,10 @@ h1 {
 
 .key {
   min-height: 56px;
-  border: 1px solid var(--border);
+  border: 1px solid #394252;
   border-radius: 14px;
-  background: var(--panel-light);
-  color: var(--text);
+  background: #252c37;
+  color: #f5f7fb;
   font-size: 24px;
   font-weight: 700;
   cursor: pointer;
@@ -363,7 +420,7 @@ h1 {
   padding: 14px;
   border: 0;
   border-radius: 14px;
-  background: linear-gradient(135deg, var(--accent), #5b6eff);
+  background: linear-gradient(135deg, #657dff, #5b6eff);
   color: #fff;
   font-size: 20px;
   font-weight: 800;
@@ -433,7 +490,7 @@ h1 {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent), #5b6eff);
+  background: linear-gradient(135deg, #657dff, #5b6eff);
   color: #fff;
   box-shadow: 0 4px 15px rgba(101,125,255,0.3);
 }
@@ -455,7 +512,7 @@ h1 {
 .score {
   font-size: 58px;
   font-weight: 900;
-  color: var(--accent);
+  color: #657dff;
   margin: 12px 0;
 }
 
@@ -467,9 +524,8 @@ h1 {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  z-index: 2000;
+  z-index: 1000;
   backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
 }
 
 .modal {
@@ -507,10 +563,15 @@ h1 {
 }
 
 .modal-question {
-  font-size: 24px;
+  font-size: 22px;
   color: #c0c7d3;
   margin: 12px 0;
   font-weight: 700;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .modal-label {
@@ -520,12 +581,16 @@ h1 {
 }
 
 .modal-answer {
-  font-size: clamp(52px, 14vw, 76px);
+  font-size: clamp(36px, 10vw, 52px);
   font-weight: 900;
-  line-height: 1.1;
+  line-height: 1.2;
   color: #fff;
-  margin: 6px 0 20px;
+  margin: 10px 0 20px;
   letter-spacing: .04em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
 }
 
 .modal-button {
@@ -533,7 +598,7 @@ h1 {
   padding: 15px;
   border: 0;
   border-radius: 14px;
-  background: linear-gradient(135deg, var(--accent), #5b6eff);
+  background: linear-gradient(135deg, #657dff, #5b6eff);
   color: #fff;
   font-size: 18px;
   font-weight: 800;
@@ -564,17 +629,18 @@ h1 {
     font-size: 22px;
   }
 
-  .question {
-    margin-bottom: 12px;
-  }
-
-  .answer {
-    font-size: 38px;
-    min-height: 64px;
+  .answer-box {
+    min-width: 54px;
+    min-height: 48px;
   }
 
   .modal {
     padding: 24px 18px;
+  }
+
+  .menu-button {
+    top: 12px;
+    left: 12px;
   }
 }
 </style>
@@ -582,72 +648,72 @@ h1 {
 
 <body>
 
-<button class="hamburger-btn" id="hamburgerBtn" aria-label="メニューを開く">
-  <div class="hamburger-bar"></div>
-  <div class="hamburger-bar"></div>
-  <div class="hamburger-bar"></div>
+<!-- ハンバーガーメニュー -->
+<button
+  id="menu-button"
+  class="menu-button"
+  aria-label="メニューを開く"
+  aria-expanded="false"
+  type="button"
+>
+  <span></span>
+  <span></span>
+  <span></span>
 </button>
 
-<div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-header">
-    <div class="sidebar-title">
-      <span>📚 学習アプリメニュー</span>
-    </div>
-    <button class="sidebar-close" id="sidebarCloseBtn" aria-label="閉じる">✕</button>
+<!-- サイドバー -->
+<nav id="sidebar" class="sidebar" aria-label="サイトメニュー">
+  <div class="sidebar-title">メニュー</div>
+  <div class="sidebar-menu">
+    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/">
+      漢字テスト
+    </a>
+    <a class="sidebar-link current" href="https://hinatabokko-jp.github.io/hinatabokko-app/page2">
+      計算トレーニング
+    </a>
+    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/page4">
+      百人一首
+    </a>
   </div>
-  <nav class="sidebar-nav">
-    <a href="https://hinatabokko-jp.github.io/hinatabokko-app/" class="sidebar-link">
-      <span class="sidebar-link-icon">📝</span>
-      <span>漢字テスト</span>
-    </a>
-    <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page2" class="sidebar-link active-page">
-      <span class="sidebar-link-icon">🧮</span>
-      <span>計算トレーニング</span>
-    </a>
-    <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page4" class="sidebar-link">
-      <span class="sidebar-link-icon">🎴</span>
-      <span>百人一首</span>
-    </a>
-  </nav>
-</aside>
+</nav>
 
+<!-- サイドバーの背景 -->
+<div id="menu-overlay" class="menu-overlay"></div>
+
+<!-- メインアプリ -->
 <div class="app">
   <div id="screen"></div>
 </div>
 
 <script>
-const hamburgerBtn = document.getElementById("hamburgerBtn");
-const sidebar = document.getElementById("sidebar");
-const sidebarOverlay = document.getElementById("sidebarOverlay");
-const sidebarCloseBtn = document.getElementById("sidebarCloseBtn");
-
-function toggleSidebar() {
-  const isActive = sidebar.classList.contains("active");
-  if (isActive) {
-    closeSidebar();
-  } else {
-    openSidebar();
-  }
-}
-
-function openSidebar() {
-  sidebar.classList.add("active");
-  sidebarOverlay.classList.add("active");
-}
-
-function closeSidebar() {
-  sidebar.classList.remove("active");
-  sidebarOverlay.classList.remove("active");
-}
-
-hamburgerBtn.addEventListener("click", toggleSidebar);
-sidebarOverlay.addEventListener("click", closeSidebar);
-sidebarCloseBtn.addEventListener("click", closeSidebar);
 
 let audioCtx = null;
 
+/* ハンバーガーメニューの操作 */
+const menuButton = document.getElementById("menu-button");
+const sidebar = document.getElementById("sidebar");
+const menuOverlay = document.getElementById("menu-overlay");
+
+function toggleMenu() {
+  const isOpen = sidebar.classList.toggle("open");
+  menuOverlay.classList.toggle("open", isOpen);
+  menuButton.classList.toggle("open", isOpen);
+  menuButton.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  menuButton.setAttribute("aria-label", isOpen ? "メニューを閉じる" : "メニューを開く");
+}
+
+function closeMenu() {
+  sidebar.classList.remove("open");
+  menuOverlay.classList.remove("open");
+  menuButton.classList.remove("open");
+  menuButton.setAttribute("aria-expanded", "false");
+  menuButton.setAttribute("aria-label", "メニューを開く");
+}
+
+menuButton.addEventListener("click", toggleMenu);
+menuOverlay.addEventListener("click", closeMenu);
+
+/* オーディオ処理 */
 function initAudio() {
   if (!audioCtx) {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -703,12 +769,14 @@ function playCorrectSound() {
   } catch (e) {}
 }
 
-const TOTAL = 18;
+const TOTAL = 20;
 
 let questions = [];
 let current = 0;
 let score = 0;
 let answered = false;
+let activeBoxIndex = 0;
+let userInputs = [];
 
 let keyListener = null;
 let modalKeyListener = null;
@@ -725,48 +793,65 @@ function shuffle(array) {
   return array;
 }
 
+// 最大公約数
+function gcd(a, b) {
+  return b === 0 ? a : gcd(b, a % b);
+}
+
+// 最小公倍数
+function lcm(a, b) {
+  return (a * b) / gcd(a, b);
+}
+
 function makeQuestions() {
   const q = [];
 
-  // 1. 1桁同士の足し算・引き算（5問）
+  // 1. 1桁同士の足し算・引き算（2問）
   const b1 = [];
-  while (b1.length < 5) {
+  while (b1.length < 2) {
     const isPlus = Math.random() < 0.5;
 
     if (isPlus) {
       const a = rand(2, 9);
       const b = rand(2, 9);
       b1.push({
-        text: `${a} ＋ ${b} ＝`,
-        answer: a + b,
-        type: "１桁 ＋ １桁"
+        type: "１桁 ＋ １桁",
+        kind: "standard",
+        promptHtml: `${a} ＋ ${b} ＝`,
+        answers: [a + b],
+        answerHtml: `${a + b}`
       });
     } else {
       const a = rand(3, 9);
       const b = rand(2, 9);
 
+      // 引き算の答えが 0 または 1 になる場合は除外
       const diff = a - b;
       if (diff <= 1) continue;
 
       b1.push({
-        text: `${a} − ${b} ＝`,
-        answer: diff,
-        type: "１桁 − １桁"
+        type: "１桁 − １桁",
+        kind: "standard",
+        promptHtml: `${a} − ${b} ＝`,
+        answers: [diff],
+        answerHtml: `${diff}`
       });
     }
   }
   q.push(...shuffle(b1));
 
-  // 2. 掛け算（5問）
+  // 2. 掛け算（5問：1の段を除外するためにrand(2,9)を使用）
   const b2 = [];
   for (let i = 0; i < 5; i++) {
     const a = rand(2, 9);
     const b = rand(2, 9);
 
     b2.push({
-      text: `${a} × ${b} ＝`,
-      answer: a * b,
-      type: "１桁 × １桁"
+      type: "１桁 × １桁",
+      kind: "standard",
+      promptHtml: `${a} × ${b} ＝`,
+      answers: [a * b],
+      answerHtml: `${a * b}`
     });
   }
   q.push(...shuffle(b2));
@@ -780,9 +865,11 @@ function makeQuestions() {
       const a = rand(10, 99);
       const b = rand(2, 9);
       b3.push({
-        text: `${a} ＋ ${b} ＝`,
-        answer: a + b,
-        type: "２桁 ＋ １桁"
+        type: "２桁 ＋ １桁",
+        kind: "standard",
+        promptHtml: `${a} ＋ ${b} ＝`,
+        answers: [a + b],
+        answerHtml: `${a + b}`
       });
     } else {
       const a = rand(10, 99);
@@ -792,9 +879,11 @@ function makeQuestions() {
       if (diff === 0 || diff === 1) continue;
 
       b3.push({
-        text: `${a} − ${b} ＝`,
-        answer: diff,
-        type: "２桁 − １桁"
+        type: "２桁 − １桁",
+        kind: "standard",
+        promptHtml: `${a} − ${b} ＝`,
+        answers: [diff],
+        answerHtml: `${diff}`
       });
     }
   }
@@ -809,9 +898,11 @@ function makeQuestions() {
       const a = rand(10, 99);
       const b = rand(10, 99);
       b4.push({
-        text: `${a} ＋ ${b} ＝`,
-        answer: a + b,
-        type: "２桁 ＋ ２桁"
+        type: "２桁 ＋ ２桁",
+        kind: "standard",
+        promptHtml: `${a} ＋ ${b} ＝`,
+        answers: [a + b],
+        answerHtml: `${a + b}`
       });
     } else {
       const a = rand(10, 99);
@@ -821,17 +912,140 @@ function makeQuestions() {
       if (diff === 0 || diff === 1) continue;
 
       b4.push({
-        text: `${a} − ${b} ＝`,
-        answer: diff,
-        type: "２桁 − ２桁"
+        type: "２桁 − ２桁",
+        kind: "standard",
+        promptHtml: `${a} − ${b} ＝`,
+        answers: [diff],
+        answerHtml: `${diff}`
       });
     }
   }
   q.push(...shuffle(b4));
 
+  // 5. 約分（2問）
+  const b5 = [];
+  while (b5.length < 2) {
+    const num = rand(1, 6);
+    const den = rand(num + 1, 9);
+    if (gcd(num, den) !== 1) continue;
+
+    const k = rand(2, 5);
+    const origNum = num * k;
+    const origDen = den * k;
+
+    if (origDen > 99) continue;
+    if (b5.some(item => item.origNum === origNum && item.origDen === origDen)) continue;
+
+    b5.push({
+      type: "約分",
+      kind: "reduction",
+      origNum, origDen,
+      answers: [num, den],
+      promptHtml: `
+        <span class="fraction">
+          <span class="numerator">${origNum}</span>
+          <span class="denominator">${origDen}</span>
+        </span>
+        <span style="font-size:32px; margin:0 4px;">＝</span>
+      `,
+      answerHtml: `
+        <span class="fraction">
+          <span class="numerator">${num}</span>
+          <span class="denominator">${den}</span>
+        </span>
+      `
+    });
+  }
+  q.push(...shuffle(b5));
+
+  // 6. 通分（共通の分母を求める）（2問）
+  const b6 = [];
+  while (b6.length < 2) {
+    const d1 = rand(2, 8);
+    const d2 = rand(2, 8);
+    if (d1 === d2) continue;
+
+    const n1 = rand(1, d1 - 1);
+    const n2 = rand(1, d2 - 1);
+
+    const commonDen = lcm(d1, d2);
+    if (commonDen > 48) continue;
+
+    if (b6.some(item => item.d1 === d1 && item.d2 === d2)) continue;
+
+    b6.push({
+      type: "通分（分母）",
+      kind: "common_denominator",
+      d1, d2, n1, n2,
+      answers: [commonDen],
+      promptHtml: `
+        <span class="fraction">
+          <span class="numerator">${n1}</span>
+          <span class="denominator">${d1}</span>
+        </span>
+        <span style="font-size:20px; color:#9da6b6; margin:0 4px;">と</span>
+        <span class="fraction">
+          <span class="numerator">${n2}</span>
+          <span class="denominator">${d2}</span>
+        </span>
+        <span style="font-size:20px; color:#9da6b6; margin-left:6px;">の通分した分母は？</span>
+      `,
+      answerHtml: `<span style="font-size:36px; color:#fff;">${commonDen}</span>`
+    });
+  }
+  q.push(...shuffle(b6));
+
+  // 7. 通分（通分後の分子を答える）（1問）
+  const b7 = [];
+  while (b7.length < 1) {
+    const d1 = rand(2, 6);
+    const d2 = rand(2, 6);
+    if (d1 === d2) continue;
+
+    const n1 = rand(1, d1 - 1);
+    const n2 = rand(1, d2 - 1);
+
+    const commonDen = lcm(d1, d2);
+    const ans1 = n1 * (commonDen / d1);
+    const ans2 = n2 * (commonDen / d2);
+
+    b7.push({
+      type: "通分（分子）",
+      kind: "common_numerators",
+      d1, d2, n1, n2, commonDen,
+      answers: [ans1, ans2],
+      promptHtml: `
+        <span class="fraction">
+          <span class="numerator">${n1}</span>
+          <span class="denominator">${d1}</span>
+        </span>
+        <span style="font-size:20px; color:#9da6b6; margin:0 2px;">と</span>
+        <span class="fraction">
+          <span class="numerator">${n2}</span>
+          <span class="denominator">${d2}</span>
+        </span>
+        <span style="font-size:28px; color:#8096ff; margin:0 6px;">➔</span>
+      `,
+      answerHtml: `
+        <span class="fraction">
+          <span class="numerator">${ans1}</span>
+          <span class="denominator">${commonDen}</span>
+        </span>
+        <span style="font-size:20px; color:#9da6b6; margin:0 4px;">と</span>
+        <span class="fraction">
+          <span class="numerator">${ans2}</span>
+          <span class="denominator">${commonDen}</span>
+        </span>
+      `
+    });
+  }
+  q.push(...b7);
+
   return q;
 }
 
+
+/* スタート画面 */
 function showStart() {
   removeKeyListener();
 
@@ -843,10 +1057,13 @@ function showStart() {
       </div>
       <p>
         段階的に難易度が上がります：<br>
-        1. 1桁の足し算・引き算 (5問)<br>
+        1. 1桁の足し算・引き算 (2問)<br>
         2. 掛け算 (5問)<br>
         3. 2桁と1桁の計算 (5問)<br>
-        4. 2桁同士の計算 (3問)
+        4. 2桁同士の計算 (3問)<br>
+        5. 約分 (2問)<br>
+        6. 通分（共通の分母） (2問)<br>
+        7. 通分（通分後の分子） (1問)
       </p>
       <button id="btn-start" class="btn-primary">
         スタート
@@ -860,6 +1077,7 @@ function showStart() {
   });
 }
 
+/* ゲーム開始 */
 function startGame() {
   questions = makeQuestions();
   current = 0;
@@ -868,6 +1086,7 @@ function startGame() {
   renderQuestion();
 }
 
+/* キーボードイベント解除 */
 function removeKeyListener() {
   if (keyListener) {
     window.removeEventListener("keydown", keyListener);
@@ -879,10 +1098,55 @@ function removeKeyListener() {
   }
 }
 
+/* 問題表示 */
 function renderQuestion() {
   removeKeyListener();
 
   const q = questions[current];
+  activeBoxIndex = 0;
+  userInputs = new Array(q.answers.length).fill("");
+
+  const qTextClass = (q.kind === "common_numerators") ? "q-text full-width" : "q-text";
+
+  let inputHtml = "";
+  if (q.kind === "standard") {
+    inputHtml = `<div id="box-0" class="answer-box active" data-index="0" style="min-width:100px;"></div>`;
+  } else if (q.kind === "reduction") {
+    inputHtml = `
+      <div class="fraction">
+        <div class="numerator">
+          <div id="box-0" class="answer-box active" data-index="0"></div>
+        </div>
+        <div class="denominator">
+          <div id="box-1" class="answer-box" data-index="1"></div>
+        </div>
+      </div>
+    `;
+  } else if (q.kind === "common_denominator") {
+    inputHtml = `
+      <div id="box-0" class="answer-box active" data-index="0" style="min-width:90px;"></div>
+    `;
+  } else if (q.kind === "common_numerators") {
+    inputHtml = `
+      <div class="fraction">
+        <div class="numerator">
+          <div id="box-0" class="answer-box active" data-index="0"></div>
+        </div>
+        <div class="denominator" style="color:#aeb7c6; font-size:28px;">
+          ${q.commonDen}
+        </div>
+      </div>
+      <span style="font-size:20px; color:#9da6b6; margin:0 2px;">と</span>
+      <div class="fraction">
+        <div class="numerator">
+          <div id="box-1" class="answer-box" data-index="1"></div>
+        </div>
+        <div class="denominator" style="color:#aeb7c6; font-size:28px;">
+          ${q.commonDen}
+        </div>
+      </div>
+    `;
+  }
 
   document.getElementById("screen").innerHTML = `
     <h1>計算トレーニング</h1>
@@ -903,8 +1167,8 @@ function renderQuestion() {
         </div>
 
         <div class="question-container">
-          <span class="q-text">${q.text}</span>
-          <span id="answer" class="answer" aria-label="答え"></span>
+          <span class="${qTextClass}">${q.promptHtml}</span>
+          ${inputHtml}
         </div>
 
         <div id="feedback" class="feedback"></div>
@@ -933,22 +1197,55 @@ function renderQuestion() {
     </div>
   `;
 
-  let value = "";
-  const display = document.getElementById("answer");
+  const boxes = document.querySelectorAll(".answer-box");
+  boxes.forEach(box => {
+    box.addEventListener("click", () => {
+      if (answered) return;
+      initAudio();
+      activeBoxIndex = parseInt(box.dataset.index, 10);
+      updateBoxHighlights();
+    });
+  });
+
   const keys = document.querySelectorAll(".key");
   const btn = document.getElementById("submit");
+
+  const updateBoxHighlights = () => {
+    boxes.forEach((b, idx) => {
+      b.classList.toggle("active", idx === activeBoxIndex);
+    });
+  };
 
   const inputKey = k => {
     initAudio();
     if (answered) return;
 
+    let currentVal = userInputs[activeBoxIndex];
+
     if (k === "back") {
-      value = value.slice(0, -1);
+      if (currentVal.length > 0) {
+        userInputs[activeBoxIndex] = currentVal.slice(0, -1);
+      } else if (activeBoxIndex > 0) {
+        activeBoxIndex--;
+        updateBoxHighlights();
+      }
     } else {
-      if (value.length >= 4) return;
-      value += k;
+      if (currentVal.length >= 4) return;
+      userInputs[activeBoxIndex] += k;
+
+      // 複数入力がある場合、目標桁数に達したら自動で次の枠へ
+      if (userInputs.length > 1 && activeBoxIndex === 0) {
+        const expectedLen = String(q.answers[0]).length;
+        if (userInputs[0].length >= expectedLen) {
+          activeBoxIndex = 1;
+        }
+      }
     }
-    display.textContent = value;
+
+    boxes.forEach((b, idx) => {
+      b.textContent = userInputs[idx];
+    });
+    updateBoxHighlights();
   };
 
   keys.forEach(key => {
@@ -965,7 +1262,13 @@ function renderQuestion() {
     } else if (e.key === "Backspace") {
       inputKey("back");
     } else if (e.key === "Enter") {
-      checkAnswer(value, display, keys, btn);
+      checkAnswer(keys, btn);
+    } else if (e.key === "Tab") {
+      e.preventDefault();
+      if (userInputs.length > 1) {
+        activeBoxIndex = (activeBoxIndex + 1) % userInputs.length;
+        updateBoxHighlights();
+      }
     }
   };
 
@@ -973,10 +1276,12 @@ function renderQuestion() {
 
   btn.addEventListener("click", () => {
     initAudio();
-    checkAnswer(value, display, keys, btn);
+    checkAnswer(keys, btn);
   });
 }
 
+
+/* 正解時の紙吹雪 */
 function celebrate(isLarge = false) {
   if (typeof confetti === "function") {
     try {
@@ -1009,12 +1314,14 @@ function celebrate(isLarge = false) {
   }
 }
 
-function checkAnswer(value, display, keys, btn) {
+/* 答え合わせ */
+function checkAnswer(keys, btn) {
   if (answered) return;
 
   const feedback = document.getElementById("feedback");
 
-  if (value === "") {
+  const hasEmpty = userInputs.some(val => val === "");
+  if (hasEmpty) {
     feedback.innerHTML = "答えを入力してください。";
     feedback.className = "feedback wrong";
     return;
@@ -1024,7 +1331,10 @@ function checkAnswer(value, display, keys, btn) {
   keys.forEach(k => k.disabled = true);
   btn.disabled = true;
 
-  if (Number(value) === questions[current].answer) {
+  const q = questions[current];
+  const isCorrect = userInputs.every((val, idx) => Number(val) === q.answers[idx]);
+
+  if (isCorrect) {
     score++;
     feedback.innerHTML = "🎉 正解！すごい！";
     feedback.className = "feedback correct";
@@ -1036,11 +1346,13 @@ function checkAnswer(value, display, keys, btn) {
   } else {
     feedback.innerHTML = "不正解";
     feedback.className = "feedback wrong";
-    showWrongModal(value);
+    showWrongModal();
   }
 }
 
-function showWrongModal(userAnswer) {
+
+/* 不正解モーダル */
+function showWrongModal() {
   removeKeyListener();
 
   const q = questions[current];
@@ -1050,9 +1362,9 @@ function showWrongModal(userAnswer) {
   overlay.innerHTML = `
     <div class="modal" role="dialog" aria-modal="true">
       <div class="modal-title">❌ 不正解</div>
-      <div class="modal-question">${q.text}</div>
+      <div class="modal-question">${q.promptHtml}</div>
       <div class="modal-label">正しい答え</div>
-      <div class="modal-answer">${q.answer}</div>
+      <div class="modal-answer">${q.answerHtml}</div>
       <button class="modal-button" id="modal-next">次の問題へ (Enter)</button>
     </div>
   `;
@@ -1082,6 +1394,7 @@ function showWrongModal(userAnswer) {
   } catch(e) {}
 }
 
+/* 完走モーダル */
 function showCompletionModal() {
   removeKeyListener();
 
@@ -1097,7 +1410,7 @@ function showCompletionModal() {
       <div style="color:#adb5c4; font-size:15px; line-height:1.6; margin-bottom:20px;">
         全 ${TOTAL} 問のトレーニングを完走しました！<br>
         最終結果:
-        <strong style="color:var(--accent); font-size:24px;">
+        <strong style="color:#657dff; font-size:24px;">
           ${score} / ${TOTAL}
         </strong>
         問正解
@@ -1135,6 +1448,7 @@ function showCompletionModal() {
   } catch(e) {}
 }
 
+/* 次の問題へ */
 function nextQuestion() {
   current++;
   if (current >= TOTAL) {
@@ -1145,6 +1459,7 @@ function nextQuestion() {
   }
 }
 
+/* 結果画面 */
 function showResult() {
   removeKeyListener();
 
@@ -1187,6 +1502,7 @@ function showResult() {
   }
 }
 
+/* 初期表示 */
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", showStart);
 } else {
