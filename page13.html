@@ -2,8 +2,20 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>医療・業務時間計算統合ツール</title>
+
+    <!-- 要望１：アプリのアイコン設定 (icon-kuroneko.png) -->
+    <link rel="icon" href="icon-kuroneko.png" type="image/png">
+    <link rel="apple-touch-icon" href="icon-kuroneko.png">
+
+    <!-- PWA Web Meta Tags -->
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="時間計算">
+    <link rel="manifest" id="pwaManifest">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js -->
@@ -37,7 +49,162 @@
                 }
             }
         };
+    </script>
 
+    <style>
+        /* カラー変数（移植元コードより） */
+        :root {
+            --bg: #0f1219;
+            --panel: #181d28;
+            --panel-light: #222836;
+            --border: #323b4e;
+            --text: #f5f7fa;
+            --sub: #9da6b5;
+            --accent: #657dff;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #0b0f19;
+            color: #f1f5f9;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        /* ハンバーガーボタン (固定配置) */
+        .hamburger-btn {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 1000;
+            width: 44px;
+            height: 44px;
+            background: rgba(24, 29, 40, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        .hamburger-btn:active {
+            transform: scale(0.95);
+        }
+        .hamburger-bar {
+            width: 20px;
+            height: 2px;
+            background-color: var(--text);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        /* サイドバー オーバーレイ */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* サイドバー本体 */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: min(280px, 80vw);
+            height: 100vh;
+            background: var(--panel);
+            border-right: 1px solid var(--border);
+            z-index: 1002;
+            transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+            overflow-y: auto;
+        }
+        .sidebar.active {
+            transform: translateX(0);
+        }
+        .sidebar-header {
+            padding: 20px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .sidebar-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .sidebar-close {
+            background: transparent;
+            border: none;
+            color: var(--sub);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .sidebar-nav {
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            color: var(--text);
+            text-decoration: none;
+            border-radius: 10px;
+            background: var(--panel-light);
+            border: 1px solid var(--border);
+            font-weight: 600;
+            font-size: 14px;
+            transition: background-color 0.2s, transform 0.1s, border-color 0.2s;
+        }
+        .sidebar-link:hover {
+            border-color: var(--accent);
+            background: rgba(101, 125, 255, 0.15);
+        }
+        .sidebar-link:active {
+            transform: scale(0.98);
+        }
+        .sidebar-link-icon {
+            font-size: 18px;
+        }
+    </style>
+
+    <script>
         function combinedApp() {
             return {
                 currentTab: 'd2b', // 初期タブ: 'd2b', 'igel', 'work', 'calc'
@@ -105,9 +272,7 @@
                     }, 2000);
                 },
 
-                // ----------------------------------------------------
                 // 1. D2B Time App State & Functions
-                // ----------------------------------------------------
                 d2b: {
                     doorRaw: '',
                     reperfRaw: '',
@@ -148,9 +313,7 @@
                     };
                 },
 
-                // ----------------------------------------------------
                 // 2. i-gel App State & Functions
-                // ----------------------------------------------------
                 igel: {
                     insertRaw: '',
                     evalRaw: '',
@@ -213,9 +376,7 @@
                     };
                 },
 
-                // ----------------------------------------------------
                 // 3. Work Time App State & Functions
-                // ----------------------------------------------------
                 work: {
                     startRaw: '0852',
                     endRaw: '1607',
@@ -286,9 +447,7 @@
                     };
                 },
 
-                // ----------------------------------------------------
                 // 4. Time Calculator App State & Functions
-                // ----------------------------------------------------
                 calc: {
                     h1: '0',
                     m1: '0',
@@ -355,23 +514,66 @@
             };
         }
     </script>
-    <style>
-        body {
-            font-family: 'Noto Sans JP', sans-serif;
-            background-color: #0b0f19;
-            color: #f1f5f9;
-        }
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        input[type=number] {
-            -moz-appearance: textfield;
-        }
-    </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between" x-data="combinedApp()">
+
+    <!-- 要望２：ハンバーガーボタン -->
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="メニューを開く">
+        <div class="hamburger-bar"></div>
+        <div class="hamburger-bar"></div>
+        <div class="hamburger-bar"></div>
+    </button>
+
+    <!-- 要望２：サイドバーオーバーレイ -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- 要望２：サイドバー本体 -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">
+                <span>仕事ツール</span>
+            </div>
+            <button class="sidebar-close" id="sidebarCloseBtn" aria-label="閉じる">✕</button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page10.html" class="sidebar-link">
+                <i class="fa-solid fa-stopwatch sidebar-link-icon"></i>
+                <span>タイマー</span>
+            </a>
+            <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page11.html" class="sidebar-link">
+                <i class="fa-regular fa-calendar-days sidebar-link-icon"></i>
+                <span>カレンダー</span>
+            </a>
+            <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page12.html" class="sidebar-link">
+                <i class="fa-solid fa-calculator sidebar-link-icon"></i>
+                <span>負担金計算</span>
+            </a>
+            <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page13.html" class="sidebar-link">
+                <i class="fa-regular fa-clock sidebar-link-icon"></i>
+                <span>時間計算</span>
+            </a>
+            <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page3.html" class="sidebar-link">
+                <i class="fa-solid fa-file-invoice-dollar sidebar-link-icon"></i>
+                <span>負担額</span>
+            </a>
+            <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page6.html" class="sidebar-link">
+                <i class="fa-solid fa-business-time sidebar-link-icon"></i>
+                <span>時間計算</span>
+            </a>
+            <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page7.html" class="sidebar-link">
+                <i class="fa-solid fa-calendar-week sidebar-link-icon"></i>
+                <span>和暦西暦</span>
+            </a>
+            <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page8.html" class="sidebar-link">
+                <i class="fa-solid fa-calculator sidebar-link-icon"></i>
+                <span>電卓</span>
+            </a>
+            <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page9.html" class="sidebar-link">
+                <i class="fa-solid fa-book-medical sidebar-link-icon"></i>
+                <span>医療用語辞典</span>
+            </a>
+        </nav>
+    </aside>
 
     <!-- トースト通知 -->
     <div x-show="toast.show" 
@@ -388,7 +590,8 @@
 
     <!-- Header & App Navigation -->
     <header class="bg-slate-900 text-white shadow-lg border-b border-slate-800 sticky top-0 z-40">
-        <div class="max-w-2xl mx-auto px-3 py-2.5">
+        <!-- 左上のハンバーガーボタンと被らないよう pl-14 で適切な余白を確保 -->
+        <div class="max-w-2xl mx-auto pl-14 pr-3 py-2.5">
             <!-- App Title & Global Action -->
             <div class="flex justify-between items-center mb-2">
                 <div class="flex items-center space-x-2">
@@ -842,7 +1045,7 @@
                     <div class="flex items-center justify-end space-x-2">
                         <div class="flex mr-auto bg-slate-950 p-1 rounded-xl border border-slate-800">
                             <button @click="calc.op = '+'" :class="calc.op === '+' ? 'bg-amber-600 text-white font-black' : 'text-slate-500 hover:text-slate-300'" class="w-8 h-8 rounded-lg text-lg flex items-center justify-center transition">＋</button>
-                            <button @click="calc.op = '-'" :class="calc.op === '- text-white font-black' : 'text-slate-500 hover:text-slate-300'" class="w-8 h-8 rounded-lg text-lg flex items-center justify-center transition">－</button>
+                            <button @click="calc.op = '-'" :class="calc.op === '-' ? 'bg-amber-600 text-white font-black' : 'text-slate-500 hover:text-slate-300'" class="w-8 h-8 rounded-lg text-lg flex items-center justify-center transition">－</button>
                         </div>
 
                         <button @click="calc.setFocus('h2')" 
@@ -908,6 +1111,98 @@
     <footer class="bg-slate-950 text-slate-500 py-3 border-t border-slate-900 text-center text-xs">
         医療・業務時間計算 統合アプリケーション
     </footer>
+
+    <!-- 要望２：JavaScript制御 & PWA設定 -->
+    <script>
+        // 要望２：ハンバーガーメニューの開閉機能
+        document.addEventListener("DOMContentLoaded", function() {
+            const hamburgerBtn = document.getElementById("hamburgerBtn");
+            const sidebar = document.getElementById("sidebar");
+            const sidebarOverlay = document.getElementById("sidebarOverlay");
+            const sidebarCloseBtn = document.getElementById("sidebarCloseBtn");
+
+            function toggleSidebar() {
+                const isActive = sidebar.classList.contains("active");
+                if (isActive) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+            }
+
+            function openSidebar() {
+                sidebar.classList.add("active");
+                sidebarOverlay.classList.add("active");
+            }
+
+            function closeSidebar() {
+                sidebar.classList.remove("active");
+                sidebarOverlay.classList.remove("active");
+            }
+
+            if (hamburgerBtn) hamburgerBtn.addEventListener("click", toggleSidebar);
+            if (sidebarOverlay) sidebarOverlay.addEventListener("click", closeSidebar);
+            if (sidebarCloseBtn) sidebarCloseBtn.addEventListener("click", closeSidebar);
+        });
+
+        // Dynamic Manifest Injection for PWA
+        (function() {
+            const manifestData = {
+                name: "医療・業務時間計算統合ツール",
+                short_name: "時間計算",
+                start_url: "./",
+                display: "standalone",
+                background_color: "#0b0f19",
+                theme_color: "#0f172a",
+                icons: [
+                    {
+                        src: "icon-kuroneko.png",
+                        sizes: "192x192",
+                        type: "image/png"
+                    },
+                    {
+                        src: "icon-kuroneko.png",
+                        sizes: "512x512",
+                        type: "image/png"
+                    }
+                ]
+            };
+            const stringManifest = JSON.stringify(manifestData);
+            const blob = new Blob([stringManifest], {type: 'application/json'});
+            const manifestUrl = URL.createObjectURL(blob);
+            const manifestElem = document.getElementById('pwaManifest');
+            if (manifestElem) {
+                manifestElem.setAttribute('href', manifestUrl);
+            }
+        })();
+
+        // PWA Service Worker Registration (Inline Data URL)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const swCode = `
+                    const CACHE_NAME = 'time-calc-v2';
+                    self.addEventListener('install', (e) => {
+                        self.skipWaiting();
+                    });
+                    self.addEventListener('activate', (e) => {
+                        e.waitUntil(clients.claim());
+                    });
+                    self.addEventListener('fetch', (e) => {
+                        e.respondWith(
+                            fetch(e.request).catch(() => caches.match(e.request))
+                        );
+                    });
+                `;
+                const blob = new Blob([swCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(swUrl).then(() => {
+                    console.log('Service Worker Registered');
+                }).catch(err => {
+                    console.error('Service Worker registration failed:', err);
+                });
+            });
+        }
+    </script>
 
 </body>
 </html>
