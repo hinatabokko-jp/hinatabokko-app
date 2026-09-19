@@ -1,4 +1,4 @@
-a<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja" class="dark">
 <head>
     <meta charset="UTF-8">
@@ -312,7 +312,7 @@ a<!DOCTYPE html>
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="sidebar-title">
-                <i class="fa-solid fa-briefcase text-indigo-400 mr-1"></i>
+                <i class="fa-solid fa-briefcase text-indigo-400"></i>
                 <span>仕事ツール</span>
             </div>
             <button class="sidebar-close" id="sidebarCloseBtn" aria-label="閉じる">✕</button>
@@ -1221,14 +1221,13 @@ a<!DOCTYPE html>
                         e.waitUntil(clients.claim());
                     });
                     self.addEventListener('fetch', (e) => {
-                        // ネットワークリクエストの通過
                         e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
                     });
                 `;
                 const blob = new Blob([swCode], { type: 'application/javascript' });
                 const blobUrl = URL.createObjectURL(blob);
                 navigator.serviceWorker.register(blobUrl).catch(() => {
-                    // Blobでの登録が制限されている環境のサイレントハンドリング
+                    // Blobでの登録制限時のサイレント処理
                 });
             }
         });
