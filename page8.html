@@ -4,10 +4,31 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>シンプル電卓</title>
+
+  <!-- アプリのアイコン設定 (icon-kuroneko.png) -->
+  <link rel="icon" href="icon-kuroneko.png" type="image/png">
+  <link rel="apple-touch-icon" href="icon-kuroneko.png">
+
+  <!-- PWA Manifest & Theme -->
+  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22%E4%BB%95%E4%BA%8B%E3%83%84%E3%83%BC%E3%83%AB%22%2C%22short_name%22%3A%22%E4%BB%95%E4%BA%8B%E3%83%84%E3%83%BC%E3%83%AB%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f1219%22%2C%22theme_color%22%3A%22%230f1219%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22icon-kuroneko.png%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%2C%7B%22src%22%3A%22icon-kuroneko.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
+  <meta name="theme-color" content="#0f1219">
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
-    /* スクロールバーの非表示（念のための予備設定） */
+    /* カラー変数 */
+    :root {
+      --bg: #0f1219;
+      --panel: #181d28;
+      --panel-light: #222836;
+      --border: #323b4e;
+      --text: #f5f7fa;
+      --sub: #9da6b5;
+      --accent: #657dff;
+    }
+
+    /* スクロールバーの非表示 */
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
@@ -15,16 +36,197 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
+
+    /* ハンバーガーボタン */
+    .hamburger-btn {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 1000;
+      width: 44px;
+      height: 44px;
+      background: rgba(24, 29, 40, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: transform 0.2s, background-color 0.2s;
+    }
+    .hamburger-btn:active {
+      transform: scale(0.95);
+    }
+    .hamburger-bar {
+      width: 20px;
+      height: 2px;
+      background-color: var(--text);
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    /* サイドバー オーバーレイ */
+    .sidebar-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 1001;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .sidebar-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* サイドバー本体 */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: min(280px, 80vw);
+      height: 100vh;
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      z-index: 1002;
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+      overflow-y: auto;
+    }
+    .sidebar.active {
+      transform: translateX(0);
+    }
+    .sidebar-header {
+      padding: 20px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sidebar-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sidebar-close {
+      background: transparent;
+      border: none;
+      color: var(--sub);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+    .sidebar-close:hover {
+      color: var(--text);
+    }
+    .sidebar-nav {
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      color: var(--text);
+      text-decoration: none;
+      border-radius: 10px;
+      background: var(--panel-light);
+      border: 1px solid var(--border);
+      font-weight: 600;
+      font-size: 14px;
+      transition: background-color 0.2s, transform 0.1s, border-color 0.2s;
+    }
+    .sidebar-link:hover {
+      border-color: var(--accent);
+      background: rgba(101, 125, 255, 0.15);
+    }
+    .sidebar-link:active {
+      transform: scale(0.98);
+    }
+    .sidebar-link-icon {
+      font-size: 18px;
+    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 flex items-center justify-center min-h-screen p-2 font-sans select-none">
+
+  <!-- ハンバーガーボタン -->
+  <button class="hamburger-btn" id="hamburgerBtn" aria-label="メニューを開く">
+    <div class="hamburger-bar"></div>
+    <div class="hamburger-bar"></div>
+    <div class="hamburger-bar"></div>
+  </button>
+
+  <!-- サイドバーオーバーレイ -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- サイドバー -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">
+        <span>仕事ツール</span>
+      </div>
+      <button class="sidebar-close" id="sidebarCloseBtn" aria-label="閉じる">✕</button>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page10.html" class="sidebar-link">
+        <span class="sidebar-link-icon">⏱️</span>
+        <span>タイマー</span>
+      </a>
+      <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page11.html" class="sidebar-link">
+        <span class="sidebar-link-icon">📅</span>
+        <span>カレンダー</span>
+      </a>
+      <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page3.html" class="sidebar-link">
+        <span class="sidebar-link-icon">💰</span>
+        <span>負担額</span>
+      </a>
+      <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page6.html" class="sidebar-link">
+        <span class="sidebar-link-icon">⏳</span>
+        <span>時間計算</span>
+      </a>
+      <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page7.html" class="sidebar-link">
+        <span class="sidebar-link-icon">⛩️</span>
+        <span>和暦西暦</span>
+      </a>
+      <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page8.html" class="sidebar-link">
+        <span class="sidebar-link-icon">🧮</span>
+        <span>電卓</span>
+      </a>
+      <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page9.html" class="sidebar-link">
+        <span class="sidebar-link-icon">📖</span>
+        <span>医療用語辞典</span>
+      </a>
+    </nav>
+  </aside>
 
   <!-- 電卓本体コンテナ -->
   <div class="relative w-full max-w-xs bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col">
     
     <!-- ヘッダーエリア -->
     <div class="flex items-center justify-between px-5 pt-4 pb-1 text-slate-400">
-      <span class="text-xs font-semibold tracking-wider text-slate-400 uppercase">電卓</span>
+      <span class="text-xs font-semibold tracking-wider text-slate-400 uppercase ml-8">電卓</span>
       <button
         id="history-btn"
         onclick="toggleHistory()"
@@ -100,7 +302,36 @@
   </div>
 
   <script>
-    // 内部状態変数
+    // ハンバーガーメニュー制御
+    const hamburgerBtn = document.getElementById("hamburgerBtn");
+    const sidebar = document.getElementById("sidebar");
+    const sidebarOverlay = document.getElementById("sidebarOverlay");
+    const sidebarCloseBtn = document.getElementById("sidebarCloseBtn");
+
+    function toggleSidebar() {
+      const isActive = sidebar.classList.contains("active");
+      if (isActive) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
+    }
+
+    function openSidebar() {
+      sidebar.classList.add("active");
+      sidebarOverlay.classList.add("active");
+    }
+
+    function closeSidebar() {
+      sidebar.classList.remove("active");
+      sidebarOverlay.classList.remove("active");
+    }
+
+    if (hamburgerBtn) hamburgerBtn.addEventListener("click", toggleSidebar);
+    if (sidebarOverlay) sidebarOverlay.addEventListener("click", closeSidebar);
+    if (sidebarCloseBtn) sidebarCloseBtn.addEventListener("click", closeSidebar);
+
+    // 電卓内部状態変数
     let displayValue = '0';
     let firstOperand = null;
     let operator = null;
@@ -301,16 +532,48 @@
 
     // キーボード入力サポート
     window.addEventListener('keydown', (e) => {
+      // サイドバーが開いている最中はキーボード操作をスキップ（操作干渉防止）
+      if (sidebar.classList.contains("active")) return;
+
       if (e.key >= '0' && e.key <= '9') inputDigit(parseInt(e.key, 10));
       else if (e.key === '.') inputDecimal();
       else if (e.key === 'Enter' || e.key === '=') { e.preventDefault(); handleEquals(); }
       else if (e.key === 'Backspace') backspace();
-      else if (e.key === 'Escape') clearAll();
+      else if (e.key === 'Escape') {
+        if (!historyPanel.classList.contains('hidden')) {
+          toggleHistory();
+        } else {
+          clearAll();
+        }
+      }
       else if (e.key === '+') performOperation('+');
       else if (e.key === '-') performOperation('-');
       else if (e.key === '*') performOperation('*');
       else if (e.key === '/') { e.preventDefault(); performOperation('/'); }
     });
+
+    // PWA Service Worker 登録（GitHub Pages等で完結動作）
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        const swCode = `
+          self.addEventListener('install', (e) => {
+            self.skipWaiting();
+          });
+          self.addEventListener('activate', (e) => {
+            return self.clients.claim();
+          });
+          self.addEventListener('fetch', (e) => {
+            e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+          });
+        `;
+        const blob = new Blob([swCode], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(blob);
+        
+        navigator.serviceWorker.register(swUrl)
+          .then(() => console.log('Service Worker Registered'))
+          .catch(err => console.log('SW Registration Failed: ', err));
+      });
+    }
   </script>
 </body>
 </html>
