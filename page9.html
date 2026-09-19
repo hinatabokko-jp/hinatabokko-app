@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>医療専門用語辞書 (PCI / ERCP)</title>
+    
+    <!-- 要求1: アプリのアイコン設定 (icon-kuroneko.png) -->
+    <link rel="icon" href="icon-kuroneko.png" type="image/png">
+    <link rel="apple-touch-icon" href="icon-kuroneko.png">
+    
+    <!-- PWA テーマカラー & Dynamic Web Manifest -->
+    <meta name="theme-color" content="#0f1219">
+    <link rel="manifest" href='data:application/manifest+json,{"name":"医療専門用語辞書","short_name":"医療辞書","start_url":"./","display":"standalone","background_color":"#0f1219","theme_color":"#0f1219","icons":[{"src":"icon-kuroneko.png","sizes":"192x192","type":"image/png"},{"src":"icon-kuroneko.png","sizes":"512x512","type":"image/png"}]}'>
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -15,7 +24,7 @@
                         darkbg: '#0f172a',
                         cardbg: '#1e293b',
                         bordercolor: '#334155',
-                        accent: '#38bdf8',
+                        accent: '#657dff',
                         accentHover: '#0284c7'
                     }
                 }
@@ -24,7 +33,20 @@
     </script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
+        /* カラー変数（移植元コードより） */
+        :root {
+            --bg: #0f1219;
+            --panel: #181d28;
+            --panel-light: #222836;
+            --border: #323b4e;
+            --text: #f5f7fa;
+            --sub: #9da6b5;
+            --accent: #657dff;
+        }
+
+        /* スクロールバー装飾 */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -39,12 +61,193 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #475569;
         }
+
+        /* ハンバーガーボタン */
+        .hamburger-btn {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 1000;
+            width: 44px;
+            height: 44px;
+            background: rgba(24, 29, 40, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        .hamburger-btn:active {
+            transform: scale(0.95);
+        }
+        .hamburger-bar {
+            width: 20px;
+            height: 2px;
+            background-color: var(--text);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        /* サイドバー オーバーレイ */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* サイドバー本体 */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: min(280px, 80vw);
+            height: 100vh;
+            background: var(--panel);
+            border-right: 1px solid var(--border);
+            z-index: 1002;
+            transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+            overflow-y: auto;
+        }
+        .sidebar.active {
+            transform: translateX(0);
+        }
+        .sidebar-header {
+            padding: 20px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .sidebar-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .sidebar-close {
+            background: transparent;
+            border: none;
+            color: var(--sub);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .sidebar-nav {
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            color: var(--text);
+            text-decoration: none;
+            border-radius: 10px;
+            background: var(--panel-light);
+            border: 1px solid var(--border);
+            font-weight: 600;
+            font-size: 14px;
+            transition: background-color 0.2s, transform 0.1s, border-color 0.2s;
+        }
+        .sidebar-link:hover {
+            border-color: var(--accent);
+            background: rgba(101, 125, 255, 0.15);
+        }
+        .sidebar-link:active {
+            transform: scale(0.98);
+        }
+        .sidebar-link-icon {
+            font-size: 18px;
+            width: 20px;
+            text-align: center;
+            color: #38bdf8;
+        }
     </style>
 </head>
 <body class="bg-darkbg text-slate-100 min-h-screen flex flex-col font-sans antialiased">
 
+    <!-- ハンバーガーボタン -->
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="メニューを開く">
+        <div class="hamburger-bar"></div>
+        <div class="hamburger-bar"></div>
+        <div class="hamburger-bar"></div>
+    </button>
+
+    <!-- サイドバーオーバーレイ -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- サイドバー -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">
+                <i class="fa-solid fa-briefcase text-cyan-400"></i>
+                <span>仕事ツール</span>
+            </div>
+            <button class="sidebar-close" id="sidebarCloseBtn" aria-label="閉じる">✕</button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page10.html" class="sidebar-link">
+                <i class="fa-solid fa-stopwatch sidebar-link-icon"></i>
+                <span>タイマー</span>
+            </a>
+            <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page11.html" class="sidebar-link">
+                <i class="fa-solid fa-calendar-days sidebar-link-icon"></i>
+                <span>カレンダー</span>
+            </a>
+            <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page3.html" class="sidebar-link">
+                <i class="fa-solid fa-hand-holding-dollar sidebar-link-icon"></i>
+                <span>負担額</span>
+            </a>
+            <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page6.html" class="sidebar-link">
+                <i class="fa-solid fa-clock sidebar-link-icon"></i>
+                <span>時間計算</span>
+            </a>
+            <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page7.html" class="sidebar-link">
+                <i class="fa-solid fa-calendar-alt sidebar-link-icon"></i>
+                <span>和暦西暦</span>
+            </a>
+            <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page8.html" class="sidebar-link">
+                <i class="fa-solid fa-calculator sidebar-link-icon"></i>
+                <span>電卓</span>
+            </a>
+            <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page9.html" class="sidebar-link">
+                <i class="fa-solid fa-book-medical sidebar-link-icon"></i>
+                <span>医療用語辞典</span>
+            </a>
+        </nav>
+    </aside>
+
     <!-- Header Navbar -->
-    <header class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-bordercolor px-4 py-3 shadow-lg">
+    <header class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-bordercolor px-4 py-3 shadow-lg pl-16 md:pl-16">
         <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
             <div class="flex items-center space-x-3">
                 <div class="bg-gradient-to-br from-cyan-500 to-blue-600 p-2.5 rounded-xl text-white shadow-md">
@@ -137,6 +340,60 @@
     </footer>
 
     <script>
+        // PWA Service Worker の動的登録
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const swCode = `
+                    self.addEventListener('install', (e) => {
+                        self.skipWaiting();
+                    });
+                    self.addEventListener('activate', (e) => {
+                        e.waitUntil(clients.claim());
+                    });
+                    self.addEventListener('fetch', (e) => {
+                        // Network first strategy
+                        e.respondWith(
+                            fetch(e.request).catch(() => caches.match(e.request))
+                        );
+                    });
+                `;
+                const blob = new Blob([swCode], { type: 'text/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(swUrl)
+                    .then(reg => console.log('Service Worker registered successfully'))
+                    .catch(err => console.log('Service Worker registration failed:', err));
+            });
+        }
+
+        // ハンバーガーメニュー制御JavaScript
+        const hamburgerBtn = document.getElementById("hamburgerBtn");
+        const sidebar = document.getElementById("sidebar");
+        const sidebarOverlay = document.getElementById("sidebarOverlay");
+        const sidebarCloseBtn = document.getElementById("sidebarCloseBtn");
+
+        function toggleSidebar() {
+            const isActive = sidebar.classList.contains("active");
+            if (isActive) {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
+        }
+
+        function openSidebar() {
+            sidebar.classList.add("active");
+            sidebarOverlay.classList.add("active");
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove("active");
+            sidebarOverlay.classList.remove("active");
+        }
+
+        hamburgerBtn.addEventListener("click", toggleSidebar);
+        sidebarOverlay.addEventListener("click", closeSidebar);
+        sidebarCloseBtn.addEventListener("click", closeSidebar);
+
         // Dictionary Database
         const dictionaryData = [
             // A
@@ -268,7 +525,7 @@
             { id: "rca", term: "RCA", reading: "アールシーエー / うかんどうみゃく", fullName: "Right Coronary Artery", category: "PCI", initial: "R", meaning: "右冠動脈（#1-4）。心臓の下壁や右心室へ血液を供給する動脈。" },
             { id: "recanalization", term: "recanalization", reading: "リカナリゼーション / さいかいつう", fullName: "Recanalization", category: "PCI", initial: "R", meaning: "再開通。閉塞して血流が途絶えていた血管を再び通れる状態にすること。" },
             { id: "remove", term: "remove", reading: "リムーブ / ばっきょ", fullName: "Remove Catheter", category: "TL", initial: "R", meaning: "取り除く・抜去する。カテーテルやワイヤーなどを血管内から取り抜く操作。" },
-            { id: "residual", term: "residual", reading: "residual", reading: "レジデュアル / ざんそん", fullName: "Residual Stenosis", category: "TL", initial: "R", meaning: "残存する・残存。治療後にも血管内に残っている狭窄（残存狭窄度など）。" },
+            { id: "residual", term: "residual", reading: "レジデュアル / ざんそん", fullName: "Residual Stenosis", category: "TL", initial: "R", meaning: "残存する・残存。治療後にも血管内に残っている狭窄（残存狭窄度など）。" },
             { id: "restenosis", term: "restenosis", reading: "リステノーシス / さいきょうさく", fullName: "Restenosis / In-Stent Restenosis", category: "PCI", initial: "R", meaning: "再狭窄。治療・ステント留置した血管部位が再び狭くなってしまう病態（ISR）。" },
             { id: "retrieve", term: "retrieve", reading: "リトリーブ / かいしゅう", fullName: "Retrieve Device", category: "TL", initial: "R", meaning: "回収する。体内に残った不具合デバイスや外れた器具などを回収すること。" },
             { id: "rotablator", term: "Rotablator", reading: "ロータブレーター", fullName: "Rotational Atherectomy System", category: "PCI", initial: "R", meaning: "高速回転式アテローム切除術。微小ダイヤモンドバーを毎分15〜19万回転させて硬い石灰化を削る。" },
@@ -279,7 +536,6 @@
             { id: "select", term: "select", reading: "セレクト / せんたく", fullName: "Select Branch", category: "TL", initial: "S", meaning: "選択的に挿入する・選択する。目的の冠動脈や分枝にカテーテルやワイヤーを入れること。" },
             { id: "sheath", term: "sheath / Sheath", reading: "シース", fullName: "Vascular Sheath Introducer", category: "TL", initial: "S", meaning: "シース。血管内にカテーテルを出入させるための弁付き外筒管。" },
             { id: "spasm", term: "spasm / Spasm", reading: "スパズム / かんけいれん", fullName: "Coronary Spasm", category: "PCI", initial: "S", meaning: "攣縮・スパズム。冠動脈壁の一時的な強度の収縮。ニトロ等で解除する。" },
-
             { id: "stba", term: "StBA / Stent BA", reading: "エスティービーエー", fullName: "Stent Balloon Angioplasty", category: "PCI", initial: "S", meaning: "ステント内バルーン拡張術。ステント留置後の再拡張やステント再狭窄（ISR）病変の治療手技。" },
             { id: "stemi", term: "STEMI", reading: "ステミ / えすてぃーじょうしょうがかしんきんこうそく", fullName: "ST-segment Elevation Myocardial Infarction", category: "PCI", initial: "S", meaning: "ST上昇型心筋梗塞。心電図でST上昇を認める緊急性の高い完全閉塞性心筋梗塞。迅速な再開通PCIを要する。" },
             { id: "stenosis", term: "stenosis", reading: "ステノーシス / きょうさく", fullName: "Vascular Stenosis", category: "PCI", initial: "S", meaning: "狭窄。動脈硬化等により血管内腔が狭くなっている状態。" },
@@ -298,7 +554,6 @@
             { id: "timi_2", term: "TIMI 2", reading: "ティミ ツー / ちえんけつりゅう", fullName: "TIMI Grade 2 Flow", category: "PCI", initial: "T", meaning: "遅延した順行性血流。造影剤が末梢まで到達するが、正常血管に比べて造影・消失が遅い状態。" },
             { id: "timi_3", term: "TIMI 3", reading: "ティミ スリー / せいじょうけつりゅう", fullName: "TIMI Grade 3 Flow", category: "PCI", initial: "T", meaning: "正常な順行性血流。造影剤が正常な速さで末梢まで完全に流れる状態。" },
             { id: "torque", term: "torque", reading: "トルク / かいてん", fullName: "Torque Control", category: "TL", initial: "T", meaning: "トルク・回転操作。ガイドワイヤー等の手元を回転させて先端の向きを微調整する操作。" },
-
             { id: "trband", term: "TR Band", reading: "ティーアールバンド / しけつバンド", fullName: "TR Band Compression Device", category: "TL", initial: "T", meaning: "手首の止血用エアバンド。TRI手技終了後、橈骨動脈の穿刺部を空気圧で圧迫止血する器具。" },
             { id: "trackability", term: "trackability", reading: "トラッカビリティ / つじゅうせい", fullName: "Trackability", category: "TL", initial: "T", meaning: "追従性。屈曲した血管の形状に沿ってデバイスがスムーズに進みやすい性質。" },
             { id: "tri", term: "TRI", reading: "ティーアールアイ", fullName: "TransRadial Intervention", category: "PCI", initial: "T", meaning: "橈骨動脈アプローチ。手首の橈骨動脈からカテーテルを入れる手法。止血が容易で負担が少ない。" },
