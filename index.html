@@ -5,12 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>小学５年生 漢字テスト</title>
 
-  <!-- アプリのアイコン設定 (kurimanjuu.png) -->
+<!-- アプリのアイコン設定 -->
 <link rel="icon" href="kurimanjuu.png" type="image/png">
 <link rel="apple-touch-icon" href="kurimanjuu.png">
   
 <!-- confetti.js library for celebration effects -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
 <style>
 *{
   box-sizing:border-box;
@@ -55,9 +56,7 @@ button{font:inherit;outline:none}
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   transition: transform 0.2s, background-color 0.2s;
 }
-.hamburger-btn:active {
-  transform: scale(0.95);
-}
+.hamburger-btn:active { transform: scale(0.95); }
 .hamburger-bar {
   width: 20px;
   height: 2px;
@@ -69,10 +68,8 @@ button{font:inherit;outline:none}
 /* サイドバー オーバーレイ */
 .sidebar-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
   z-index: 1001;
@@ -80,16 +77,12 @@ button{font:inherit;outline:none}
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
 }
-.sidebar-overlay.active {
-  opacity: 1;
-  visibility: visible;
-}
+.sidebar-overlay.active { opacity: 1; visibility: visible; }
 
 /* サイドバー本体 */
 .sidebar {
   position: fixed;
-  top: 0;
-  left: 0;
+  top: 0; left: 0;
   width: min(280px, 80vw);
   height: 100vh;
   background: var(--panel);
@@ -102,9 +95,7 @@ button{font:inherit;outline:none}
   box-shadow: 10px 0 30px rgba(0,0,0,0.5);
   overflow-y: auto;
 }
-.sidebar.active {
-  transform: translateX(0);
-}
+.sidebar.active { transform: translateX(0); }
 .sidebar-header {
   padding: 20px 16px;
   border-bottom: 1px solid var(--border);
@@ -152,12 +143,8 @@ button{font:inherit;outline:none}
   border-color: var(--accent);
   background: rgba(101, 125, 255, 0.15);
 }
-.sidebar-link:active {
-  transform: scale(0.98);
-}
-.sidebar-link-icon {
-  font-size: 18px;
-}
+.sidebar-link:active { transform: scale(0.98); }
+.sidebar-link-icon { font-size: 18px; }
 
 header{text-align:center;margin-bottom:12px;margin-top:8px;display:flex;align-items:baseline;justify-content:center;gap:12px;flex-wrap:wrap}
 .title{margin:0;font-size:clamp(16px,3.5vw,20px);font-weight:900;letter-spacing:.04em;background:linear-gradient(135deg,#fff,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
@@ -175,7 +162,84 @@ header{text-align:center;margin-bottom:12px;margin-top:8px;display:flex;align-it
 .badge-group{display:flex;gap:8px}.badge{color:var(--sub);font-size:12px;background:var(--panel-light);border:1px solid var(--border);padding:4px 10px;border-radius:20px}
 .tool-btn{background:var(--panel-light);border:1px solid var(--border);color:var(--text);border-radius:10px;cursor:pointer;padding:6px 12px;font-size:12px;font-weight:600}
 
-/* 問題文コンテナ：ふりがなと本文を上下に表示 */
+/* 追加画面（画面１ & 画面２）用スタイル */
+.preview-header {
+  text-align: center;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: rgba(101, 125, 255, 0.08);
+  border: 1px solid rgba(101, 125, 255, 0.25);
+  border-radius: 14px;
+}
+.preview-message {
+  font-size: clamp(10px, 1.8vw, 11px);
+  font-weight: 400;
+  color: #7a88a8;
+  margin: 0;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+}
+.ready-message {
+  font-size: clamp(20px, 5.5vw, 28px);
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.5;
+  letter-spacing: 0.05em;
+  text-shadow: 0 2px 10px rgba(101, 125, 255, 0.3);
+}
+
+/* 漢字カードグリッド（画面１） */
+.kanji-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+  gap: 12px;
+  max-height: 50vh;
+  overflow-y: auto;
+  padding: 6px;
+  margin-bottom: 20px;
+}
+.kanji-card {
+  background: var(--panel-light);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 6px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+.kanji-card-char {
+  font-family: "UD Digi Kyokasho N-R", "YuKyokasho", "Hiragino Mincho ProN", "Yu Mincho", "Kozuka Mincho Pro", serif;
+  font-size: 34px;
+  font-weight: 300;
+  color: #f0f4f8;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+}
+.kanji-card-reading {
+  font-size: 12px;
+  color: #a5b4fc;
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+.ready-container {
+  text-align: center;
+  padding: 30px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.ready-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+/* テスト画面スタイル */
 .question{
   text-align:center;
   font-size:clamp(18px,4vw,24px);
@@ -216,7 +280,6 @@ header{text-align:center;margin-bottom:12px;margin-top:8px;display:flex;align-it
   width: 100%;
 }
 
-/* 常に横並び（row）で均等配置 */
 .writing-area {
   display: flex;
   flex-direction: row;
@@ -229,7 +292,6 @@ header{text-align:center;margin-bottom:12px;margin-top:8px;display:flex;align-it
   overflow: visible;
 }
 
-/* スクロール補助用サイドバー */
 .scroll-sidebar {
   width: 40px;
   background: rgba(255, 255, 255, 0.04);
@@ -249,10 +311,7 @@ header{text-align:center;margin-bottom:12px;margin-top:8px;display:flex;align-it
   touch-action: pan-y;
   flex-shrink: 0;
 }
-.scroll-sidebar span {
-  margin: 4px 0;
-  opacity: 0.7;
-}
+.scroll-sidebar span { margin: 4px 0; opacity: 0.7; }
 
 .writing-box {
   position: relative;
@@ -290,20 +349,12 @@ header{text-align:center;margin-bottom:12px;margin-top:8px;display:flex;align-it
   pointer-events: none;
   z-index: 1;
 }
-.writing-box:before {
-  left: 0; right: 0; top: 50%;
-  border-top: 1px dashed rgba(100, 110, 130, .35);
-}
-.writing-box:after {
-  top: 0; bottom: 0; left: 50%;
-  border-left: 1px dashed rgba(100, 110, 130, .35);
-}
+.writing-box:before { left: 0; right: 0; top: 50%; border-top: 1px dashed rgba(100, 110, 130, .35); }
+.writing-box:after { top: 0; bottom: 0; left: 50%; border-left: 1px dashed rgba(100, 110, 130, .35); }
 canvas {
   display: block;
-  width: 100%;
-  height: 100%;
-  position: relative;
-  z-index: 2;
+  width: 100%; height: 100%;
+  position: relative; z-index: 2;
   cursor: crosshair;
   touch-action: none;
   -webkit-touch-callout: none;
@@ -318,15 +369,23 @@ canvas {
 .btn-check{background:linear-gradient(135deg,#5b6eff,#8b5cf6);box-shadow:0 4px 15px rgba(91,110,255,.3)}
 .btn-next{background:linear-gradient(135deg,#2563eb,#3b82f6)}
 .btn-finish{background:transparent;border:1px solid #3b4351;color:#aeb7c5;min-height:38px;font-size:13px}
-.answer-section{margin-top:12px}.answer-box{min-height:60px;background:#10141b;border:1px solid var(--border);border-radius:12px;display:flex;justify-content:center;align-items:center;padding:8px}
-.answer-placeholder{color:#657080;font-size:12px;text-align:center}.answer{display:none;color:#fff;font-family:"Noto Serif JP","Yu Mincho",serif;font-size:clamp(28px,6vw,38px);font-weight:700;letter-spacing:.2em}
+.answer-section{margin-top:12px}
+.answer-box{min-height:60px;background:#10141b;border:1px solid var(--border);border-radius:12px;display:flex;justify-content:center;align-items:center;padding:8px}
+.answer-placeholder{color:#657080;font-size:12px;text-align:center}
+.answer{display:none;color:#fff;font-family:"UD Digi Kyokasho N-R", "YuKyokasho", "Hiragino Mincho ProN", "Yu Mincho", "Kozuka Mincho Pro", serif;font-size:clamp(28px,6vw,38px);font-weight:300;letter-spacing:.2em}
 .answer.show{display:block}
-.self-grading{display:none;margin-top:10px;grid-template-columns:1fr 1fr;gap:10px}.self-grading.show{display:grid}
+.self-grading{display:none;margin-top:10px;grid-template-columns:1fr 1fr;gap:10px}
+.self-grading.show{display:grid}
 .btn-correct{background:rgba(94,214,160,.15);border:2px solid var(--success);color:var(--success)}
 .btn-incorrect{background:rgba(255,59,48,.15);border:2px solid var(--danger);color:var(--danger)}
-.btn-correct.selected{background:var(--success);color:#000}.btn-incorrect.selected{background:var(--danger);color:#fff}
-.result{display:none;text-align:center;padding:20px 10px}.result.show{display:block}
-.result-icon{font-size:48px}.result-score{font-size:36px;font-weight:900;color:var(--accent);margin:8px 0}.result-title{font-size:22px;font-weight:900}.result-message{margin-top:8px;color:var(--sub);line-height:1.6;font-size:13px}
+.btn-correct.selected{background:var(--success);color:#000}
+.btn-incorrect.selected{background:var(--danger);color:#fff}
+.result{display:none;text-align:center;padding:20px 10px}
+.result.show{display:block}
+.result-icon{font-size:48px}
+.result-score{font-size:36px;font-weight:900;color:var(--accent);margin:8px 0}
+.result-title{font-size:22px;font-weight:900}
+.result-message{margin-top:8px;color:var(--sub);line-height:1.6;font-size:13px}
 .footer{text-align:center;color:#525b69;font-size:10px;margin-top:12px}
 
 @media(max-width:480px){
@@ -339,17 +398,14 @@ canvas {
 </head>
 <body>
 
-<!-- ハンバーガーボタン -->
 <button class="hamburger-btn" id="hamburgerBtn" aria-label="メニューを開く">
   <div class="hamburger-bar"></div>
   <div class="hamburger-bar"></div>
   <div class="hamburger-bar"></div>
 </button>
 
-<!-- サイドバーオーバーレイ -->
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-<!-- サイドバー -->
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-header">
     <div class="sidebar-title">
@@ -373,19 +429,46 @@ canvas {
   </nav>
 </aside>
 
-  
 <div class="app">
 <header><h1 class="title">小学５年生 漢字</h1><div class="subtitle" id="headerSubtitle">第１章 〜 第１４章（問１〜問１３８）</div></header>
 
 <div id="sectionSelectArea"><div class="section-grid" id="sectionGrid"></div></div>
 
 <main class="card hidden" id="mainCard">
+
+<!-- 画面１：出題漢字の事前学習画面 -->
+<section id="kanjiPreviewArea" class="hidden">
+  <div class="preview-header">
+    <p class="preview-message">📖 これらが、ここで出題される漢字です。<br>覚えてください。</p>
+  </div>
+  <div class="kanji-grid" id="kanjiGrid"></div>
+  <div class="buttons">
+    <button class="btn btn-next" id="toProblemPreviewBtn">次へ進む ▶</button>
+    <button class="btn btn-finish" id="backToMenuFromKanjiBtn">コース選択へ戻る</button>
+  </div>
+</section>
+
+<!-- 画面２：テスト開始前の確認案内画面 -->
+<section id="problemPreviewArea" class="hidden">
+  <div class="ready-container">
+    <div class="ready-icon">💡</div>
+    <div class="preview-header" style="width: 100%;">
+      <p class="ready-message">覚えましたか？<br>それでは始めましょう。</p>
+    </div>
+  </div>
+  <div class="buttons">
+    <button class="btn btn-next" id="startTestBtn">漢字テストを始める ▶</button>
+    <button class="btn btn-finish" id="backToKanjiBtn" style="border-color:var(--accent); color:var(--accent);">◀ 前の画面に戻る（漢字一覧へ）</button>
+  </div>
+</section>
+
+<!-- 漢字テスト実行画面 -->
+<section id="testArea" class="hidden">
 <div class="topbar">
 <div class="progress"><strong id="currentNumber">1</strong> / <span id="totalNumber">10</span> 問</div>
 <div class="badge-group"><div class="badge">正解: <span id="correctCount">0</span></div><div class="badge" id="questionType">1文字</div></div>
 </div>
 
-<section id="testArea">
 <div class="question" id="question"></div>
 <div class="question-note">（読み仮名）の漢字を下の枠内に書いてください</div>
 
@@ -416,6 +499,7 @@ canvas {
 </div>
 </section>
 
+<!-- 最終結果画面 -->
 <section class="result" id="resultArea">
 <div class="result-icon">🎉</div><div class="result-title">おつかれさでした！</div>
 <div class="result-score" id="finalScore">0 / 0</div>
@@ -428,7 +512,6 @@ canvas {
 </div>
 
 <script>
-// 小学５年生 漢字（１）: 第1章〜（問1〜問138）
 const allQuestions=[
 {type:2,words:[{kanji:"許",reading:"きょ"},{kanji:"可",reading:"か"}],sentence:"{0}{1}を 得る。"},
 {type:2,words:[{kanji:"貿",reading:"ぼう"},{kanji:"易",reading:"えき"}],sentence:"{0}{1}が さかんだ。"},
@@ -530,8 +613,6 @@ const allQuestions=[
 {type:2,words:[{kanji:"序",reading:"じょ"},{kanji:"章",reading:"しょう"}],sentence:"それは {0}{1}に 過ぎなかった。"},
 {type:2,words:[{kanji:"武",reading:"ぶ"},{kanji:"士",reading:"し"}],sentence:"{0}{1}が 活躍する。"},
 {type:2,words:[{kanji:"資",reading:"し"},{kanji:"料",reading:"りょう"}],sentence:"それは 貴重な {0}{1}だ。"},
-
-// --- 追加された問題（問101〜問138） ---
 {type:2,words:[{kanji:"宿",reading:"しゅく"},{kanji:"舎",reading:"しゃ"}],sentence:"代表選手の {0}{1}。"},
 {type:2,words:[{kanji:"往",reading:"おう"},{kanji:"路",reading:"ろ"}],sentence:"目的地までの {0}{1}。"},
 {type:1,words:[{kanji:"罪",reading:"つみ"}],sentence:"{0}を 償う。",furigana:"つみを つぐなう"},
@@ -585,13 +666,14 @@ const clearBtn=$("clearBtn"),undoBtn=$("undoBtn"),checkBtn=$("checkBtn"),nextBtn
 const answer=$("answer"),answerPlaceholder=$("answerPlaceholder"),selfGrading=$("selfGrading"),correctBtn=$("correctBtn"),incorrectBtn=$("incorrectBtn");
 const testArea=$("testArea"),resultArea=$("resultArea"),restartBtn=$("restartBtn"),backToMenuBtn=$("backToMenuBtn"),finalScore=$("finalScore");
 
-// サイドバー要素
+const kanjiPreviewArea = $("kanjiPreviewArea"), kanjiGrid = $("kanjiGrid"), toProblemPreviewBtn = $("toProblemPreviewBtn"), backToMenuFromKanjiBtn = $("backToMenuFromKanjiBtn");
+const problemPreviewArea = $("problemPreviewArea"), startTestBtn = $("startTestBtn"), backToKanjiBtn = $("backToKanjiBtn");
+
 const hamburgerBtn = $("hamburgerBtn"), sidebar = $("sidebar"), sidebarOverlay = $("sidebarOverlay"), sidebarCloseBtn = $("sidebarCloseBtn");
 
 function toggleSidebar() {
   playSound("tap");
-  const isActive = sidebar.classList.contains("active");
-  if (isActive) {
+  if (sidebar.classList.contains("active")) {
     closeSidebar();
   } else {
     openSidebar();
@@ -623,7 +705,6 @@ function initAudio() {
   }
 }
 
-// Google サイト・iframe内でも安全にスクロールするための関数
 function scrollToTop() {
   try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e){}
 }
@@ -710,19 +791,67 @@ function initSectionMenu(){
   
   const card=document.createElement("div");card.className="section-card";
   card.innerHTML=`<div class="section-card-title">第 ${chapterNum} 章</div><div class="section-card-sub">問 ${startNum} 〜 問 ${endNum} （${endNum-startNum+1}問）</div>`;
-  card.addEventListener("click",()=>startSection(i));sectionGrid.appendChild(card);
+  card.addEventListener("click",()=>selectSection(i));sectionGrid.appendChild(card);
  }
 }
 
-function startSection(i){
+function selectSection(i){
  playSound("tap");currentSectionIndex=i;const size=10,start=i*size,end=Math.min((i+1)*size,allQuestions.length);
- questions=allQuestions.slice(start,end);sectionSelectArea.classList.add("hidden");mainCard.classList.remove("hidden");testArea.classList.remove("hidden");resultArea.classList.remove("show");
+ questions=allQuestions.slice(start,end);
  
  const chapterNum = BASE_CHAPTER + i;
  const startNum = BASE_QUESTION + start;
  const endNum = BASE_QUESTION + end - 1;
 
  headerSubtitle.textContent=`第 ${chapterNum} 章 （問 ${startNum} 〜 問 ${endNum}）`;
+ 
+ showKanjiPreview();
+}
+
+/* 画面１：選択したまとまりの出題漢字を表示 */
+function showKanjiPreview() {
+ sectionSelectArea.classList.add("hidden");
+ mainCard.classList.remove("hidden");
+ kanjiPreviewArea.classList.remove("hidden");
+ problemPreviewArea.classList.add("hidden");
+ testArea.classList.add("hidden");
+ resultArea.classList.remove("show");
+
+ kanjiGrid.innerHTML = "";
+ const uniqueKanjiMap = new Map();
+ questions.forEach(q => {
+   q.words.forEach(w => {
+     if(!uniqueKanjiMap.has(w.kanji)) {
+       uniqueKanjiMap.set(w.kanji, w.reading);
+     }
+   });
+ });
+
+ uniqueKanjiMap.forEach((reading, kanji) => {
+   const card = document.createElement("div");
+   card.className = "kanji-card";
+   card.innerHTML = `<div class="kanji-card-char">${kanji}</div><div class="kanji-card-reading">${reading}</div>`;
+   kanjiGrid.appendChild(card);
+ });
+
+ scrollToTop();
+}
+
+/* 画面２：テスト前の確認案内画面を表示（漢字一覧は削除しメッセージとボタンのみ） */
+function showProblemPreview() {
+ playSound("tap");
+ kanjiPreviewArea.classList.add("hidden");
+ problemPreviewArea.classList.remove("hidden");
+ testArea.classList.add("hidden");
+
+ scrollToTop();
+}
+
+function startActualTest() {
+ playSound("tap");
+ problemPreviewArea.classList.add("hidden");
+ testArea.classList.remove("hidden");
+ 
  currentIndex=0;correctCount=0;correctCountEl.textContent=0;showQuestion();
  scrollToTop();
 }
@@ -730,6 +859,10 @@ function startSection(i){
 function showMenu(){
  playSound("tap");
  mainCard.classList.add("hidden");
+ kanjiPreviewArea.classList.add("hidden");
+ problemPreviewArea.classList.add("hidden");
+ testArea.classList.add("hidden");
+ resultArea.classList.remove("show");
  sectionSelectArea.classList.remove("hidden");
  const totalChapters = Math.ceil(allQuestions.length / 10);
  headerSubtitle.textContent=`第１章 〜 第${totalChapters}章（問１〜問${allQuestions.length}）`;
@@ -878,7 +1011,12 @@ function showResult(){
  scrollToTop();
 }
 
-function restart(){ startSection(currentSectionIndex); }
+function restart(){ selectSection(currentSectionIndex); }
+
+toProblemPreviewBtn.onclick = showProblemPreview;
+backToMenuFromKanjiBtn.onclick = showMenu;
+backToKanjiBtn.onclick = showKanjiPreview;
+startTestBtn.onclick = startActualTest;
 
 clearBtn.onclick=()=>{playSound("tap");clearCanvas()};
 undoBtn.onclick=undoLastStroke;
@@ -891,7 +1029,7 @@ correctBtn.onclick=()=>gradeAnswer(true);
 incorrectBtn.onclick=()=>gradeAnswer(false);
 
 const resizeHandler = ()=>{
- if(!mainCard.classList.contains("hidden")){
+ if(!mainCard.classList.contains("hidden") && !testArea.classList.contains("hidden")){
   canvases.forEach((c,i)=>setupCanvas(c,ctxs[i],i));
   redrawAll();
  }
