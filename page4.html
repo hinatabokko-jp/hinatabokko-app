@@ -4,11 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>百人一首</title>
+    
+    <!-- PWA Settings -->
+    <meta name="theme-color" content="#0f1117">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="百人一首">
+    
+    <!-- PWA Manifest Data URI -->
+    <link rel="manifest" href="data:application/manifest+json;utf8,%7B%22name%22%3A%22%E7%99%BE%E4%BA%BA%E4%B8%80%E9%A6%96%E7%B7%B4%E7%BF%92%22%2C%22short_name%22%3A%22%E7%99%BE%E4%BA%BA%E4%B8%80%E9%A6%96%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f1117%22%2C%22theme_color%22%3A%22%230f1117%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%253D%2522http%253A%252F%252Fwww.w3.org%252F2000%252Fsvg%2522%2520viewBox%253D%25220%25200%2520512%2520512%2522%253E%253Crect%2520width%253D%2522512%2522%2520height%253D%2522512%2522%2520rx%253D%2522128%2522%2520fill%253D%2522%2523e11d48%2522%252F%253E%253Ctext%2520x%253D%252250%2525%2522%2520y%253D%252255%2525%2522%2520dominant-baseline%253D%2522middle%2522%2520text-anchor%253D%2522middle%2522%2520font-size%253D%2522280%2522%2520fill%253D%2522white%2522%2520font-family%253D%2522serif%2522%2520font-weight%253D%2522bold%2522%253E%25E7%2599%22253E%253C%252Ftext%253E%253C%252Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+
+    <!-- External Assets -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=Zen+Kaku Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
@@ -366,7 +377,7 @@
 
                         <!-- ふりがな (furigana) 表示：下行に追加 -->
                         <div class="w-full overflow-x-auto no-scrollbar py-1">
-                            <p id="ans-furigana" class="text-sm sm:text-base font-serif text-jp-subtext whitespace-nowrap"></p>
+                            <p id="ans-furigana" class="text-sm sm:text-base font-serif text-slate-200 whitespace-nowrap"></p>
                         </div>
 
                         <!-- 解説 (kaisetu) 表示 -->
@@ -437,7 +448,7 @@
             { id: 10, kaminoku: "これやこの", banme2: "行くも帰るも", banme3: "別れては", shimonoku: "知るも知らぬも", banme5: "逢坂の関", kuZentai: "これやこの 行くも帰るも 別れては 知るも知らぬも 逢坂の関", kaisetu: "ここが、行く人も帰る人も、知っている人も知らない人も、みんな出会ったり別れたりする逢坂の関なのだなあ。", furigana: "これやこの ゆくもかえるも わかれては しるもおしらぬも おうさかのせき" },
             { id: 11, kaminoku: "わたの原", banme2: "八十島かけて", banme3: "漕ぎ出でぬと", shimonoku: "人には告げよ", banme5: "海人の釣舟", kuZentai: "わたの原 八十島かけて 漕ぎ出でぬと 人には告げよ 海人の釣舟", kaisetu: "広い海を、たくさんの島々を目指して船でこぎ出したと、都にいる人たちに伝えておくれ、漁師の釣り船よ。", furigana: "わたのはら やそしまかけて こぎいでぬと ひとにはつげよ あまのつりぶね" },
             { id: 12, kaminoku: "天つ風", banme2: "雲の通ひ路", banme3: "吹きとぢよ", shimonoku: "をとめの姿", banme5: "しばしとどめむ", kuZentai: "天つ風 雲の通ひ路 吹きとぢよ をとめの姿 しばしとどめむ", kaisetu: "空を吹く風よ、雲の中の通り道を閉じておくれ。美しい乙女たちが、もう少しここにいてくれるように。", furigana: "あまつかぜ くものかよいじ ふきとじよ おとめのすがた しばしとどめむ" },
-            { id: 13, kaminoku: "筑波嶺の", banme2: "峰より落つる", banme3: "みなの川", shimonoku: "恋ぞ積もりて", banme5: "淵となりぬる", kuZentai: "筑波嶺の 峰より落つる みなの川 恋ぞ積もりて 淵となりぬる", kaisetu: "筑波山の峰から流れ落ちる川が深い淵になるように、私の恋心もどんどん積もって、深くなってしまった。", furigana: "つくばねの みねよりおつる みなのがわ こいぞつもりて ふちとなりぬる" },
+            { id: 13, kaminoku: "筑波嶺の", banme2: "峰より落つる", banme3: "みなの川", shimonoku: "恋ぞ積もりて", banme5: "淵となりぬる", kuZentai: "筑波嶺の 峰より落つる みなの川 恋ぞ積もりて 淵となりぬる", kaisetu: "筑波山の峰から流れ落ちる川が深い淵になるように、私の恋心もどんどん積もって、深くなってしまった。", furigana: "つくばねの みねよりおつる みなのがわ こいぞ picnic ふちとなりぬる" },
             { id: 14, kaminoku: "陸奥の", banme2: "しのぶもぢずり", banme3: "誰ゆゑに", shimonoku: "乱れそめにし", banme5: "我ならなくに", kuZentai: "陸奥の しのぶもぢずり 誰ゆゑに 乱れそめにし 我ならなくに", kaisetu: "陸奥のしのぶもじずりの模様のように、私の心が乱れ始めたのは、誰のせいだろう。あなたのせいなのに。", furigana: "みちのくの しのぶもじずり たれゆえに みだれそめにし われならなくに" },
             { id: 15, kaminoku: "君がため", banme2: "春の野に出でて", banme3: "若菜摘む", shimonoku: "わが衣手に", banme5: "雪は降りつつ", kuZentai: "君がため 春の野に出でて 若菜摘む わが衣手に 雪は降りつつ", kaisetu: "あなたのために春の野原へ出て、若菜を摘んでいると、私の着物のそでには雪が降り続いているよ。", furigana: "きみがため はるののにいでて わかなつむ わがころもでに ゆきはふりつつ" },
             { id: 16, kaminoku: "立ち別れ", banme2: "いなばの山の", banme3: "峰に生ふる", shimonoku: "まつとし聞かば", banme5: "今帰り来む", kuZentai: "立ち別れ いなばの山の 峰に生ふる まつとし聞かば 今帰り来む", kaisetu: "あなたと別れて遠くへ行くけれど、「待っている」と聞いたなら、すぐに帰ってこよう。", furigana: "たちわかれ いなばのやまの みねにおうる まつとしきかば いまかえりこむ" },
@@ -469,7 +480,7 @@
             { id: 42, kaminoku: "契りきな", banme2: "かたみに袖を", banme3: "しぼりつつ", shimonoku: "末の松山", banme5: "波越さじとは", kuZentai: "契りきな かたみに袖を しぼりつつ 末の松山 波越さじとは", kaisetu: "お互いに涙でぬれたそでをしぼりながら、末の松山を波が越えないように、決して心変わりしないと約束したのに。", furigana: "ちぎりきな かたみにそでを しぼりつつ すえのまつやま なみこさじとは" },
             { id: 43, kaminoku: "逢ひ見ての", banme2: "後の心に", banme3: "くらぶれば", shimonoku: "昔はものを", banme5: "思はざりけり", kuZentai: "逢ひ見ての 後の心に くらぶれば 昔はものを 思はざりけり", kaisetu: "あなたと実際に会った後の今の苦しさに比べれば、会う前に恋しくて悩んでいたことなんて、悩んでいなかったのと同じくらいだ。", furigana: "あいみての のちのこころに くらぶれば むかしはものを おもわざりけり" },
             { id: 44, kaminoku: "逢ふことの", banme2: "絶えてしなくは", banme3: "なかなかに", shimonoku: "人をも身をも", banme5: "恨みざらまし", kuZentai: "逢ふことの 絶えてしなくは なかなかに 人をも身をも 恨みざらまし", kaisetu: "もし最初からあなたに会うことがなかったなら、あなたのことも、自分の運命のことも、こんなに恨んだりしなかっただろう。", furigana: "あうことの たえてしなくは なかなかに ひとをもみをも うらみざらまし" },
-            { id: 45, kaminoku: "あはれとも", banme2: "いふべき人は", banme3: "思ほえで", shimonoku: "身のいたづらに", banme5: "なりぬべきかな", kuZentai: "あはれとも いふべき人は 思ほえで 身のいたづらに なりぬべきかな", kaisetu: "私が死んでしまっても、かわいそうだと言ってくれる人さえ思い浮かばない。このままむなしく死んでしまうのだろうか。", furigana: "あわれとも いうべきひとは おもおえで みのいたずらに なりぬべきかな" },
+            { id: 45, kaminoku: "あはれとも", banme2: "いふべき人は", banme3: "思ほえで", shimonoku: "身のいたづらに", banme5: "なりぬべきかな", kuZentai: "あはれとも いふべき人は 思ほえで 身のいたづらに なりぬべきかな", kaisetu: "私があはれと言ってくれる人さえ思い浮かばない。このままむなしく死んでしまうのだろうか。", furigana: "あわれとも いうべきひとは おもおえで みのいたずらに なりぬべきかな" },
             { id: 46, kaminoku: "由良の門を", banme2: "渡る舟人", banme3: "かぢを絶え", shimonoku: "行方も知らぬ", banme5: "恋の道かな", kuZentai: "由良の門を 渡る舟人 かぢを絶え 行方も知らぬ 恋の道かな", kaisetu: "由良の海峡を渡る船の人が、かじを失ってどこへ行くかわからなくなるように、私も恋をして、これからどうなるかわからない。", furigana: "ゆらのとを わたるふなびと かじをたえ ゆくえもしらぬ こいのみちかな" },
             { id: 47, kaminoku: "八重むぐら", banme2: "茂れる宿の", banme3: "さびしきに", shimonoku: "人こそ見えね", banme5: "秋は来にけり", kuZentai: "八重むぐら 茂れる宿の さびしきに 人こそ見えね 秋は来にけり", kaisetu: "雑草が何重にも生い茂った、さびしい家には人が訪ねてこない。それでも秋だけはやって来た。", furigana: "やえむぐら しげれるやどの さびしきに ひとこそみえね あきはきにけり" },
             { id: 48, kaminoku: "風をいたみ", banme2: "岩打つ波の", banme3: "おのれのみ", shimonoku: "くだけてものを", banme5: "思ふころかな", kuZentai: "風をいたみ 岩打つ波の おのれのみ くだけてものを 思ふころかな", kaisetu: "風が強いので、岩にぶつかる波が自分だけ砕けてしまうように、私だけが苦しんで恋のことを思い悩んでいる。", furigana: "かぜをいたみ いわうつなみの おのれのみ くだけてものを おもうころかな" },
@@ -562,7 +573,7 @@
             return audioCtx;
         }
 
-        // トイピアノ風ファンファーレ音を再生（C5 -> E5 -> G5 -> C6 -> E6）
+        // トイピアノ風ファンファーレ音を再生
         function playToyPianoFanfare() {
             const ctx = getAudioContext();
             const notes = [
@@ -610,7 +621,6 @@
             });
         }
 
-        // 正解用お祝いクラッカーエフェクト
         function triggerCorrectCracker() {
             const canvas = document.getElementById('confetti-canvas');
             if (!canvas) return;
@@ -688,7 +698,36 @@
         document.addEventListener('DOMContentLoaded', () => {
             initSidebar();
             initGroupList();
+            registerPwaServiceWorker();
         });
+
+        // PWA用のインラインService Workerの登録
+        function registerPwaServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                const swCode = `
+                    const CACHE_NAME = 'hyakunin-isshu-v1';
+                    self.addEventListener('install', (e) => {
+                        e.waitUntil(self.skipWaiting());
+                    });
+                    self.addEventListener('activate', (e) => {
+                        e.waitUntil(self.clients.claim());
+                    });
+                    self.addEventListener('fetch', (e) => {
+                        e.respondWith(
+                            fetch(e.request).catch(() => caches.match(e.request))
+                        );
+                    });
+                `;
+                const blob = new Blob([swCode], { type: 'text/javascript' });
+                const blobUrl = URL.createObjectURL(blob);
+                
+                navigator.serviceWorker.register(blobUrl).then(() => {
+                    console.log('Service Worker Registered successfully');
+                }).catch(err => {
+                    console.log('SW registration skipped or error:', err);
+                });
+            }
+        }
 
         function initSidebar() {
             const openBtn = document.getElementById('openSidebarBtn');
@@ -750,7 +789,7 @@
             showMemorizeScreen();
         }
 
-        // 画面1：このグループの10首・ふりがな・控えめメッセージを表示
+        // 画面1：このグループの10首・ふりがなを表示（ご要望2: 白くて読みやすいフォントに変更）
         function showMemorizeScreen() {
             document.getElementById('memorize-group-title').innerText = currentGroup.name;
 
@@ -761,6 +800,7 @@
                 const card = document.createElement('div');
                 card.className = 'waka-card p-4 rounded-xl border border-jp-border/70 flex flex-col gap-2 relative';
 
+                /* ご要望2の改善：ふりがな部分を白くて読みやすいフォント（font-sans / Zen Kaku Gothic New, text-slate-100）に修正 */
                 card.innerHTML = `
                     <div class="flex items-center gap-2">
                         <span class="text-xs font-bold px-2 py-0.5 rounded bg-jp-gold/15 text-jp-gold border border-jp-gold/30">第${item.id}首</span>
@@ -768,8 +808,8 @@
                             ${item.kaminoku} <span class="text-jp-gold">${item.shimonoku} ${item.banme5}</span>
                         </span>
                     </div>
-                    <div class="text-xs sm:text-sm font-serif text-jp-subtext flex items-center gap-1.5 pl-1 border-t border-jp-border/40 pt-1.5">
-                        <i class="fa-solid fa-font text-[10px] text-jp-gold/70"></i>
+                    <div class="text-sm sm:text-base font-sans text-slate-100 font-medium tracking-wide flex items-center gap-2 pl-1 border-t border-jp-border/40 pt-2">
+                        <i class="fa-solid fa-font text-xs text-jp-gold"></i>
                         <span>${item.furigana}</span>
                     </div>
                 `;
@@ -842,17 +882,19 @@
 
             options.forEach(opt => {
                 const btn = document.createElement('button');
+                btn.dataset.optionId = opt.id; // 不正解時強調の特定用にデータ属性を付与
                 btn.className = 'w-full waka-card option-card p-4 sm:p-5 rounded-xl text-left border border-jp-border hover:border-jp-gold flex justify-between items-center transition cursor-pointer';
                 btn.onclick = () => checkAnswer(opt.id, q, btn);
 
                 btn.innerHTML = `
                     <span class="font-serif text-base sm:text-lg font-bold text-white">${opt.shimonoku} ${opt.banme5}</span>
-                    <i class="fa-regular fa-circle text-jp-subtext text-lg opacity-40"></i>
+                    <i class="icon-indicator fa-regular fa-circle text-jp-subtext text-lg opacity-40"></i>
                 `;
                 optionsContainer.appendChild(btn);
             });
         }
 
+        // 解答判定処理（ご要望1: 不正解時に正解の選択肢も強調表示する処理を追加）
         function checkAnswer(selectedId, correctQ, clickedBtn) {
             if (isAnswered) return;
             isAnswered = true;
@@ -864,20 +906,32 @@
                 triggerCorrectCracker();
             }
 
-            // 選択肢ボタン無効化＆色付け
+            // 全ての選択肢ボタンをロックし、スタイルを反映
             const buttons = document.querySelectorAll('#options-container button');
             buttons.forEach(btn => {
                 btn.disabled = true;
                 btn.classList.remove('hover:border-jp-gold', 'option-card');
-            });
+                
+                const optionId = parseInt(btn.dataset.optionId);
+                const indicatorIcon = btn.querySelector('.icon-indicator');
 
-            if (isCorrect) {
-                clickedBtn.classList.add('border-emerald-500', 'bg-emerald-950/30');
-                clickedBtn.querySelector('i').className = 'fa-solid fa-circle-check text-emerald-400 text-xl';
-            } else {
-                clickedBtn.classList.add('border-rose-500', 'bg-rose-950/30');
-                clickedBtn.querySelector('i').className = 'fa-solid fa-circle-xmark text-rose-400 text-xl';
-            }
+                if (optionId === correctQ.id) {
+                    // 正解の選択肢を常に緑色ハイライト（不正解を選んだ場合にも強調）
+                    btn.classList.add('border-emerald-500', 'bg-emerald-950/40', 'ring-2', 'ring-emerald-500/50');
+                    if (indicatorIcon) {
+                        indicatorIcon.className = 'icon-indicator fa-solid fa-circle-check text-emerald-400 text-xl';
+                    }
+                } else if (btn === clickedBtn && !isCorrect) {
+                    // 間違えてタップした選択肢を赤色表示
+                    btn.classList.add('border-rose-500', 'bg-rose-950/30');
+                    if (indicatorIcon) {
+                        indicatorIcon.className = 'icon-indicator fa-solid fa-circle-xmark text-rose-400 text-xl';
+                    }
+                } else {
+                    // その他の非選択項目は不透明度を下げて引き立てる
+                    btn.classList.add('opacity-50');
+                }
+            });
 
             // バッジ設定
             const badge = document.getElementById('result-badge');
@@ -886,7 +940,7 @@
                 badge.innerHTML = '<i class="fa-solid fa-circle-check"></i> 正解！';
             } else {
                 badge.className = 'mb-3 inline-flex items-center px-3 py-1 rounded-full text-xs font-bold gap-1.5 bg-rose-500/20 text-rose-400 border border-rose-500/30';
-                badge.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> 不正解';
+                badge.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> 不正解（緑色の枠が正解です）';
             }
 
             document.getElementById('ans-ku-zentai').innerText = correctQ.kuZentai;
@@ -957,8 +1011,8 @@
                 });
             }
 
-            let animationFrame;
-            const draw = () => {
+            let animId;
+            const animate = () => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 let alive = false;
 
@@ -967,25 +1021,26 @@
                     p.x += p.speedX;
                     p.rotation += p.rotSpeed;
 
-                    if (p.y < canvas.height) alive = true;
-
-                    ctx.save();
-                    ctx.translate(p.x, p.y);
-                    ctx.rotate((p.rotation * Math.PI) / 180);
-                    ctx.fillStyle = p.color;
-                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
-                    ctx.restore();
+                    if (p.y < canvas.height) {
+                        alive = true;
+                        ctx.save();
+                        ctx.translate(p.x, p.y);
+                        ctx.rotate((p.rotation * Math.PI) / 180);
+                        ctx.fillStyle = p.color;
+                        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                        ctx.restore();
+                    }
                 });
 
                 if (alive) {
-                    animationFrame = requestAnimationFrame(draw);
+                    animId = requestAnimationFrame(animate);
                 } else {
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    cancelAnimationFrame(animationFrame);
+                    cancelAnimationFrame(animId);
                 }
             };
 
-            draw();
+            animate();
         }
     </script>
 </body>
