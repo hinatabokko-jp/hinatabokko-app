@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>小学５年生 漢字テスト</title>
 
+<!-- STREAMING_CHUNK: Loading icons and external scripts... -->
 <!-- アプリのアイコン設定 -->
 <link rel="icon" href="kurimanjuu.png" type="image/png">
 <link rel="apple-touch-icon" href="kurimanjuu.png">
@@ -13,6 +14,7 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <style>
+/* STREAMING_CHUNK: Styling base design and variables... */
 *{
   box-sizing:border-box;
   -webkit-tap-highlight-color:transparent;
@@ -35,6 +37,7 @@ body{min-height:100vh;background:radial-gradient(circle at 50% -10%,rgba(101,125
 button{font:inherit;outline:none}
 .app{width:min(860px,100%);padding:12px 16px;position:relative}
 
+/* STREAMING_CHUNK: Styling navigation and sidebar... */
 /* ハンバーガーボタン & サイドバー用スタイル */
 .hamburger-btn {
   position: fixed;
@@ -146,6 +149,7 @@ button{font:inherit;outline:none}
 .sidebar-link:active { transform: scale(0.98); }
 .sidebar-link-icon { font-size: 18px; }
 
+/* STREAMING_CHUNK: Styling card container and top buttons... */
 header{text-align:center;margin-bottom:12px;margin-top:8px;display:flex;align-items:baseline;justify-content:center;gap:12px;flex-wrap:wrap}
 .title{margin:0;font-size:clamp(16px,3.5vw,20px);font-weight:900;letter-spacing:.04em;background:linear-gradient(135deg,#fff,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .subtitle{margin:0;color:var(--sub);font-size:12px}
@@ -155,12 +159,48 @@ header{text-align:center;margin-bottom:12px;margin-top:8px;display:flex;align-it
 .section-card:active{transform:scale(.98)}
 .section-card-title{font-size:16px;font-weight:800;margin-bottom:4px}
 .section-card-sub{font-size:12px;color:var(--sub)}
-.card{background:rgba(24,29,40,.95);border:1px solid var(--border);border-radius:20px;padding:clamp(12px,3vw,20px);box-shadow:0 20px 50px rgba(0,0,0,.4)}
+
+.card{
+  position: relative;
+  background:rgba(24,29,40,.95);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:clamp(12px,3vw,20px);
+  box-shadow:0 20px 50px rgba(0,0,0,.4)
+}
 .hidden{display:none!important}
-.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:10px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px}
 .progress{color:var(--sub);font-size:14px}.progress strong{color:var(--accent);font-size:20px}
 .badge-group{display:flex;gap:8px}.badge{color:var(--sub);font-size:12px;background:var(--panel-light);border:1px solid var(--border);padding:4px 10px;border-radius:20px}
 .tool-btn{background:var(--panel-light);border:1px solid var(--border);color:var(--text);border-radius:10px;cursor:pointer;padding:6px 12px;font-size:12px;font-weight:600}
+
+/* 要望２：画面右上に配置するコンパクトな「コース選択へ」ボタン */
+.btn-top-right {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border);
+  color: var(--sub);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 10;
+}
+.btn-top-right:hover {
+  background: rgba(101, 125, 255, 0.15);
+  color: var(--text);
+  border-color: var(--accent);
+}
+.btn-top-right:active {
+  transform: scale(0.95);
+}
 
 /* 追加画面（画面１ & 画面２）用スタイル */
 .preview-header {
@@ -239,6 +279,7 @@ header{text-align:center;margin-bottom:12px;margin-top:8px;display:flex;align-it
   margin-bottom: 12px;
 }
 
+/* STREAMING_CHUNK: Styling test section and writing elements... */
 /* テスト画面スタイル */
 .question{
   text-align:center;
@@ -362,12 +403,33 @@ canvas {
   user-select: none;
 }
 
+/* STREAMING_CHUNK: Styling action buttons and results... */
 .canvas-tools{display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap}
-.buttons{display:grid;gap:10px;margin-top:12px}
-.btn{width:100%;min-height:46px;border:0;border-radius:12px;padding:8px 16px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;transition:.1s;display:flex;justify-content:center;align-items:center;gap:8px}
+.buttons{display:grid;gap:12px;margin-top:14px}
+.btn{width:100%;min-height:46px;border:0;border-radius:12px;padding:8px 16px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;transition:.15s;display:flex;justify-content:center;align-items:center;gap:8px}
 .btn:disabled{opacity:.35;cursor:not-allowed}
 .btn-check{background:linear-gradient(135deg,#5b6eff,#8b5cf6);box-shadow:0 4px 15px rgba(91,110,255,.3)}
-.btn-next{background:linear-gradient(135deg,#2563eb,#3b82f6)}
+
+/* 要望１：大きく押しやすく、丸みを帯びたデザインの「次の問題へ」ボタン */
+.btn-next {
+  min-height: 58px;
+  border-radius: 30px;
+  padding: 12px 24px;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+}
+.btn-next:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5);
+}
+.btn-next:active:not(:disabled) {
+  transform: scale(0.97);
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.3);
+}
+
 .btn-finish{background:transparent;border:1px solid #3b4351;color:#aeb7c5;min-height:38px;font-size:13px}
 .answer-section{margin-top:12px}
 .answer-box{min-height:60px;background:#10141b;border:1px solid var(--border);border-radius:12px;display:flex;justify-content:center;align-items:center;padding:8px}
@@ -398,6 +460,7 @@ canvas {
 </head>
 <body>
 
+<!-- STREAMING_CHUNK: Rendering HTML elements... -->
 <button class="hamburger-btn" id="hamburgerBtn" aria-label="メニューを開く">
   <div class="hamburger-bar"></div>
   <div class="hamburger-bar"></div>
@@ -438,18 +501,19 @@ canvas {
 
 <!-- 画面１：出題漢字の事前学習画面 -->
 <section id="kanjiPreviewArea" class="hidden">
-  <div class="preview-header">
+  <button class="btn-top-right" id="backToMenuFromKanjiBtn">🏠 コース選択へ</button>
+  <div class="preview-header" style="margin-top: 10px;">
     <p class="preview-message">📖 これらが、ここで出題される漢字です。<br>覚えてください。</p>
   </div>
   <div class="kanji-grid" id="kanjiGrid"></div>
   <div class="buttons">
     <button class="btn btn-next" id="toProblemPreviewBtn">次へ進む ▶</button>
-    <button class="btn btn-finish" id="backToMenuFromKanjiBtn">コース選択へ戻る</button>
   </div>
 </section>
 
 <!-- 画面２：テスト開始前の確認案内画面 -->
 <section id="problemPreviewArea" class="hidden">
+  <button class="btn-top-right" id="backToMenuFromPreviewBtn">🏠 コース選択へ</button>
   <div class="ready-container">
     <div class="ready-icon">💡</div>
     <div class="preview-header" style="width: 100%;">
@@ -464,7 +528,10 @@ canvas {
 
 <!-- 漢字テスト実行画面 -->
 <section id="testArea" class="hidden">
-<div class="topbar">
+<!-- 要望２：テスト画面の右上に配置された「コース選択へ」ボタン -->
+<button class="btn-top-right" id="finishBtn">🏠 コース選択</button>
+
+<div class="topbar" style="padding-right: 110px;">
 <div class="progress"><strong id="currentNumber">1</strong> / <span id="totalNumber">10</span> 問</div>
 <div class="badge-group"><div class="badge">正解: <span id="correctCount">0</span></div><div class="badge" id="questionType">1文字</div></div>
 </div>
@@ -493,9 +560,9 @@ canvas {
 </div>
 </div>
 
-<div class="buttons" style="margin-top:14px">
+<!-- 要望１：大きく押しやすい形状に変更された「次の問題へ」ボタン -->
+<div class="buttons" style="margin-top:20px">
 <button class="btn btn-next" id="nextBtn" disabled>▶ 次の問題へ</button>
-<button class="btn btn-finish" id="finishBtn">コース選択へ戻る</button>
 </div>
 </section>
 
@@ -512,6 +579,7 @@ canvas {
 </div>
 
 <script>
+/* STREAMING_CHUNK: Defining question data... */
 const rawMondaiData = [
   {"kanji":["許","可"],"mondai":"（きょ）（か）を 得る。","yomikata":"きょかをえる"},
   {"kanji":["貿","易"],"mondai":"（ぼう）（えき）が 盛んだ。","yomikata":"ぼうえきがさかんだ"},
@@ -621,7 +689,7 @@ const rawMondaiData = [
   {"kanji":["成","績"],"mondai":"（せい）（せき）が 上がる。","yomikata":"せいせきが あがる"},
   {"kanji":["志","望","校"],"mondai":"兄の （し）（ぼう）（こう）。","yomikata":"あにの しぼうこう"},
   {"kanji":["航","空","機"],"mondai":"（こう）（くう）（き）で 運ぶ。","yomikata":"こうくうきで はこぶ"},
-  {"kanji":["険"],"mondai":"（けわ）しい 表情。","yomikata":"けわしい ひょうじょう"},
+  {"kanji":["险"],"mondai":"（けわ）しい 表情。","yomikata":"けわしい ひょうじょう"},
   {"kanji":["断"],"mondai":"要求を （ことわ）る。","yomikata":"ようきゅうを ことわる"},
   {"kanji":["心","境"],"mondai":"（しん）（きょう）の 変化","yomikata":"しんきょうの へんか"},
   {"kanji":["逆"],"mondai":"風に （さか）らう。","yomikata":"かぜに さからう"},
@@ -653,6 +721,7 @@ const rawMondaiData = [
   {"kanji":["花","弁"],"mondai":"（か）（べん）の 数を 数える。","yomikata":"かべんのかずを かぞえる"}
 ];
 
+/* STREAMING_CHUNK: Initializing state and dom variables... */
 function parseMondaiItem(item) {
   const kanjiList = item.kanji;
   const rawSentence = item.mondai;
@@ -695,10 +764,11 @@ const answer = $("answer"), answerPlaceholder = $("answerPlaceholder"), selfGrad
 const testArea = $("testArea"), resultArea = $("resultArea"), restartBtn = $("restartBtn"), backToMenuBtn = $("backToMenuBtn"), finalScore = $("finalScore");
 
 const kanjiPreviewArea = $("kanjiPreviewArea"), kanjiGrid = $("kanjiGrid"), toProblemPreviewBtn = $("toProblemPreviewBtn"), backToMenuFromKanjiBtn = $("backToMenuFromKanjiBtn");
-const problemPreviewArea = $("problemPreviewArea"), startTestBtn = $("startTestBtn"), backToKanjiBtn = $("backToKanjiBtn");
+const problemPreviewArea = $("problemPreviewArea"), startTestBtn = $("startTestBtn"), backToKanjiBtn = $("backToKanjiBtn"), backToMenuFromPreviewBtn = $("backToMenuFromPreviewBtn");
 
 const hamburgerBtn = $("hamburgerBtn"), sidebar = $("sidebar"), sidebarOverlay = $("sidebarOverlay"), sidebarCloseBtn = $("sidebarCloseBtn");
 
+/* STREAMING_CHUNK: Managing sidebar navigation... */
 function toggleSidebar() {
   playSound("tap");
   if (sidebar.classList.contains("active")) {
@@ -722,6 +792,7 @@ hamburgerBtn.addEventListener("click", toggleSidebar);
 sidebarOverlay.addEventListener("click", closeSidebar);
 sidebarCloseBtn.addEventListener("click", closeSidebar);
 
+/* STREAMING_CHUNK: Managing audio synthesis and animations... */
 let audioCtx = null;
 function initAudio() {
   if(!audioCtx) {
@@ -810,6 +881,7 @@ function triggerConfetti(){
  } catch(e) {}
 }
 
+/* STREAMING_CHUNK: Managing screen flow and section selections... */
 function initSectionMenu(){
  sectionGrid.innerHTML="";const size=10,total=Math.ceil(allQuestions.length/size);
  for(let i=0;i<total;i++){
@@ -897,6 +969,7 @@ function showMenu(){
  scrollToTop();
 }
 
+/* STREAMING_CHUNK: Handling canvas drawing interactions... */
 function setupCanvas(cvs,ctx,index){
  if(!cvs) return;
  const rect=cvs.getBoundingClientRect();
@@ -980,6 +1053,7 @@ function stopDrawing(e,i){
 function clearCanvas(){strokes=[];redrawAll()}
 function undoLastStroke(){if(strokes.length){strokes.pop();redrawAll();playSound("tap")}}
 
+/* STREAMING_CHUNK: Controlling test logic and scoring... */
 function createQuestionHTML(item){
   let mainText = item.sentence;
   item.words.forEach((w,i) => {
@@ -1041,8 +1115,10 @@ function showResult(){
 
 function restart(){ selectSection(currentSectionIndex); }
 
+/* STREAMING_CHUNK: Binding events and window load initialization... */
 toProblemPreviewBtn.onclick = showProblemPreview;
 backToMenuFromKanjiBtn.onclick = showMenu;
+if(backToMenuFromPreviewBtn) backToMenuFromPreviewBtn.onclick = showMenu;
 backToKanjiBtn.onclick = showKanjiPreview;
 startTestBtn.onclick = startActualTest;
 
