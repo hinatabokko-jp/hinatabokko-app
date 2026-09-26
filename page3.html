@@ -125,7 +125,7 @@ button{font:inherit;outline:none}
   flex-direction: column;
   gap: 8px;
 }
-.sidebar-link, .sidebar-btn {
+.sidebar-link {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -138,20 +138,54 @@ button{font:inherit;outline:none}
   font-weight: 600;
   font-size: 14px;
   transition: background-color 0.2s, transform 0.1s, border-color 0.2s;
-  width: 100%;
-  text-align: left;
   cursor: pointer;
 }
-.sidebar-link:hover, .sidebar-btn:hover {
+.sidebar-link:hover {
   border-color: var(--accent);
   background: rgba(101, 125, 255, 0.15);
 }
-.sidebar-link:active, .sidebar-btn:active { transform: scale(0.98); }
+.sidebar-link:active { transform: scale(0.98); }
 .sidebar-link-icon { font-size: 18px; }
+
+.sidebar-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 0;
+}
 
 header{text-align:center;margin-bottom:12px;margin-top:8px;display:flex;align-items:baseline;justify-content:center;gap:12px;flex-wrap:wrap}
 .title{margin:0;font-size:clamp(16px,3.5vw,20px);font-weight:900;letter-spacing:.04em;background:linear-gradient(135deg,#fff,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .subtitle{margin:0;color:var(--sub);font-size:12px}
+
+/* データ管理（入出力）エリア */
+.json-tools-area {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+.json-btn {
+  background: var(--panel-light);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.json-btn:hover {
+  border-color: var(--accent);
+  background: rgba(101, 125, 255, 0.15);
+}
+.json-btn:active { transform: scale(0.96); }
+
 .section-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:12px}
 .section-card{background:var(--panel-light);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;cursor:pointer;transition:.2s}
 .section-card:hover{border-color:var(--accent);transform:translateY(-2px)}
@@ -401,6 +435,9 @@ canvas {
 </head>
 <body>
 
+<!-- 隠しファイル入力フォーム -->
+<input type="file" id="jsonFileInput" accept=".json" style="display:none;">
+
 <button class="hamburger-btn" id="hamburgerBtn" aria-label="メニューを開く">
   <div class="hamburger-bar"></div>
   <div class="hamburger-bar"></div>
@@ -429,17 +466,33 @@ canvas {
       <span class="sidebar-link-icon">🎴</span>
       <span>百人一首</span>
     </a>
-    <button id="downloadJsonBtn" class="sidebar-btn">
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-link" id="sidebarExportBtn">
       <span class="sidebar-link-icon">📥</span>
       <span>mondai.json を出力</span>
-    </button>
+    </div>
+    <div class="sidebar-link" id="sidebarImportBtn">
+      <span class="sidebar-link-icon">📤</span>
+      <span>mondai.json を読み込み</span>
+    </div>
   </nav>
 </aside>
 
 <div class="app">
-<header><h1 class="title">小学５年生 漢字</h1><div class="subtitle" id="headerSubtitle">第１章 〜 第１４章（問１〜問１３８）</div></header>
+<header>
+  <h1 class="title">小学５年生 漢字</h1>
+  <div class="subtitle" id="headerSubtitle">第１章 〜 第１４章（問１〜問１３８）</div>
+</header>
 
-<div id="sectionSelectArea"><div class="section-grid" id="sectionGrid"></div></div>
+<div id="sectionSelectArea">
+  <div class="json-tools-area">
+    <button class="json-btn" id="exportBtn">📥 mondai.json を出力</button>
+    <button class="json-btn" id="importBtn">📤 mondai.json を読み込み</button>
+  </div>
+  <div class="section-grid" id="sectionGrid"></div>
+</div>
 
 <main class="card hidden" id="mainCard">
 
@@ -508,7 +561,7 @@ canvas {
 
 <!-- 最終結果画面 -->
 <section class="result" id="resultArea">
-<div class="result-icon">🎉</div><div class="result-title">おつかれさまでした！</div>
+<div class="result-icon">🎉</div><div class="result-title">おつかれさでした！</div>
 <div class="result-score" id="finalScore">0 / 0</div>
 <div class="result-message" id="resultMessage"></div>
 <button class="btn btn-next" id="restartBtn" style="margin-top:20px">↻ もう一度挑戦する</button>
@@ -519,7 +572,7 @@ canvas {
 </div>
 
 <script>
-const allQuestions=[
+let allQuestions=[
 {type:2,words:[{kanji:"許",reading:"きょ"},{kanji:"可",reading:"か"}],sentence:"{0}{1}を 得る。"},
 {type:2,words:[{kanji:"貿",reading:"ぼう"},{kanji:"易",reading:"えき"}],sentence:"{0}{1}が さかんだ。"},
 {type:2,words:[{kanji:"技",reading:"ぎ"},{kanji:"術",reading:"じゅつ"}],sentence:"{0}{1}を 身につける。"},
@@ -628,7 +681,7 @@ const allQuestions=[
 {type:2,words:[{kanji:"成",reading:"せい"},{kanji:"績",reading:"せき"}],sentence:"{0}{1}が 上がる。"},
 {type:3,words:[{kanji:"志",reading:"し"},{kanji:"望",reading:"ぼう"},{kanji:"校",reading:"こう"}],sentence:"兄の {0}{1}{2}。"},
 {type:3,words:[{kanji:"航",reading:"こう"},{kanji:"空",reading:"くう"},{kanji:"機",reading:"き"}],sentence:"{0}{1}{2}で 運ぶ。"},
-{type:1,words:[{kanji:"险",reading:"けわ"}],sentence:"{0}しい 表情。"},
+{type:1,words:[{kanji:"険",reading:"けわ"}],sentence:"{0}しい 表情。"},
 {type:1,words:[{kanji:"断",reading:"ことわ"}],sentence:"要求を {0}る。"},
 {type:2,words:[{kanji:"心",reading:"しん"},{kanji:"境",reading:"きょう"}],sentence:"{0}{1}が 変化する。"},
 {type:1,words:[{kanji:"逆",reading:"さか"}],sentence:"風に {0}らう。"},
@@ -676,7 +729,9 @@ const testArea=$("testArea"),resultArea=$("resultArea"),restartBtn=$("restartBtn
 const kanjiPreviewArea = $("kanjiPreviewArea"), kanjiGrid = $("kanjiGrid"), toProblemPreviewBtn = $("toProblemPreviewBtn"), backToMenuFromKanjiBtn = $("backToMenuFromKanjiBtn");
 const problemPreviewArea = $("problemPreviewArea"), startTestBtn = $("startTestBtn"), backToKanjiBtn = $("backToKanjiBtn");
 
-const hamburgerBtn = $("hamburgerBtn"), sidebar = $("sidebar"), sidebarOverlay = $("sidebarOverlay"), sidebarCloseBtn = $("sidebarCloseBtn"), downloadJsonBtn = $("downloadJsonBtn");
+const hamburgerBtn = $("hamburgerBtn"), sidebar = $("sidebar"), sidebarOverlay = $("sidebarOverlay"), sidebarCloseBtn = $("sidebarCloseBtn");
+const jsonFileInput = $("jsonFileInput"), exportBtn = $("exportBtn"), importBtn = $("importBtn");
+const sidebarExportBtn = $("sidebarExportBtn"), sidebarImportBtn = $("sidebarImportBtn");
 
 function toggleSidebar() {
   playSound("tap");
@@ -700,44 +755,6 @@ function closeSidebar() {
 hamburgerBtn.addEventListener("click", toggleSidebar);
 sidebarOverlay.addEventListener("click", closeSidebar);
 sidebarCloseBtn.addEventListener("click", closeSidebar);
-
-/* JSON出力機能 */
-function downloadMondaiJson() {
-  playSound("tap");
-  const formattedData = allQuestions.map(item => {
-    // kanji プロパティの配列を作成
-    const kanjiList = item.words.map(w => w.kanji);
-    
-    // mondai プロパティ（文章中の {0}, {1}... を （読み仮名） に置換）
-    let mondaiStr = item.sentence;
-    item.words.forEach((w, idx) => {
-      mondaiStr = mondaiStr.replace(`{${idx}}`, `（${w.reading||""}）`);
-    });
-
-    // yomikata プロパティ（漢字の読み方を順に連結）
-    const yomikataStr = item.words.map(w => w.reading || "").join("");
-
-    return {
-      kanji: kanjiList,
-      mondai: mondaiStr,
-      yomikata: yomikataStr
-    };
-  });
-
-  const jsonString = JSON.stringify(formattedData, null, 2);
-  const blob = new Blob([jsonString], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "mondai.json";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
-
-downloadJsonBtn.addEventListener("click", downloadMondaiJson);
 
 let audioCtx = null;
 function initAudio() {
@@ -913,6 +930,127 @@ function showMenu(){
  headerSubtitle.textContent=`第１章 〜 第${totalChapters}章（問１〜問${allQuestions.length}）`;
  scrollToTop();
 }
+
+/* JSONエクスポート機能 */
+function exportMondaiJson() {
+  playSound("tap");
+  const exportData = allQuestions.map(q => {
+    const kanjiStr = q.words.map(w => w.kanji).join(",");
+    let mondaiStr = q.sentence;
+    q.words.forEach((w, i) => {
+      mondaiStr = mondaiStr.replace(`{${i}}`, `（${w.reading}）`);
+    });
+    
+    let yomikataStr = q.furigana || "";
+    if(!yomikataStr) {
+      yomikataStr = q.words.map(w => w.reading).join("");
+    }
+
+    return {
+      kanji: kanjiStr,
+      mondai: mondaiStr,
+      yomikata: yomikataStr
+    };
+  });
+
+  const jsonString = JSON.stringify(exportData, null, 2);
+  const blob = new Blob([jsonString], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "mondai.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  closeSidebar();
+}
+
+/* JSONインポート機能 */
+function triggerImportJson() {
+  playSound("tap");
+  closeSidebar();
+  jsonFileInput.value = "";
+  jsonFileInput.click();
+}
+
+jsonFileInput.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    try {
+      const data = JSON.parse(event.target.result);
+      if(!Array.isArray(data)) {
+        alert("JSONファイルの形式が正しくありません。(配列である必要があります)");
+        return;
+      }
+
+      const importedQuestions = [];
+      for(let item of data) {
+        if(!item.kanji || !item.mondai) continue;
+
+        let kanjiArray = [];
+        if(Array.isArray(item.kanji)) {
+          kanjiArray = item.kanji;
+        } else if(typeof item.kanji === "string") {
+          if(item.kanji.includes(",")) {
+            kanjiArray = item.kanji.split(",").map(k => k.trim());
+          } else {
+            kanjiArray = item.kanji.split("");
+          }
+        }
+
+        const readings = [];
+        const regex = /[（\(]([^）\)]+)[）\)]/g;
+        let match;
+        while ((match = regex.exec(item.mondai)) !== null) {
+          readings.push(match[1]);
+        }
+
+        const words = [];
+        const wordCount = Math.max(kanjiArray.length, readings.length);
+        for(let i = 0; i < wordCount; i++) {
+          words.push({
+            kanji: kanjiArray[i] || "",
+            reading: readings[i] || ""
+          });
+        }
+
+        let replaceIndex = 0;
+        const sentence = item.mondai.replace(/[（\(][^）\)]+[）\)]/g, () => `{${replaceIndex++}}`);
+
+        importedQuestions.push({
+          type: words.length,
+          words: words,
+          sentence: sentence,
+          furigana: item.yomikata || ""
+        });
+      }
+
+      if(importedQuestions.length === 0) {
+        alert("有効な問題データが見つかりませんでした。");
+        return;
+      }
+
+      allQuestions = importedQuestions;
+      initSectionMenu();
+      showMenu();
+      alert(`問題を ${allQuestions.length} 件読み込んで読み込み完了しました！`);
+
+    } catch(err) {
+      alert("JSONファイルの読み込みに失敗しました。\n" + err.message);
+    }
+  };
+  reader.readAsText(file);
+});
+
+exportBtn.onclick = exportMondaiJson;
+importBtn.onclick = triggerImportJson;
+sidebarExportBtn.onclick = exportMondaiJson;
+sidebarImportBtn.onclick = triggerImportJson;
 
 function setupCanvas(cvs,ctx,index){
  if(!cvs) return;
