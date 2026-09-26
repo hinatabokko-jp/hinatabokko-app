@@ -430,7 +430,7 @@ canvas {
 </aside>
 
 <div class="app">
-<header><h1 class="title">小学５年生 漢字</h1><div class="subtitle" id="headerSubtitle">第１章 〜 第１４章（問１〜問１３８）</div></header>
+<header><h1 class="title">小学５年生 漢字</h1><div class="subtitle" id="headerSubtitle">第１章 〜 第１３章（問１〜問１３０）</div></header>
 
 <div id="sectionSelectArea"><div class="section-grid" id="sectionGrid"></div></div>
 
@@ -508,163 +508,191 @@ canvas {
 <button class="btn btn-finish" id="backToMenuBtn" style="margin-top:8px">コース選択に戻る</button>
 </section>
 </main>
-<div class="footer">漢字テスト・手書き練習アプリ（１）</div>
+<div class="footer">漢字テスト・手書き練習アプリ</div>
 </div>
 
 <script>
-const allQuestions=[
-{type:2,words:[{kanji:"許",reading:"きょ"},{kanji:"可",reading:"か"}],sentence:"{0}{1}を 得る。"},
-{type:2,words:[{kanji:"貿",reading:"ぼう"},{kanji:"易",reading:"えき"}],sentence:"{0}{1}が さかんだ。"},
-{type:2,words:[{kanji:"技",reading:"ぎ"},{kanji:"術",reading:"じゅつ"}],sentence:"{0}{1}を 身につける。"},
-{type:2,words:[{kanji:"準",reading:"じゅん"},{kanji:"備",reading:"び"}],sentence:"{0}{1}を 整える。"},
-{type:2,words:[{kanji:"賞",reading:"しょう"},{kanji:"状",reading:"じょう"}],sentence:"{0}{1}を もらう。"},
-{type:2,words:[{kanji:"銅",reading:"どう"},{kanji:"像",reading:"ぞう"}],sentence:"{0}{1}を たてる。"},
-{type:2,words:[{kanji:"情",reading:"じょう"},{kanji:"報",reading:"ほう"}],sentence:"{0}{1}を 集める。"},
-{type:2,words:[{kanji:"確",reading:"かく"},{kanji:"認",reading:"にん"}],sentence:"内容を {0}{1}する。"},
-{type:2,words:[{kanji:"知",reading:"ち"},{kanji:"識",reading:"しき"}],sentence:"新しい {0}{1}を 身につける。"},
-{type:2,words:[{kanji:"原",reading:"げん"},{kanji:"因",reading:"いん"}],sentence:"事故の {0}{1}を 調べる。"},
-{type:2,words:[{kanji:"製",reading:"せい"},{kanji:"造",reading:"ぞう"}],sentence:"工場で 品物を {0}{1}する。"},
-{type:2,words:[{kanji:"現",reading:"げん"},{kanji:"在",reading:"ざい"}],sentence:"{0}{1}の 状況を 調べる。"},
-{type:2,words:[{kanji:"接",reading:"せつ"},{kanji:"続",reading:"ぞく"}],sentence:"Wi-Fiに {0}{1}する。"},
-{type:2,words:[{kanji:"反",reading:"はん"},{kanji:"応",reading:"のう"}],sentence:"相手の {0}{1}を見る。"},
-{type:2,words:[{kanji:"勢",reading:"せい"},{kanji:"力",reading:"りょく"}],sentence:"台風の {0}{1}が 強い。"},
-{type:2,words:[{kanji:"河",reading:"か"},{kanji:"川",reading:"せん"}],sentence:"{0}{1}の 水を 調べる。"},
-{type:2,words:[{kanji:"歴",reading:"れき"},{kanji:"史",reading:"し"}],sentence:"日本の {0}{1}を 学ぶ。"},
-{type:2,words:[{kanji:"幹",reading:"かん"},{kanji:"部",reading:"ぶ"}],sentence:"会社の {0}{1}が 集まる。"},
-{type:2,words:[{kanji:"招",reading:"しょう"},{kanji:"待",reading:"たい"}],sentence:"友達を {0}{1}する。"},
-{type:2,words:[{kanji:"常",reading:"じょう"},{kanji:"識",reading:"しき"}],sentence:"それは 社会の {0}{1}だ。"},
-{type:2,words:[{kanji:"序",reading:"じょ"},{kanji:"章",reading:"しょう"}],sentence:"物語の はじまりの 部分を {0}{1}という。"},
-{type:2,words:[{kanji:"武",reading:"ぶ"},{kanji:"士",reading:"し"}],sentence:"昔の {0}{1}について 学ぶ。"},
-{type:2,words:[{kanji:"資",reading:"し"},{kanji:"料",reading:"りょう"}],sentence:"必要な {0}{1}を 集める。"},
-{type:2,words:[{kanji:"調",reading:"ちょう"},{kanji:"査",reading:"さ"}],sentence:"原因を {0}{1}する。"},
-{type:2,words:[{kanji:"性",reading:"せい"},{kanji:"質",reading:"しつ"}],sentence:"物の {0}{1}を 調べる。"},
-{type:2,words:[{kanji:"非",reading:"ひ"},{kanji:"常",reading:"じょう"}],sentence:"{0}{1}に 大きな 音がした。"},
-{type:2,words:[{kanji:"総",reading:"そう"},{kanji:"合",reading:"ごう"}],sentence:"{0}{1}的に 判断する。"},
-{type:2,words:[{kanji:"測",reading:"そく"},{kanji:"定",reading:"てい"}],sentence:"長さを {0}{1}する。"},
-{type:2,words:[{kanji:"往",reading:"おう"},{kanji:"復",reading:"ふく"}],sentence:"駅まで {0}{1}する。"},
-{type:2,words:[{kanji:"演",reading:"えん"},{kanji:"奏",reading:"そう"}],sentence:"音楽を {0}{1}する。"},
-{type:2,words:[{kanji:"刊",reading:"かん"},{kanji:"行",reading:"こう"}],sentence:"雑誌を {0}{1}する。"},
-{type:2,words:[{kanji:"肥",reading:"ひ"},{kanji:"料",reading:"りょう"}],sentence:"畑に {0}{1}を まく。"},
-{type:2,words:[{kanji:"謝",reading:"しゃ"},{kanji:"罪",reading:"ざい"}],sentence:"迷惑を かけたことを {0}{1}する。"},
-{type:2,words:[{kanji:"防",reading:"ぼう"},{kanji:"災",reading:"さい"}],sentence:"{0}{1}訓練を 行う。"},
-{type:2,words:[{kanji:"鉱",reading:"こう"},{kanji:"山",reading:"ざん"}],sentence:"昔の {0}{1}を 見学する。"},
-{type:2,words:[{kanji:"成",reading:"せい"},{kanji:"績",reading:"せき"}],sentence:"テストの {0}{1}が よかった。"},
-{type:2,words:[{kanji:"航",reading:"こう"},{kanji:"海",reading:"かい"}],sentence:"船で {0}{1}する。"},
-{type:2,words:[{kanji:"編",reading:"へん"},{kanji:"集",reading:"しゅう"}],sentence:"作文を {0}{1}する。"},
-{type:2,words:[{kanji:"危",reading:"き"},{kanji:"険",reading:"けん"}],sentence:"{0}{1}な 場所には 近づかない。"},
-{type:2,words:[{kanji:"判",reading:"はん"},{kanji:"断",reading:"だん"}],sentence:"自分で {0}{1}する。"},
-{type:2,words:[{kanji:"圧",reading:"あつ"},{kanji:"力",reading:"りょく"}],sentence:"強い {0}{1}が かかる。"},
-{type:2,words:[{kanji:"境",reading:"きょう"},{kanji:"界",reading:"かい"}],sentence:"二つの 国の {0}{1}を 越える。"},
-{type:2,words:[{kanji:"逆",reading:"ぎゃく"},{kanji:"転",reading:"てん"}],sentence:"形勢が {0}{1}する。"},
-{type:2,words:[{kanji:"夢",reading:"む"},{kanji:"中",reading:"ちゅう"}],sentence:"趣味に {0}{1}になる。"},
-{type:2,words:[{kanji:"質",reading:"しつ"},{kanji:"問",reading:"もん"}],sentence:"先生に {0}{1}する。"},
-{type:2,words:[{kanji:"報",reading:"ほう"},{kanji:"告",reading:"こく"}],sentence:"結果を {0}{1}する。"},
-{type:2,words:[{kanji:"所",reading:"しょ"},{kanji:"属",reading:"ぞく"}],sentence:"自分の {0}{1}する 部署。"},
-{type:2,words:[{kanji:"造",reading:"ぞう"},{kanji:"形",reading:"けい"}],sentence:"粘土で {0}{1}を 作る。"},
-{type:2,words:[{kanji:"留",reading:"りゅう"},{kanji:"学",reading:"がく"}],sentence:"海外へ {0}{1}する。"},
-{type:3,words:[{kanji:"新",reading:"しん"},{kanji:"幹",reading:"かん"},{kanji:"線",reading:"せん"}],sentence:"{0}{1}{2}に 乗る。"},
-{type:2,words:[{kanji:"招",reading:"しょう"},{kanji:"集",reading:"しゅう"}],sentence:"関係者を {0}{1}して 会議を 開く。"},
-{type:2,words:[{kanji:"句",reading:"く"},{kanji:"読",reading:"とう"}],sentence:"文章の {0}{1}点に 気をつける。"},
-{type:2,words:[{kanji:"武",reading:"ぶ"},{kanji:"道",reading:"どう"}],sentence:"{0}{1}を 習う。"},
-{type:2,words:[{kanji:"調",reading:"ちょう"},{kanji:"査",reading:"さ"}],sentence:"現地で {0}{1}を 行う。"},
-{type:2,words:[{kanji:"総",reading:"そう"},{kanji:"合",reading:"ごう"}],sentence:"{0}{1}点を 計算する。"},
-{type:2,words:[{kanji:"肥",reading:"ひ"},{kanji:"満",reading:"まん"}],sentence:"食べすぎによる {0}{1}に 気をつける。"},
-{type:2,words:[{kanji:"製",reading:"せい"},{kanji:"品",reading:"ひん"}],sentence:"新しい {0}{1}を 手に取る。"},
-{type:2,words:[{kanji:"暴",reading:"ぼう"},{kanji:"風",reading:"ふう"}],sentence:"{0}{1}に 備える。"},
-{type:2,words:[{kanji:"防",reading:"ぼう"},{kanji:"止",reading:"し"}],sentence:"事故を {0}{1}する。"},
-{type:2,words:[{kanji:"志",reading:"し"},{kanji:"望",reading:"ぼう"}],sentence:"{0}{1}校に 合格する。"},
-{type:3,words:[{kanji:"飛",reading:"ひ"},{kanji:"行",reading:"こう"},{kanji:"機",reading:"き"}],sentence:"{0}{1}{2}が 飛ぶ。"},
-{type:2,words:[{kanji:"険",reading:"けん"},{kanji:"悪",reading:"あく"}],sentence:"ケンカして {0}{1}な ムードになる。"},
-{type:2,words:[{kanji:"態",reading:"たい"},{kanji:"度",reading:"ど"}],sentence:"相手への {0}{1}を 改める。"},
-{type:2,words:[{kanji:"経",reading:"けい"},{kanji:"過",reading:"か"}],sentence:"時間が {0}{1}する。"},
-{type:1,words:[{kanji:"情",reading:"なさ"}],sentence:"{0}けが 深い。"},
-{type:1,words:[{kanji:"象",reading:"ぞう"}],sentence:"大きな {0}を 見る。"},
-{type:1,words:[{kanji:"絶",reading:"た"}],sentence:"{0}えまなく ながれる。"},
-{type:1,words:[{kanji:"厚",reading:"あつ"}],sentence:"本が {0}い。"},
-{type:1,words:[{kanji:"似",reading:"に"}],sentence:"よく {0}ている。"},
-{type:1,words:[{kanji:"限",reading:"かぎ"}],sentence:"{0}りがある。"},
-{type:1,words:[{kanji:"喜",reading:"よろこ"}],sentence:"とても {0}ぶ。"},
-{type:1,words:[{kanji:"解",reading:"と"}],sentence:"問題を {0}く。"},
-{type:2,words:[{kanji:"内",reading:"ない"},{kanji:"容",reading:"よう"}],sentence:"{0}{1}を 確認する。"},
-{type:2,words:[{kanji:"適",reading:"てき"},{kanji:"切",reading:"せつ"}],sentence:"{0}{1}な 言葉を 選ぶ。"},
-{type:2,words:[{kanji:"複",reading:"ふく"},{kanji:"数",reading:"すう"}],sentence:"候補者が {0}{1}いる。"},
-{type:1,words:[{kanji:"構",reading:"かま"}],sentence:"{0}わずに 進む。"},
-{type:1,words:[{kanji:"桜",reading:"さくら"}],sentence:"{0}の 花が 咲く。"},
-{type:1,words:[{kanji:"破",reading:"やぶ"}],sentence:"紙を {0}る。"},
-{type:1,words:[{kanji:"修",reading:"おさ"}],sentence:"学問を {0}める。"},
-{type:1,words:[{kanji:"眼",reading:"がん"}],sentence:"{0}科へ 行く。"},
-{type:2,words:[{kanji:"停",reading:"てい"},{kanji:"止",reading:"し"}],sentence:"バスが {0}{1}する。"},
-{type:2,words:[{kanji:"祖",reading:"そ"},{kanji:"母",reading:"ぼ"}],sentence:"{0}{1}と 遊ぶ。"},
-{type:3,words:[{kanji:"国",reading:"こく"},{kanji:"際",reading:"さい"},{kanji:"的",reading:"てき"}],sentence:"{0}{1}{2}な イベント。"},
-{type:2,words:[{kanji:"清",reading:"せい"},{kanji:"潔",reading:"けつ"}],sentence:"{0}{1}に 保つ。"},
-{type:1,words:[{kanji:"告",reading:"つ"}],sentence:"先生に 知らせを {0}げる。"},
-{type:2,words:[{kanji:"所",reading:"しょ"},{kanji:"属",reading:"ぞく"}],sentence:"美術クラブに {0}{1}する。"},
-{type:2,words:[{kanji:"知",reading:"ち"},{kanji:"識",reading:"しき"}],sentence:"正しい {0}{1}を 身につける。"},
-{type:2,words:[{kanji:"原",reading:"げん"},{kanji:"因",reading:"いん"}],sentence:"事故の {0}{1}を 調べる。"},
-{type:3,words:[{kanji:"留",reading:"る"},{kanji:"守",reading:"す"},{kanji:"番",reading:"ばん"}],sentence:"{0}{1}{2}を する。"},
-{type:1,words:[{kanji:"現",reading:"あらわ"}],sentence:"突然 {0}れる。"},
-{type:1,words:[{kanji:"接",reading:"せつ"}],sentence:"人に {0}する。"},
-{type:1,words:[{kanji:"応",reading:"こた"}],sentence:"声援に {0}える。"},
-{type:1,words:[{kanji:"勢",reading:"いきお"}],sentence:"すごい {0}いで 走る。"},
-{type:1,words:[{kanji:"河",reading:"かわ"}],sentence:"大きな {0}を 渡る。"},
-{type:2,words:[{kanji:"歴",reading:"れき"},{kanji:"史",reading:"し"}],sentence:"日本の {0}{1}を 学ぶ。"},
-{type:1,words:[{kanji:"招",reading:"まね"}],sentence:"友達を {0}く。"},
-{type:2,words:[{kanji:"俳",reading:"はい"},{kanji:"句",reading:"く"}],sentence:"{0}{1}を 詠む。"},
-{type:2,words:[{kanji:"序",reading:"じょ"},{kanji:"章",reading:"しょう"}],sentence:"それは {0}{1}に 過ぎなかった。"},
-{type:2,words:[{kanji:"武",reading:"ぶ"},{kanji:"士",reading:"し"}],sentence:"{0}{1}が 活躍する。"},
-{type:2,words:[{kanji:"資",reading:"し"},{kanji:"料",reading:"りょう"}],sentence:"それは 貴重な {0}{1}だ。"},
-{type:2,words:[{kanji:"宿",reading:"しゅく"},{kanji:"舎",reading:"しゃ"}],sentence:"代表選手の {0}{1}。"},
-{type:2,words:[{kanji:"往",reading:"おう"},{kanji:"路",reading:"ろ"}],sentence:"目的地までの {0}{1}。"},
-{type:1,words:[{kanji:"罪",reading:"つみ"}],sentence:"{0}を 償う。",furigana:"つみを つぐなう"},
-{type:1,words:[{kanji:"防",reading:"ふせ"}],sentence:"落下を {0}ぐ。"},
-{type:2,words:[{kanji:"鉱",reading:"こう"},{kanji:"山",reading:"ざん"}],sentence:"金が とれる {0}{1}。",furigana:"きんが とれる こうざん"},
-{type:2,words:[{kanji:"成",reading:"せい"},{kanji:"績",reading:"せき"}],sentence:"{0}{1}が 上がる。"},
-{type:3,words:[{kanji:"志",reading:"し"},{kanji:"望",reading:"ぼう"},{kanji:"校",reading:"こう"}],sentence:"兄の {0}{1}{2}。"},
-{type:3,words:[{kanji:"航",reading:"こう"},{kanji:"空",reading:"くう"},{kanji:"機",reading:"き"}],sentence:"{0}{1}{2}で 運ぶ。"},
-{type:1,words:[{kanji:"険",reading:"けわ"}],sentence:"{0}しい 表情。"},
-{type:1,words:[{kanji:"断",reading:"ことわ"}],sentence:"要求を {0}る。"},
-{type:2,words:[{kanji:"心",reading:"しん"},{kanji:"境",reading:"きょう"}],sentence:"{0}{1}が 変化する。"},
-{type:1,words:[{kanji:"逆",reading:"さか"}],sentence:"風に {0}らう。"},
-{type:2,words:[{kanji:"得",reading:"とく"},{kanji:"意",reading:"い"}],sentence:"作文が {0}{1}だ。"},
-{type:2,words:[{kanji:"余",reading:"よ"},{kanji:"興",reading:"きょう"}],sentence:"{0}{1}で 手品をする。"},
-{type:1,words:[{kanji:"比",reading:"くら"}],sentence:"高さを {0}べる。"},
-{type:1,words:[{kanji:"示",reading:"しめ"}],sentence:"駅の 方向を {0}す。"},
-{type:2,words:[{kanji:"政",reading:"せい"},{kanji:"府",reading:"ふ"}],sentence:"{0}{1}は 予算案を 提出した。",furigana:"せいふは よさんあんを ていしゅつした"},
-{type:2,words:[{kanji:"興",reading:"こう"},{kanji:"行",reading:"ぎょう"}],sentence:"コンサートの {0}{1}を 行う。"},
-{type:1,words:[{kanji:"個",reading:"こ"}],sentence:"おにぎりを 三十{0} 作る。"},
-{type:1,words:[{kanji:"在",reading:"あ"}],sentence:"生活の {0}り方を 見直す。",furigana:"せいかつの ありかたを みなおす"},
-{type:2,words:[{kanji:"支",reading:"し"},{kanji:"流",reading:"りゅう"}],sentence:"川の {0}{1}に 沿って 歩く。",furigana:"かわの しりゅうに そってあるく"},
-{type:1,words:[{kanji:"張",reading:"は"}],sentence:"綱を ぴんと {0}る。",furigana:"つなを ぴんと はる"},
-{type:2,words:[{kanji:"独",reading:"どく"},{kanji:"身",reading:"しん"}],sentence:"兄は {0}{1}だ。"},
-{type:2,words:[{kanji:"実",reading:"じつ"},{kanji:"在",reading:"ざい"}],sentence:"{0}{1}の 人物だ。"},
-{type:1,words:[{kanji:"支",reading:"ささ"}],sentence:"生活を {0}える。"},
-{type:2,words:[{kanji:"主",reading:"しゅ"},{kanji:"張",reading:"ちょう"}],sentence:"私の {0}{1}が 認められる。"},
-{type:1,words:[{kanji:"独",reading:"ひと"}],sentence:"おやつを {0}り占めする。",furigana:"おやつを ひとりじめ する"},
-{type:1,words:[{kanji:"迷",reading:"まよ"}],sentence:"暗くて 道に {0}う。"},
-{type:1,words:[{kanji:"仏",reading:"ほとけ"}],sentence:"{0}の 道に 入る。"},
-{type:2,words:[{kanji:"寄",reading:"き"},{kanji:"生",reading:"せい"}],sentence:"{0}{1}植物について 調べる。"},
-{type:2,words:[{kanji:"余",reading:"よ"},{kanji:"力",reading:"りょく"}],sentence:"{0}{1}を 残す。"},
-{type:2,words:[{kanji:"仏",reading:"ぶつ"},{kanji:"像",reading:"ぞう"}],sentence:"{0}{1}を 写生する。",furigana:"ぶつぞうを しゃせいする"},
-{type:1,words:[{kanji:"寄",reading:"よ"}],sentence:"友達の 家に {0}る。"},
-{type:1,words:[{kanji:"寄",reading:"よ"}],sentence:"{0}り道をして 帰る。"},
-{type:1,words:[{kanji:"余",reading:"あま"}],sentence:"作りすぎて 料理が {0}る。"},
-{type:2,words:[{kanji:"提",reading:"てい"},{kanji:"案",reading:"あん"}],sentence:"学級会で 席替えを {0}{1}した。"},
-{type:2,words:[{kanji:"検",reading:"けん"},{kanji:"証",reading:"しょう"}],sentence:"現場{0}{1}が 行われる。",furigana:"げんばけんしょう が おこなわれる"},
-{type:2,words:[{kanji:"花",reading:"か"},{kanji:"弁",reading:"べん"}],sentence:"{0}{1}の 数を 数える。"}
+const rawMondaiData = [
+  {"kanji":["許","可"],"mondai":"（きょ）（か）を 得る。","yomikata":"きょかをえる"},
+  {"kanji":["貿","易"],"mondai":"（ぼう）（えき）が 盛んだ。","yomikata":"ぼうえきがさかんだ"},
+  {"kanji":["技","術"],"mondai":"（ぎ）（じゅつ）を 身につける。","yomikata":"ぎじゅつをみにつける"},
+  {"kanji":["準","備"],"mondai":"（じゅん）（び）を 整える。","yomikata":"じゅんびをととのえる"},
+  {"kanji":["賞","状"],"mondai":"（しょう）（じょう）を 貰う。","yomikata":"しょうじょうをもらう"},
+  {"kanji":["銅","像"],"mondai":"（どう）（ぞう）を 建てる。","yomikata":"どうぞうをたてる"},
+  {"kanji":["情","報"],"mondai":"（じょう）（ほう）を 集める。","yomikata":"じょうほうをあつめる"},
+  {"kanji":["確","認"],"mondai":"内容を （かく）（にん）する。","yomikata":"ないようをかくにんする"},
+  {"kanji":["知","識"],"mondai":"新しい （ち）（しき）を 身につける。","yomikata":"あたらしい ちしきを みにつける"},
+  {"kanji":["原","因"],"mondai":"事故の （げん）（いん）を 調べる。","yomikata":"じこのげんいんをしらべる"},
+  {"kanji":["製","造"],"mondai":"工場で 品物を （せい）（ぞう）する。","yomikata":"こうじょうで しなものを せいぞうする"},
+  {"kanji":["現","在"],"mondai":"（げん）（ざい）の 状況を 調べる。","yomikata":"げんざいの じょうきょうを しらべる"},
+  {"kanji":["接","続"],"mondai":"Wi-Fiに （せつ）（ぞく）する。","yomikata":"わいふぁいに せつぞくする"},
+  {"kanji":["反","応"],"mondai":"相手の （はん）（のう）を見る。","yomikata":"あいての はんのうを みる"},
+  {"kanji":["勢","力"],"mondai":"台風の （せい）（りょく）が 強い。","yomikata":"たいふうの せいりょくが つよい"},
+  {"kanji":["河","川"],"mondai":"（か）（せん）の 水質を 調べる。","yomikata":"かせんの すいしつを しらべる"},
+  {"kanji":["歴","史"],"mondai":"日本の （れき）（し）を 学ぶ。","yomikata":"にほんの れきしを まなぶ"},
+  {"kanji":["幹","部"],"mondai":"会社の （かん）（ぶ）が 集まる。","yomikata":"かいしゃの かんぶが あつまる"},
+  {"kanji":["招","待"],"mondai":"友達を （しょう）（たい）する。","yomikata":"ともだちを しょうたいする"},
+  {"kanji":["常","識"],"mondai":"それは 社会の （じょう）（しき）だ。","yomikata":"それは しゃかいの じょうしきだ"},
+  {"kanji":["序","章"],"mondai":"物語の はじまりの 部分を （じょ）（しょう）という。","yomikata":"ものがたりの はじまりのぶぶんを じょしょう という"},
+  {"kanji":["武","士"],"mondai":"昔の （ぶ）（し）について 学ぶ。","yomikata":"むかしの ぶしについて まなぶ"},
+  {"kanji":["資","料"],"mondai":"必要な （し）（りょう）を 集める。","yomikata":"ひつような しりょうを あつめる"},
+  {"kanji":["調","査"],"mondai":"原因を （ちょう）（さ）する。","yomikata":"げんいんを ちょうさする"},
+  {"kanji":["性","質"],"mondai":"物の （せい）（しつ）を 調べる。","yomikata":"ものの せいしつをしらべる"},
+  {"kanji":["非","常"],"mondai":"（ひ）（じょう）に 大きな 物音がした。","yomikata":"ひじょうに おおきな ものおとがした"},
+  {"kanji":["総","合"],"mondai":"（そう）（ごう）的に 判断する。","yomikata":"そうごうてきに はんだんする"},
+  {"kanji":["測","定"],"mondai":"長さを （そく）（てい）する。","yomikata":"ながさを そくていする"},
+  {"kanji":["往","復"],"mondai":"駅まで （おう）（ふく）する。","yomikata":"えきまで おうふくする"},
+  {"kanji":["演","奏"],"mondai":"楽器を （えん）（そう）する。","yomikata":"がっきを えんそうする"},
+  {"kanji":["刊","行"],"mondai":"雑誌を （かん）（こう）する。","yomikata":"ざっしを かんこうする"},
+  {"kanji":["肥","料"],"mondai":"畑に （ひ）（りょう）を 撒く。","yomikata":"はたけに ひりょうをまく"},
+  {"kanji":["謝","罪"],"mondai":"迷惑を かけたことを （しゃ）（ざい）する。","yomikata":"めいわくを かけたことを しゃざいする"},
+  {"kanji":["防","災"],"mondai":"（ぼう）（さい）訓練を 行う。","yomikata":"ぼうさいくんれんを おこなう"},
+  {"kanji":["鉱","山"],"mondai":"昔の （こう）（ざん）を 見学する。","yomikata":"むかしの こうざんを けんがくする"},
+  {"kanji":["成","績"],"mondai":"テストの （せい）（せき）が よかった。","yomikata":"てすとの せいせきがよかった"},
+  {"kanji":["航","海"],"mondai":"船で （こう）（かい）する。","yomikata":"ふねで こうかいする"},
+  {"kanji":["編","集"],"mondai":"作文を （へん）（しゅう）する。","yomikata":"さくぶんを へんしゅうする"},
+  {"kanji":["危","険"],"mondai":"（き）（けん）な 場所には 近づかない。","yomikata":"きけんな ばしょには ちかづかない"},
+  {"kanji":["判","断"],"mondai":"自分で （はん）（だん）する。","yomikata":"じぶんで はんだんする"},
+  {"kanji":["圧","力"],"mondai":"強い （あつ）（りょく）が かかる。","yomikata":"つよい あつりょくがかかる"},
+  {"kanji":["境","界"],"mondai":"二つの 国の （きょう）（かい）を 越える。","yomikata":"ふたつの くにの きょうかいをこえる"},
+  {"kanji":["逆","転"],"mondai":"形勢が （ぎゃく）（てん）する。","yomikata":"けいせいが ぎゃくてんする"},
+  {"kanji":["夢","中"],"mondai":"趣味に （む）（ちゅう）になる。","yomikata":"しゅみに むちゅうになる"},
+  {"kanji":["質","問"],"mondai":"先生に （しつ）（もん）する。","yomikata":"せんせいに しつもんする"},
+  {"kanji":["報","告"],"mondai":"結果を （ほう）（こく）する。","yomikata":"けっかを ほうこくする"},
+  {"kanji":["所","属"],"mondai":"自分の （しょ）（ぞく）する 部署。","yomikata":"じぶんの しょぞくするぶしょ"},
+  {"kanji":["造","形"],"mondai":"粘土で （ぞう）（けい）を 作る。","yomikata":"ねんどで ぞうけいをつくる"},
+  {"kanji":["留","学"],"mondai":"海外へ （りゅう）（がく）する。","yomikata":"かいがいへ りゅうがくする"},
+  {"kanji":["新","幹","線"],"mondai":"（しん）（かん）（せん）に 乗る。","yomikata":"しんかんせんにのる"},
+  {"kanji":["招","集"],"mondai":"関係者を （しょう）（しゅう）して 会議を 開く。","yomikata":"かんけいしゃを しょうしゅうして かいぎをひらく"},
+  {"kanji":["句","読"],"mondai":"文章の （く）（とう）点に 気をつける。","yomikata":"ぶんしょうの くとうてんに きをつける"},
+  {"kanji":["武","道"],"mondai":"（ぶ）（どう）を 習う。","yomikata":"ぶどうを ならう"},
+  {"kanji":["調","査"],"mondai":"現地で （ちょう）（さ）を 行う。","yomikata":"げんちで ちょうさをおこなう"},
+  {"kanji":["総","合"],"mondai":"（そう）（ごう）点を 計算する。","yomikata":"そうごうてんを けいさんする"},
+  {"kanji":["肥","満"],"mondai":"食べすぎによる （ひ）（まん）に 気をつける。","yomikata":"たべすぎによる ひまんにきをつける"},
+  {"kanji":["製","品"],"mondai":"新しい （せい）（ひん）を 手に取る。","yomikata":"あたらしい せいひんをてにとる"},
+  {"kanji":["暴","風"],"mondai":"（ぼう）（ふう）に 備える。","yomikata":"ぼうふうに そなえる"},
+  {"kanji":["防","止"],"mondai":"事故を （ぼう）（し）する。","yomikata":"じこを ぼうしする"},
+  {"kanji":["志","望"],"mondai":"（し）（ぼう）校に 合格する。","yomikata":"しぼうこうに ごうかくする"},
+  {"kanji":["飛","行","機"],"mondai":"（ひ）（こう）（き）が 飛ぶ。","yomikata":"ひこうきが とぶ"},
+  {"kanji":["険","悪"],"mondai":"ケンカして （けん）（あく）な ムードになる。","yomikata":"けんかして けんあくな むーどになる"},
+  {"kanji":["態","度"],"mondai":"相手への （たい）（ど）を 改める。","yomikata":"あいてへの たいどを あらためる"},
+  {"kanji":["経","過"],"mondai":"時間が （けい）（か）する。","yomikata":"じかんが けいかする"},
+  {"kanji":["情"],"mondai":"（なさ）けが 深い。","yomikata":"なさけが ふかい"},
+  {"kanji":["象"],"mondai":"大きな （ぞう）を 見る。","yomikata":"おおきな ぞうをみる"},
+  {"kanji":["絶"],"mondai":"（た）えまなく 流れる。","yomikata":"たえまなく ながれる"},
+  {"kanji":["厚"],"mondai":"本が （あつ）い。","yomikata":"ほんが あつい"},
+  {"kanji":["似"],"mondai":"よく （に）ている。","yomikata":"よく にている"},
+  {"kanji":["限"],"mondai":"（かぎ）りがある。","yomikata":"かぎりがある"},
+  {"kanji":["喜"],"mondai":"とても （よろこ）ぶ。","yomikata":"とても よろこぶ"},
+  {"kanji":["解"],"mondai":"問題を （と）く。","yomikata":"もんだいを とく"},
+  {"kanji":["内","容"],"mondai":"（ない）（よう）を 確認する。","yomikata":"ないようを かくにんする"},
+  {"kanji":["適","切"],"mondai":"（てき）（せつ）な 言葉を 選ぶ。","yomikata":"てきせつな ことばをえらぶ"},
+  {"kanji":["複","数"],"mondai":"候補者が （ふく）（すう）いる。","yomikata":"こうほしゃが ふくすういる"},
+  {"kanji":["構"],"mondai":"（かま）わずに 進む。","yomikata":"かまわずに すすむ"},
+  {"kanji":["桜"],"mondai":"（さくら）の 花が 咲く。","yomikata":"さくらの はながさく"},
+  {"kanji":["破"],"mondai":"紙を （やぶ）る。","yomikata":"かみを やぶる"},
+  {"kanji":["修"],"mondai":"学問を （おさ）める。","yomikata":"がくもんを おさめる"},
+  {"kanji":["眼"],"mondai":"（がん）科へ 行く。","yomikata":"がんかへ いく"},
+  {"kanji":["停","止"],"mondai":"バスが （てい）（し）する。","yomikata":"ばすが ていしする"},
+  {"kanji":["祖","母"],"mondai":"（そ）（ぼ）と 遊ぶ。","yomikata":"そぼとあそぶ"},
+  {"kanji":["国","際","的"],"mondai":"（こく）（さい）（てき）な イベント。","yomikata":"こくさいてきな いべんと"},
+  {"kanji":["清","潔"],"mondai":"（せい）（けつ）に 保つ。","yomikata":"せいけつに たもつ"},
+  {"kanji":["告"],"mondai":"先生に 知らせを （つ）げる。","yomikata":"せんせいに しらせを つげる"},
+  {"kanji":["所","属"],"mondai":"美術クラブに （しょ）（ぞく）する。","yomikata":"びじゅつくらぶに しょぞくする"},
+  {"kanji":["知","識"],"mondai":"正しい （ち）（しき）を 身につける。","yomikata":"ただしい ちしきを みにつける"},
+  {"kanji":["原","因"],"mondai":"事故の （げん）（いん）を 調べる。","yomikata":"じこの げんいんを しらべる"},
+  {"kanji":["留","守","番"],"mondai":"（る）（す）（ばん）を する。","yomikata":"るすばんをする"},
+  {"kanji":["現"],"mondai":"突然 （あらわ）れる。","yomikata":"とつぜん あらわれる"},
+  {"kanji":["接"],"mondai":"人に （せつ）する。","yomikata":"ひとに せつする"},
+  {"kanji":["応"],"mondai":"声援に （こた）える。","yomikata":"せいえんに こたえる"},
+  {"kanji":["勢"],"mondai":"すごい （いきお）いで 走る。","yomikata":"すごい いきおいではしる"},
+  {"kanji":["河"],"mondai":"大きな （かわ）を 渡る。","yomikata":"おおきな かわを わたる"},
+  {"kanji":["歴","史"],"mondai":"日本の （れき）（し）を 学ぶ。","yomikata":"にほんの れきしを まなぶ"},
+  {"kanji":["招"],"mondai":"友達を （まね）く。","yomikata":"ともだちを まねく"},
+  {"kanji":["俳","句"],"mondai":"（はい）（く）を 詠む。","yomikata":"はいくを よむ"},
+  {"kanji":["序","章"],"mondai":"それは （じょ）（しょう）に 過ぎなかった。","yomikata":"それは じょしょうに すぎなかった"},
+  {"kanji":["武","士"],"mondai":"（ぶ）（し）が 活躍する。","yomikata":"ぶしが かつやくする"},
+  {"kanji":["資","料"],"mondai":"それは 貴重な （し）（りょう）だ。","yomikata":"それは きちょうな しりょうだ"},
+  {"kanji":["宿","舎"],"mondai":"代表選手の （しゅく）（しゃ）。","yomikata":"だいひょうせんしゅの しゅくしゃ"},
+  {"kanji":["往","路"],"mondai":"目的地までの （おう）（ろ）。","yomikata":"もくてきちまでの おうろ"},
+  {"kanji":["罪"],"mondai":"（つみ）を 償う。","yomikata":"つみを つぐなう"},
+  {"kanji":["防"],"mondai":"落下を （ふせ）ぐ。","yomikata":"らっかを ふせぐ"},
+  {"kanji":["鉱","山"],"mondai":"金が とれる （こう）（ざん）。","yomikata":"かねが とれる こうざん"},
+  {"kanji":["成","績"],"mondai":"（せい）（せき）が 上がる。","yomikata":"せいせきが あがる"},
+  {"kanji":["志","望","校"],"mondai":"兄の （し）（ぼう）（こう）。","yomikata":"あにの しぼうこう"},
+  {"kanji":["航","空","機"],"mondai":"（こう）（くう）（き）で 運ぶ。","yomikata":"こうくうきで はこぶ"},
+  {"kanji":["険"],"mondai":"（けわ）しい 表情。","yomikata":"けわしい ひょうじょう"},
+  {"kanji":["断"],"mondai":"要求を （ことわ）る。","yomikata":"ようきゅうを ことわる"},
+  {"kanji":["心","境"],"mondai":"（しん）（きょう）の 変化","yomikata":"しんきょうの へんか"},
+  {"kanji":["逆"],"mondai":"風に （さか）らう。","yomikata":"かぜに さからう"},
+  {"kanji":["得","意"],"mondai":"作文が （とく）（い）だ。","yomikata":"さくぶんが とくいだ"},
+  {"kanji":["余","興"],"mondai":"（よ）（きょう）で 手品をする。","yomikata":"よきょうで てじなをする"},
+  {"kanji":["比"],"mondai":"高さを （くら）べる。","yomikata":"たかさを くらべる"},
+  {"kanji":["示"],"mondai":"駅の 方向を （しめ）す。","yomikata":"えきの ほうこうを しめす"},
+  {"kanji":["政","府"],"mondai":"（せい）（ふ）は 予算案を 提出した。","yomikata":"せいふは よさんあんを ていしゅつした"},
+  {"kanji":["興","行"],"mondai":"コンサートの （こう）（ぎょう）を 行う。","yomikata":"こんさーとの こうぎょうを おこなう"},
+  {"kanji":["個"],"mondai":"おにぎりを 三（こ） 作る。","yomikata":"おにぎりを さんこ つくる"},
+  {"kanji":["在"],"mondai":"生活の （あ）り方を 見直す。","yomikata":"せいかつの ありかたを みなおす"},
+  {"kanji":["支","流"],"mondai":"川の （し）（りゅう）に 沿って 歩く。","yomikata":"かわの しりゅうに そってあるく"},
+  {"kanji":["張"],"mondai":"綱を ぴんと （は）る。","yomikata":"つなを ぴんと はる"},
+  {"kanji":["独","身"],"mondai":"兄は （どく）（しん）だ。","yomikata":"あには どくしんだ"},
+  {"kanji":["実","在"],"mondai":"（じつ）（ざい）の 人物だ。","yomikata":"じつざいの じんぶつだ"},
+  {"kanji":["支"],"mondai":"生活を （ささ）える。","yomikata":"せいかつを ささえる"},
+  {"kanji":["主","張"],"mondai":"私の （しゅ）（ちょう）が 認められる。","yomikata":"わたしの しゅちょうが みとめられる"},
+  {"kanji":["独"],"mondai":"おやつを （ひと）り占めする。","yomikata":"おやつを ひとりじめする"},
+  {"kanji":["迷"],"mondai":"暗くて 道に （まよ）う。","yomikata":"くらくて みちに まよう"},
+  {"kanji":["仏"],"mondai":"（ほとけ）の 道に 入る。","yomikata":"ほとけの みちに はいる"},
+  {"kanji":["寄","生"],"mondai":"（き）（せい）植物について 調べる。","yomikata":"きせい しょくぶつについて しらべる"},
+  {"kanji":["余","力"],"mondai":"（よ）（りょく）を 残す。","yomikata":"よりょくを のこす"},
+  {"kanji":["仏","像"],"mondai":"（ぶつ）（ぞう）を 写生する。","yomikata":"ぶつぞうを しゃせいする"},
+  {"kanji":["寄"],"mondai":"友達の 家に （よ）る。","yomikata":"ともだちの いえによる"},
+  {"kanji":["寄"],"mondai":"（よ）り道をして 帰る。","yomikata":"よりみちをして かえる"},
+  {"kanji":["余"],"mondai":"作りすぎて 料理が （あま）る。","yomikata":"つくりすぎて りょうりが あまる"},
+  {"kanji":["提","案"],"mondai":"学級会で 席替えを （てい）（あん）した。","yomikata":"がっきゅうかいで せきがえを ていあんした"},
+  {"kanji":["検","証"],"mondai":"現場（けん）（しょう）が 行われる。","yomikata":"げんばけんしょうが おこなわれる"},
+  {"kanji":["花","弁"],"mondai":"（か）（べん）の 数を 数える。","yomikata":"かべんのかずを かぞえる"}
 ];
 
-let questions=[],currentSectionIndex=0,currentIndex=0,answered=false,correctCount=0,userGraded=false;
-let canvases=[],ctxs=[],strokes=[],currentStroke=null,currentCanvasIndex=-1,drawing=false;
+function parseMondaiItem(item) {
+  const kanjiList = item.kanji;
+  const rawSentence = item.mondai;
+  const readings = [];
+  const re = /（([^）]+)）/g;
+  let match;
+  while ((match = re.exec(rawSentence)) !== null) {
+    readings.push(match[1]);
+  }
+
+  const words = kanjiList.map((k, idx) => ({
+    kanji: k,
+    reading: readings[idx] || ""
+  }));
+
+  let index = 0;
+  const sentenceTemplate = rawSentence.replace(/（[^）]+）/g, () => `{${index++}}`);
+
+  return {
+    type: words.length,
+    words: words,
+    sentence: sentenceTemplate,
+    furigana: item.yomikata || ""
+  };
+}
+
+const allQuestions = rawMondaiData.map(parseMondaiItem);
+
+let questions = [], currentSectionIndex = 0, currentIndex = 0, answered = false, correctCount = 0, userGraded = false;
+let canvases = [], ctxs = [], strokes = [], currentStroke = null, currentCanvasIndex = -1, drawing = false;
 
 const BASE_CHAPTER = 1;
 const BASE_QUESTION = 1;
 
-const $=id=>document.getElementById(id);
-const sectionSelectArea=$("sectionSelectArea"),sectionGrid=$("sectionGrid"),mainCard=$("mainCard"),headerSubtitle=$("headerSubtitle");
-const questionEl=$("question"),currentNumberEl=$("currentNumber"),totalNumberEl=$("totalNumber"),questionTypeEl=$("questionType"),correctCountEl=$("correctCount"),writingArea=$("writingArea");
-const clearBtn=$("clearBtn"),undoBtn=$("undoBtn"),checkBtn=$("checkBtn"),nextBtn=$("nextBtn"),finishBtn=$("finishBtn");
-const answer=$("answer"),answerPlaceholder=$("answerPlaceholder"),selfGrading=$("selfGrading"),correctBtn=$("correctBtn"),incorrectBtn=$("incorrectBtn");
-const testArea=$("testArea"),resultArea=$("resultArea"),restartBtn=$("restartBtn"),backToMenuBtn=$("backToMenuBtn"),finalScore=$("finalScore");
+const $ = id => document.getElementById(id);
+const sectionSelectArea = $("sectionSelectArea"), sectionGrid = $("sectionGrid"), mainCard = $("mainCard"), headerSubtitle = $("headerSubtitle");
+const questionEl = $("question"), currentNumberEl = $("currentNumber"), totalNumberEl = $("totalNumber"), questionTypeEl = $("questionType"), correctCountEl = $("correctCount"), writingArea = $("writingArea");
+const clearBtn = $("clearBtn"), undoBtn = $("undoBtn"), checkBtn = $("checkBtn"), nextBtn = $("nextBtn"), finishBtn = $("finishBtn");
+const answer = $("answer"), answerPlaceholder = $("answerPlaceholder"), selfGrading = $("selfGrading"), correctBtn = $("correctBtn"), incorrectBtn = $("incorrectBtn");
+const testArea = $("testArea"), resultArea = $("resultArea"), restartBtn = $("restartBtn"), backToMenuBtn = $("backToMenuBtn"), finalScore = $("finalScore");
 
 const kanjiPreviewArea = $("kanjiPreviewArea"), kanjiGrid = $("kanjiGrid"), toProblemPreviewBtn = $("toProblemPreviewBtn"), backToMenuFromKanjiBtn = $("backToMenuFromKanjiBtn");
 const problemPreviewArea = $("problemPreviewArea"), startTestBtn = $("startTestBtn"), backToKanjiBtn = $("backToKanjiBtn");
@@ -837,7 +865,7 @@ function showKanjiPreview() {
  scrollToTop();
 }
 
-/* 画面２：テスト前の確認案内画面を表示（漢字一覧は削除しメッセージとボタンのみ） */
+/* 画面２：テスト前の確認案内画面を表示 */
 function showProblemPreview() {
  playSound("tap");
  kanjiPreviewArea.classList.add("hidden");
