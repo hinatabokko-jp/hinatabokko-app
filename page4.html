@@ -352,8 +352,13 @@
                     <div class="lg:col-span-5 flex flex-col items-center">
                         <div class="w-full waka-card rounded-2xl p-6 sm:p-8 text-center relative overflow-hidden group border-l-4 border-l-jp-accent">
                             <span class="text-xs uppercase tracking-widest text-jp-accent font-semibold mb-2 block">上の句 (kaminoku)</span>
-                            <div id="question-kaminoku" class="text-2xl sm:text-3xl font-serif font-bold text-white py-6 tracking-widest leading-relaxed"></div>
-                            <div class="text-xs text-jp-subtext mt-2 flex items-center justify-center gap-1">
+                            
+                            <!-- 要望１：上の句のふりがな（白に近い色で表示） -->
+                            <div id="question-kaminoku-furigana" class="text-xs sm:text-sm font-sans font-medium text-slate-200 tracking-wider mb-1 min-h-[1.25rem]"></div>
+                            
+                            <div id="question-kaminoku" class="text-2xl sm:text-3xl font-serif font-bold text-white py-2 tracking-widest leading-relaxed"></div>
+                            
+                            <div class="text-xs text-jp-subtext mt-3 flex items-center justify-center gap-1">
                                 <i class="fa-solid fa-circle-info"></i> 正しい下の句を選んでください
                             </div>
                         </div>
@@ -448,7 +453,7 @@
             { id: 10, kaminoku: "これやこの", banme2: "行くも帰るも", banme3: "別れては", shimonoku: "知るも知らぬも", banme5: "逢坂の関", kuZentai: "これやこの 行くも帰るも 別れては 知るも知らぬも 逢坂の関", kaisetu: "ここが、行く人も帰る人も、知っている人も知らない人も、みんな出会ったり別れたりする逢坂の関なのだなあ。", furigana: "これやこの ゆくもかえるも わかれては しるもおしらぬも おうさかのせき" },
             { id: 11, kaminoku: "わたの原", banme2: "八十島かけて", banme3: "漕ぎ出でぬと", shimonoku: "人には告げよ", banme5: "海人の釣舟", kuZentai: "わたの原 八十島かけて 漕ぎ出でぬと 人には告げよ 海人の釣舟", kaisetu: "広い海を、たくさんの島々を目指して船でこぎ出したと、都にいる人たちに伝えておくれ、漁師の釣り船よ。", furigana: "わたのはら やそしまかけて こぎいでぬと ひとにはつげよ あまのつりぶね" },
             { id: 12, kaminoku: "天つ風", banme2: "雲の通ひ路", banme3: "吹きとぢよ", shimonoku: "をとめの姿", banme5: "しばしとどめむ", kuZentai: "天つ風 雲の通ひ路 吹きとぢよ をとめの姿 しばしとどめむ", kaisetu: "空を吹く風よ、雲の中の通り道を閉じておくれ。美しい乙女たちが、もう少しここにいてくれるように。", furigana: "あまつかぜ くものかよいじ ふきとじよ おとめのすがた しばしとどめむ" },
-            { id: 13, kaminoku: "筑波嶺の", banme2: "峰より落つる", banme3: "みなの川", shimonoku: "恋ぞ積もりて", banme5: "淵となりぬる", kuZentai: "筑波嶺の 峰より落つる みなの川 恋ぞ積もりて 淵となりぬる", kaisetu: "筑波山の峰から流れ落ちる川が深い淵になるように、私の恋心もどんどん積もって、深くなってしまった。", furigana: "つくばねの みねよりおつる みなのがわ こいぞ picnic ふちとなりぬる" },
+            { id: 13, kaminoku: "筑波嶺の", banme2: "峰より落つる", banme3: "みなの川", shimonoku: "恋ぞ積もりて", banme5: "淵となりぬる", kuZentai: "筑波嶺の 峰より落つる みなの川 恋ぞ積もりて 淵となりぬる", kaisetu: "筑波山の峰から流れ落ちる川が深い淵になるように、私の恋心もどんどん積もって、深くなってしまった。", furigana: "つくばねの みねよりおつる みなのがわ こいぞ ふちとなりぬる" },
             { id: 14, kaminoku: "陸奥の", banme2: "しのぶもぢずり", banme3: "誰ゆゑに", shimonoku: "乱れそめにし", banme5: "我ならなくに", kuZentai: "陸奥の しのぶもぢずり 誰ゆゑに 乱れそめにし 我ならなくに", kaisetu: "陸奥のしのぶもじずりの模様のように、私の心が乱れ始めたのは、誰のせいだろう。あなたのせいなのに。", furigana: "みちのくの しのぶもじずり たれゆえに みだれそめにし われならなくに" },
             { id: 15, kaminoku: "君がため", banme2: "春の野に出でて", banme3: "若菜摘む", shimonoku: "わが衣手に", banme5: "雪は降りつつ", kuZentai: "君がため 春の野に出でて 若菜摘む わが衣手に 雪は降りつつ", kaisetu: "あなたのために春の野原へ出て、若菜を摘んでいると、私の着物のそでには雪が降り続いているよ。", furigana: "きみがため はるののにいでて わかなつむ わがころもでに ゆきはふりつつ" },
             { id: 16, kaminoku: "立ち別れ", banme2: "いなばの山の", banme3: "峰に生ふる", shimonoku: "まつとし聞かば", banme5: "今帰り来む", kuZentai: "立ち別れ いなばの山の 峰に生ふる まつとし聞かば 今帰り来む", kaisetu: "あなたと別れて遠くへ行くけれど、「待っている」と聞いたなら、すぐに帰ってこよう。", furigana: "たちわかれ いなばのやまの みねにおうる まつとしきかば いまかえりこむ" },
@@ -501,7 +506,7 @@
             { id: 63, kaminoku: "今はただ", banme2: "思ひ絶えなむ", banme3: "とばかりを", shimonoku: "人づてならで", banme5: "言ふよしもがな", kuZentai: "今はただ 思ひ絶えなむ とばかりを 人づてならで 言ふよしもがな", kaisetu: "もうあなたを思うのをあきらめようと思う。そのことだけでも、人づてではなく、直接あなたに伝える方法があればいいのに。", furigana: "いまはただ おもいたえなん とばかりを ひとづてならで いうよしもがな" },
             { id: 64, kaminoku: "朝ぼらけ", banme2: "宇治の川霧", banme3: "絶えだえに", shimonoku: "あらはれわたる", banme5: "瀬々の網代木", kuZentai: "朝ぼらけ 宇治の川霧 絶えだえに あらはれわたる 瀬々の網代木", kaisetu: "夜が明け始めるころ、宇治川の霧がところどころ晴れて、その向こうに川に並んだ網代木が見えてくる。", furigana: "あさぼらけ うじのかわぎり たえだえに あらわれわたる せぜのあじろぎ" },
             { id: 65, kaminoku: "恨みわび", banme2: "ほさぬ袖だに", banme3: "あるものを", shimonoku: "恋に朽ちなむ", banme5: "名こそ惜しけれ", kuZentai: "恨みわび ほさぬ袖だに あるものを 恋に朽ちなむ 名こそ惜しけれ", kaisetu: "あなたを恨みながら泣き続けて、そでが乾くこともない。それだけでもつらいのに、恋のせいで悪い評判まで残るのがくやしい。", furigana: "うらみわび ほさぬそでだに あるものを こいにくちなん なこそおしけれ" },
-            { id: 66, kaminoku: "もろともに", banme2: "あはれと思へ", banme3: "山桜", shimonoku: "花よりほかに", banme5: "知る人もなし", kuZentai: "もろともに あはれと思へ 山桜 花よりほかに 知る人もなし", kaisetu: "山桜よ、私と一緒にしみじみと感じておくれ。私には、あなたの花以外に心を通わせられる相手はいないのだから。", furigana: "もろともに あわれとおもえ やまざくら はなよりほかに しるひともなし" },
+            { id: 66, kaminoku: "もろともに", banme2: "あはれと思へ", banme3: "山桜", shimonoku: "花よりほかに", banme5: "知る人もなし", kuZentai: "もろともに あはれと思へ やまざくら はなよりほかに 知る人もなし", kaisetu: "山桜よ、私と一緒にしみじみと感じておくれ。私には、あなたの花以外に心を通わせられる相手はいないのだから。", furigana: "もろともに あわれとおもえ やまざくら はなよりほかに しるひともなし" },
             { id: 67, kaminoku: "春の夜の", banme2: "夢ばかりなる", banme3: "手枕に", shimonoku: "かひなく立たむ", banme5: "名こそ惜しけれ", kuZentai: "春の夜の 夢ばかりなる 手枕に かひなく立たむ 名こそ惜しけれ", kaisetu: "春の夜の夢のようにはかない恋だったのに、あなたと一緒に寝たといううわさだけが広まって、悪い評判が立つのが残念だ。", furigana: "はるのよの ゆめばかりなる たまくらに かいなくたたむ なこそおしけれ" },
             { id: 68, kaminoku: "心にも", banme2: "あらでうき世に", banme3: "ながらへば", shimonoku: "恋しかるべき", banme5: "夜半の月かな", kuZentai: "心にも あらでうき世に ながらえば こいしかるべき よわのつきかな", kaisetu: "本当は望んでいないのに、このつらい世の中で長く生きてしまったら、きっと今見ているこの夜中の月を恋しく思うのだろう。", furigana: "こころにも あらでうきよに ながらえば こいしかるべき よわのつきかな" },
             { id: 69, kaminoku: "嵐吹く", banme2: "三室の山の", banme3: "もみぢ葉は", shimonoku: "竜田の川の", banme5: "錦なりけり", kuZentai: "嵐吹く 三室の山の もみぢ葉は 竜田の川の 錦なりけり", kaisetu: "強い風が吹く三室山の紅葉が川に流れ、竜田川を美しい錦の布のようにしている。", furigana: "あらしふく みむろのやまの もみじばは たつたのかわの にしきなりけり" },
@@ -520,12 +525,12 @@
             { id: 82, kaminoku: "思ひわび", banme2: "さても命は", banme3: "あるものを", shimonoku: "憂きに堪へぬは", banme5: "涙なりけり", kuZentai: "思ひわび さても命は あるものを 憂きに堪へぬは 涙なりけり", kaisetu: "つらいことに悩みながらも、命はまだ続いている。でも、この苦しさに耐えられず、涙が流れてしまう。", furigana: "おもいわび さてもいのちは あるものを うきにたえぬは なみだなりけり" },
             { id: 83, kaminoku: "世の中よ", banme2: "道こそなけれ", banme3: "思ひ入る", shimonoku: "山の奥にも", banme5: "鹿ぞ鳴くなる", kuZentai: "世の中よ 道こそなけれ 思ひ入る 山の奥にも 鹿ぞ鳴くなる", kaisetu: "世の中がつらくて山奥に入ってきたのに、ここにも鹿の悲しそうな鳴き声が聞こえる。どこへ行っても逃げ場はないのだなあ。", furigana: "よのなかよ みちこそなけれ おもいいる やまのおくにも しかぞなくなる" },
             { id: 84, kaminoku: "長らへば", banme2: "またこの頃や", banme3: "しのばれむ", shimonoku: "憂しと見し世ぞ", banme5: "今は恋しき", kuZentai: "長らへば またこの頃や しのばれむ 憂しと見し世ぞ 今は恋しき", kaisetu: "長く生きていれば、今のこともいつか懐かしく思うのだろう。つらいと思っていた昔の世の中さえ、今では恋しく感じるのだから。", furigana: "ながらえば またこのごろや しのばれん うしとみしよぞ いまはこいしき" },
-            { id: 85, kaminoku: "夜もすがら", banme2: "もの思ふころは", banme3: "明けやらで", shimonoku: "ねやのひまさへ", banme5: "つれなかりけり", kuZentai: "夜もすがら もの思ふころは 明けやらで ねやのひまさへ つれなかりけり", kaisetu: "一晩中、恋のことで悩んでいると、なかなか夜が明けない。それだけでなく、寝室のすき間さえも冷たく感じられる。", furigana: "よもすがら ものおもうころは あけやらで ねやのひまさえ つれなかりけり" },
+            { id: 85, kaminoku: "夜もすがら", banme2: "もの思ふころは", banme3: "明けやらで", shimonoku: "ねやのひまさへ", banme5: "つれなかりけり", kuZentai: "夜もすがら もの思ふころは 明けやらで ねやのひまさえ つれなかりけり", kaisetu: "一晩中、恋のことで悩んでいると、なかなか夜が明けない。それだけでなく、寝室のすき間さえも冷たく感じられる。", furigana: "よもすがら ものおもうころは あけやらで ねやのひまさえ つれなかりけり" },
             { id: 86, kaminoku: "嘆けとて", banme2: "月やはものを", banme3: "思はする", shimonoku: "かこち顔なる", banme5: "わが涙かな", kuZentai: "嘆けとて 月やはものを 思はする かこち顔なる わが涙かな", kaisetu: "月が私に「嘆きなさい」と言ったわけではない。それなのに、月を見ていると、月のせいにしたくなるほど涙が出てくる。", furigana: "なげけとて つきやはものを おもわする かこちがおなる わが涙かな" },
             { id: 87, kaminoku: "村雨の", banme2: "露もまだひぬ", banme3: "まきの葉に", shimonoku: "霧立ちのぼる", banme5: "秋の夕暮", kuZentai: "村雨の 露もまだひぬ まきの葉に 霧立ちのぼる 秋の夕暮", kaisetu: "にわか雨が通り過ぎたばかりで、まだ葉の露も乾いていない。その木の葉の上に霧が立ちのぼっている秋の夕暮れだ。", furigana: "むらさめの つゆもまだひぬ まきのはに きりたちのぼる あきのゆうぐれ" },
             { id: 88, kaminoku: "難波江の", banme2: "芦のかりねの", banme3: "ひとよゆゑ", shimonoku: "みをつくしてや", banme5: "恋ひわたるべき", kuZentai: "難波江の 芦のかりねの ひとよゆゑ みをつくしてや 恋ひわたるべき", kaisetu: "難波江の芦の一節ほどの、ほんの一晩の出来事なのに、私はこれからもずっと、身を滅ぼすほど恋し続けるのだろうか。", furigana: "なにわえの あしのかりねの ひとよゆえ みをつくしてや こいわたるべき" },
             { id: 89, kaminoku: "玉の緒よ", banme2: "絶えなば絶えね", banme3: "ながらへば", shimonoku: "忍ぶることの", banme5: "弱りもぞする", kuZentai: "玉の緒よ 絶えなば絶えね ながらえば しのぶることの よわりもぞする", kaisetu: "命よ、もし終わるなら終わってしまってほしい。このまま生きていると、恋心を隠している力がなくなってしまいそうだから。", furigana: "たまのおよ たえなばたえね ながらえば しのぶることの よわりもぞする" },
-            { id: 90, kaminoku: "見せばやな", banme2: "雄島の海人の", banme3: "袖だにも", shimonoku: "濡れにぞ濡れし", banme5: "色は変はらず", kuZentai: "見せばやな 雄島の海人の 袖だにも 濡れにぞ濡れし 色は変はらず", kaisetu: "私の涙でぬれたそでを、あなたに見せたい。雄島の漁師のそでさえ何度も海水にぬれるけれど、色が変わるほどではないのに、私のそでは涙で色が変わってしまうほどだ。", furigana: "みせばやな おじまのあまの そでだにも ぬれにぞぬれし いろはかわらず" },
+            { id: 90, kaminoku: "見せばやな", banme2: "雄島の海人の", banme3: "袖だにも", shimonoku: "濡れにぞ濡れし", banme5: "色は変はらず", kuZentai: "見せばやな 雄島の海人の 袖だにも 濡れにぞ濡れし いろはかわらず", kaisetu: "私の涙でぬれたそでを、あなたに見せたい。雄島の漁師のそでさえ何度も海水にぬれるけれど、色が変わるほどではないのに、私のそでは涙で色が変わってしまうほどだ。", furigana: "みせばやな おじまのあまの そでだにも ぬれにぞぬれし いろはかわらず" },
             { id: 91, kaminoku: "きりぎりす", banme2: "鳴くや霜夜の", banme3: "さむしろに", shimonoku: "衣かたしき", banme5: "ひとりかも寝む", kuZentai: "きりぎりす 鳴くや霜夜の さむしろに 衣かたしき ひとりかも寝む", kaisetu: "こおろぎが鳴く寒い霜の夜、さびしいむしろの上で、着物のそでを敷いてひとりで寝るのだろうか。", furigana: "きりぎりす なくやしもよの さむしろに ころもかたしき ひとりかもねむ" },
             { id: 92, kaminoku: "わが袖は", banme2: "潮干に見えぬ", banme3: "沖の石の", shimonoku: "人こそ知らね", banme5: "乾く間もなし", kuZentai: "わが袖は 潮干に見えぬ 沖の石の 人こそ知らね 乾く間もなし", kaisetu: "私のそでは、潮が引いたときにも海の中に隠れている沖の石のように、人には見えないところで、涙にぬれて乾く暇もない。", furigana: "わがそでは しおひにみえぬ おきのいしの ひとこそしらね かわくまもなし" },
             { id: 93, kaminoku: "世の中は", banme2: "常にもがもな", banme3: "渚漕ぐ", shimonoku: "海人の小舟の", banme5: "綱手かなしも", kuZentai: "世の中は 常にもがもな なぎさこぐ あまのおぶねの つなでかなしも", kaisetu: "この世の中が、ずっと変わらなければいいのに。海辺をこぐ漁師の小舟と、それを引く綱の様子を見ると、なぜか悲しく感じられる。", furigana: "よのなかは つねにもがもな なぎさこぐ あまのおぶねの つなでかなしも" },
@@ -789,7 +794,8 @@
             showMemorizeScreen();
         }
 
-        // 画面1：このグループの10首・ふりがなを表示（ご要望2: 白くて読みやすいフォントに変更）
+        // 画面1：このグループの10首を表示
+        // 要望２修正：上の句(1〜3文)＋下の句(4〜5文)の句全体を表示し、下の句は色を変える（text-jp-gold）
         function showMemorizeScreen() {
             document.getElementById('memorize-group-title').innerText = currentGroup.name;
 
@@ -800,17 +806,19 @@
                 const card = document.createElement('div');
                 card.className = 'waka-card p-4 rounded-xl border border-jp-border/70 flex flex-col gap-2 relative';
 
-                /* ご要望2の改善：ふりがな部分を白くて読みやすいフォント（font-sans / Zen Kaku Gothic New, text-slate-100）に修正 */
                 card.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs font-bold px-2 py-0.5 rounded bg-jp-gold/15 text-jp-gold border border-jp-gold/30">第${item.id}首</span>
-                        <span class="font-serif font-bold text-base sm:text-lg text-white">
-                            ${item.kaminoku} <span class="text-jp-gold">${item.shimonoku} ${item.banme5}</span>
-                        </span>
-                    </div>
-                    <div class="text-sm sm:text-base font-sans text-slate-100 font-medium tracking-wide flex items-center gap-2 pl-1 border-t border-jp-border/40 pt-2">
-                        <i class="fa-solid fa-font text-xs text-jp-gold"></i>
-                        <span>${item.furigana}</span>
+                    <div class="flex flex-col gap-1.5">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-xs font-bold px-2 py-0.5 rounded bg-jp-gold/15 text-jp-gold border border-jp-gold/30 shrink-0">第${item.id}首</span>
+                            <div class="font-serif font-bold text-base sm:text-lg leading-relaxed">
+                                <span class="text-white">${item.kaminoku} ${item.banme2} ${item.banme3}</span>
+                                <span class="text-jp-gold ml-1.5">${item.shimonoku} ${item.banme5}</span>
+                            </div>
+                        </div>
+                        <div class="text-xs sm:text-sm font-sans text-slate-200 font-medium tracking-wide flex items-center gap-2 pl-1 border-t border-jp-border/40 pt-1.5">
+                            <i class="fa-solid fa-font text-xs text-jp-gold"></i>
+                            <span>${item.furigana}</span>
+                        </div>
                     </div>
                 `;
                 listContainer.appendChild(card);
@@ -866,7 +874,12 @@
             const progressPercent = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
             document.getElementById('progress-bar').style.width = `${progressPercent}%`;
 
-            // 上の句表示
+            // 要望１：上の句の「ふりがな」を上に白に近い色で表示
+            const furiganaParts = q.furigana.split(" ");
+            const kaminokuFurigana = furiganaParts.slice(0, 3).join(" ");
+            document.getElementById('question-kaminoku-furigana').innerText = kaminokuFurigana;
+
+            // 上の句（漢字）表示
             document.getElementById('question-kaminoku').innerText = q.kaminoku;
 
             // 解答カードを隠す
@@ -881,20 +894,27 @@
             optionsContainer.innerHTML = '';
 
             options.forEach(opt => {
+                // 要望１：選択肢（下の句）の上にもふりがなを白に近い色で表示
+                const optFuriganaParts = opt.furigana.split(" ");
+                const shimonokuFurigana = optFuriganaParts.slice(3).join(" ");
+
                 const btn = document.createElement('button');
-                btn.dataset.optionId = opt.id; // 不正解時強調の特定用にデータ属性を付与
+                btn.dataset.optionId = opt.id;
                 btn.className = 'w-full waka-card option-card p-4 sm:p-5 rounded-xl text-left border border-jp-border hover:border-jp-gold flex justify-between items-center transition cursor-pointer';
                 btn.onclick = () => checkAnswer(opt.id, q, btn);
 
                 btn.innerHTML = `
-                    <span class="font-serif text-base sm:text-lg font-bold text-white">${opt.shimonoku} ${opt.banme5}</span>
-                    <i class="icon-indicator fa-regular fa-circle text-jp-subtext text-lg opacity-40"></i>
+                    <div class="flex flex-col items-start gap-1">
+                        <span class="text-xs sm:text-sm font-sans font-medium text-slate-200 tracking-wider">${shimonokuFurigana}</span>
+                        <span class="font-serif text-base sm:text-lg font-bold text-white">${opt.shimonoku} ${opt.banme5}</span>
+                    </div>
+                    <i class="icon-indicator fa-regular fa-circle text-jp-subtext text-lg opacity-40 shrink-0 ml-2"></i>
                 `;
                 optionsContainer.appendChild(btn);
             });
         }
 
-        // 解答判定処理（ご要望1: 不正解時に正解の選択肢も強調表示する処理を追加）
+        // 解答判定処理
         function checkAnswer(selectedId, correctQ, clickedBtn) {
             if (isAnswered) return;
             isAnswered = true;
@@ -916,7 +936,7 @@
                 const indicatorIcon = btn.querySelector('.icon-indicator');
 
                 if (optionId === correctQ.id) {
-                    // 正解の選択肢を常に緑色ハイライト（不正解を選んだ場合にも強調）
+                    // 正解の選択肢を常に緑色ハイライト
                     btn.classList.add('border-emerald-500', 'bg-emerald-950/40', 'ring-2', 'ring-emerald-500/50');
                     if (indicatorIcon) {
                         indicatorIcon.className = 'icon-indicator fa-solid fa-circle-check text-emerald-400 text-xl';
