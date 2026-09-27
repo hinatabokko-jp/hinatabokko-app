@@ -399,16 +399,18 @@ h1 {
   color: #fff;
 }
 
+/* 白に近い背景、十分な高さ設定 */
 .scratchpad-container {
   width: 100%;
-  height: 180px;
-  background: #1a1f2c;
-  border: 1px dashed #3a455a;
+  height: 320px;
+  background: #f8f9fa;
+  border: 2px dashed #cbd5e1;
   border-radius: 12px;
   position: relative;
   overflow: hidden;
   touch-action: none; /* 画像ドラッグやページスクロールを完全に抑止 */
   cursor: crosshair;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.06);
 }
 
 .scratchpad-canvas {
@@ -673,7 +675,7 @@ h1 {
   }
 
   .scratchpad-container {
-    height: 150px;
+    height: 240px;
   }
 
   .modal {
@@ -1187,11 +1189,11 @@ class Scratchpad {
 
     if (this.mode === "pen") {
       this.ctx.globalCompositeOperation = "source-over";
-      this.ctx.strokeStyle = "#ffca58"; // 明るい黄色で筆算が見やすい
+      this.ctx.strokeStyle = "#111827"; // 白背景で見やすい黒色インク
       this.ctx.lineWidth = 3;
     } else {
       this.ctx.globalCompositeOperation = "destination-out";
-      this.ctx.lineWidth = 18;
+      this.ctx.lineWidth = 20;
     }
 
     this.ctx.stroke();
@@ -1212,7 +1214,6 @@ class Scratchpad {
 
     // リサイズ時に解像度調整
     window.addEventListener("resize", () => {
-      // 描画内容保持のため一次元退避等の制御も可能だが、簡易初期化
       const tempImage = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
       const rect = this.canvas.parentElement.getBoundingClientRect();
       this.canvas.width = rect.width;
