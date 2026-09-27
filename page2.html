@@ -16,6 +16,8 @@
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 body {
@@ -29,7 +31,6 @@ body {
   align-items: center;
   padding: 16px;
   touch-action: manipulation;
-  user-select: none;
 }
 
 /* ========================================
@@ -191,7 +192,7 @@ body {
 ======================================== */
 
 .app {
-  width: min(780px, 100%);
+  width: min(1080px, 100%);
   background: #191e27;
   border: 1px solid #2d3442;
   border-radius: 24px;
@@ -268,7 +269,7 @@ h1 {
 .pane-left,
 .pane-right {
   width: 100%;
-  max-width: 380px;
+  max-width: 480px;
   margin: 0 auto;
 }
 
@@ -278,28 +279,23 @@ h1 {
   justify-content: center;
 }
 
-@media (min-width: 640px) {
-  .app {
-    max-width: 760px;
-  }
-
+@media (min-width: 860px) {
   .quiz-layout {
     flex-direction: row;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
-    gap: 28px;
-    margin-top: 10px;
+    gap: 24px;
   }
 
   .pane-left {
-    flex: 1;
-    max-width: 360px;
+    flex: 1.2;
+    max-width: 580px;
     margin: 0;
   }
 
   .pane-right {
-    flex: 1;
-    max-width: 320px;
+    flex: 0.8;
+    max-width: 360px;
     margin: 0;
   }
 }
@@ -354,12 +350,47 @@ h1 {
   flex-basis: 100%;
 }
 
-/* 入力ボックス（標準・分数共通） */
+/* 問題文ボックス（数直線文章題用） */
+.problem-box {
+  background: #212836;
+  border: 1px solid #343e52;
+  border-radius: 16px;
+  padding: 16px 20px;
+  font-size: clamp(16px, 3.2vw, 19px);
+  line-height: 1.6;
+  font-weight: 600;
+  color: #f5f7fa;
+  margin-bottom: 14px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.problem-box .highlight {
+  color: #ffca58;
+  font-weight: 800;
+}
+
+/* 二重数直線コンテナ */
+.number-line-card {
+  background: #141821;
+  border: 1px solid #2e3648;
+  border-radius: 18px;
+  padding: 16px 12px;
+  margin-bottom: 12px;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.4);
+}
+
+.number-line-svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* 入力ボックス（標準・分数・数直線共通） */
 .answer-box {
   min-width: 64px;
   min-height: 54px;
   padding: 4px 12px;
-  font-size: clamp(28px, 6.5vw, 42px);
+  font-size: clamp(24px, 5.5vw, 38px);
   font-weight: 800;
   text-align: center;
   color: #8096ff;
@@ -376,12 +407,101 @@ h1 {
   transition: border-color .15s ease, background .15s ease;
 }
 
+.number-line-card .answer-box {
+  min-width: 58px;
+  height: 42px;
+  min-height: 42px;
+  font-size: 20px;
+  border-radius: 10px;
+  padding: 2px 6px;
+}
+
 .answer-box.active {
   border-color: #657dff;
   background: #181f33;
+  color: #ffffff;
   box-shadow: 0 0 12px rgba(101,125,255,0.4), inset 0 2px 6px rgba(0,0,0,0.5);
 }
 
+.answer-box.filled {
+  color: #5ed6a0;
+}
+
+/* 手書きメモエリア (Scratchpad) */
+.scratchpad-card {
+  background: #141821;
+  border: 1px solid #2e3648;
+  border-radius: 18px;
+  padding: 12px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scratchpad-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+.scratchpad-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffca58;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.scratchpad-tools {
+  display: flex;
+  gap: 6px;
+}
+
+.tool-btn {
+  background: #252c37;
+  border: 1px solid #3a4454;
+  color: #d0d7e5;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+.tool-btn:hover {
+  background: #303846;
+}
+
+.tool-btn.active {
+  background: #3b4870;
+  border-color: #657dff;
+  color: #fff;
+}
+
+.scratchpad-container {
+  width: 100%;
+  height: 260px;
+  background: #f8f9fa;
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+  cursor: crosshair;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.scratchpad-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* テンキー・キーボード */
 .keypad {
   width: 100%;
   display: grid;
@@ -533,7 +653,7 @@ h1 {
 }
 
 .modal {
-  width: min(460px, 100%);
+  width: min(500px, 100%);
   background: #1b212c;
   border: 1px solid #414b5d;
   border-radius: 24px;
@@ -578,6 +698,17 @@ h1 {
   gap: 8px;
 }
 
+.modal-problem {
+  font-size: 16px;
+  color: #c0c7d3;
+  margin: 12px 0;
+  line-height: 1.5;
+  text-align: left;
+  background: #222938;
+  padding: 12px 16px;
+  border-radius: 12px;
+}
+
 .modal-label {
   font-size: 14px;
   color: #8f99aa;
@@ -595,6 +726,24 @@ h1 {
   justify-content: center;
   align-items: center;
   gap: 12px;
+}
+
+.modal-answer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  margin: 10px 0 18px;
+}
+
+.modal-answer-item {
+  font-size: 20px;
+  font-weight: 800;
+  color: #657dff;
+  background: #141821;
+  padding: 8px 18px;
+  border-radius: 10px;
+  border: 1px solid #2e3648;
 }
 
 .modal-button {
@@ -636,6 +785,10 @@ h1 {
   .answer-box {
     min-width: 54px;
     min-height: 48px;
+  }
+
+  .scratchpad-container {
+    height: 220px;
   }
 
   .modal {
@@ -776,7 +929,7 @@ function playCorrectSound() {
   } catch (e) {}
 }
 
-const TOTAL = 20;
+let TOTAL = 20;
 
 let questions = [];
 let current = 0;
@@ -810,6 +963,258 @@ function lcm(a, b) {
   return (a * b) / gcd(a, b);
 }
 
+// 数直線文章題生成テンプレート
+function makeWordProblem() {
+  const templates = [
+    () => {
+      const perPerson = rand(6, 12) * 10;
+      const basePeople = rand(2, 4);
+      const baseGram = perPerson * basePeople;
+      let targetPeople = rand(3, 8);
+      while (targetPeople === basePeople) targetPeople = rand(3, 8);
+      const targetGram = perPerson * targetPeople;
+      return {
+        type: "数直線文章題",
+        kind: "word_problem",
+        text: `スパゲッティ<span class="highlight">${baseGram}g</span>で<span class="highlight">${basePeople}人分</span>が作れます。<span class="highlight">${targetPeople}人分</span>を作りたいとき、スパゲッティは何g必要ですか？`,
+        topUnit: "g", bottomUnit: "人",
+        topValues: [
+          { type: "input", answer: perPerson, label: "1人分" },
+          { type: "value", value: baseGram },
+          { type: "input", answer: targetGram, label: "目標" }
+        ],
+        bottomValues: [
+          { type: "value", value: 1 },
+          { type: "value", value: basePeople },
+          { type: "value", value: targetPeople }
+        ],
+        explanation: `1人分の量は ${baseGram} ÷ ${basePeople} ＝ ${perPerson}g。<br>${targetPeople}人分は ${perPerson} × ${targetPeople} ＝ ${targetGram}g です。`
+      };
+    },
+    () => {
+      const perMeter = rand(4, 15) * 10;
+      const baseMeters = rand(2, 5);
+      const baseYen = perMeter * baseMeters;
+      let targetMeters = rand(6, 12);
+      const targetYen = perMeter * targetMeters;
+      return {
+        type: "数直線文章題",
+        kind: "word_problem",
+        text: `リボン<span class="highlight">${baseMeters}m</span>の代金は<span class="highlight">${baseYen}円</span>です。このリボン<span class="highlight">${targetMeters}m</span>を買うと代金はいくらですか？`,
+        topUnit: "円", bottomUnit: "m",
+        topValues: [
+          { type: "input", answer: perMeter, label: "1m分" },
+          { type: "value", value: baseYen },
+          { type: "input", answer: targetYen, label: "目標" }
+        ],
+        bottomValues: [
+          { type: "value", value: 1 },
+          { type: "value", value: baseMeters },
+          { type: "value", value: targetMeters }
+        ],
+        explanation: `1mの値段は ${baseYen} ÷ ${baseMeters} ＝ ${perMeter}円。<br>${targetMeters}m分の代金は ${perMeter} × ${targetMeters} ＝ ${targetYen}円 です。`
+      };
+    },
+    () => {
+      const perDl = rand(3, 9);
+      const baseDl = rand(2, 6);
+      const baseSq = perDl * baseDl;
+      let targetDl = rand(7, 12);
+      const targetSq = perDl * targetDl;
+      return {
+        type: "数直線文章題",
+        kind: "word_problem",
+        text: `<span class="highlight">${baseDl}dL</span>のペンキで壁を<span class="highlight">${baseSq}m²</span>ぬれます。<span class="highlight">${targetDl}dL</span>のペンキでは壁を何m²ぬれますか？`,
+        topUnit: "m²", bottomUnit: "dL",
+        topValues: [
+          { type: "input", answer: perDl, label: "1dL分" },
+          { type: "value", value: baseSq },
+          { type: "input", answer: targetSq, label: "目標" }
+        ],
+        bottomValues: [
+          { type: "value", value: 1 },
+          { type: "value", value: baseDl },
+          { type: "value", value: targetDl }
+        ],
+        explanation: `1dLでぬれる面積は ${baseSq} ÷ ${baseDl} ＝ ${perDl}m²。<br>${targetDl}dLでは ${perDl} × ${targetDl} ＝ ${targetSq}m² ぬれます。`
+      };
+    }
+  ];
+  return templates[rand(0, templates.length - 1)]();
+}
+
+function renderNumberLineSVG(q) {
+  let boxIndex = 0;
+  const boxes = [];
+
+  const topItems = q.topValues.map(item => {
+    if (item.type === "input") {
+      const idx = boxIndex++;
+      boxes.push({ index: idx, answer: item.answer });
+      return { isInput: true, index: idx, label: item.label };
+    }
+    return { isInput: false, value: item.value };
+  });
+
+  const bottomItems = q.bottomValues.map(item => {
+    if (item.type === "input") {
+      const idx = boxIndex++;
+      boxes.push({ index: idx, answer: item.answer });
+      return { isInput: true, index: idx, label: item.label };
+    }
+    return { isInput: false, value: item.value };
+  });
+
+  const startX = 60;
+  const endX = 460;
+  const positions = [
+    startX,
+    startX + (endX - startX) * 0.22,
+    startX + (endX - startX) * 0.58,
+    startX + (endX - startX) * 0.94
+  ];
+
+  const yTop = 45;
+  const yBottom = 115;
+
+  let html = `<svg class="number-line-svg" viewBox="0 0 500 160" xmlns="http://www.w3.org/2000/svg">`;
+  html += `<text x="12" y="${yTop + 6}" fill="#9da6b6" font-size="14" font-weight="700">[ ${q.topUnit} ]</text>`;
+  html += `<text x="12" y="${yBottom + 6}" fill="#9da6b6" font-size="14" font-weight="700">[ ${q.bottomUnit} ]</text>`;
+
+  html += `<line x1="${startX}" y1="${yTop}" x2="${endX + 15}" y2="${yTop}" stroke="#4a566d" stroke-width="3" stroke-linecap="round"/>`;
+  html += `<line x1="${startX}" y1="${yBottom}" x2="${endX + 15}" y2="${yBottom}" stroke="#4a566d" stroke-width="3" stroke-linecap="round"/>`;
+
+  html += `<path d="M ${endX + 10} ${yTop - 6} L ${endX + 18} ${yTop} L ${endX + 10} ${yTop + 6}" fill="none" stroke="#4a566d" stroke-width="3"/>`;
+  html += `<path d="M ${endX + 10} ${yBottom - 6} L ${endX + 18} ${yBottom} L ${endX + 10} ${yBottom + 6}" fill="none" stroke="#4a566d" stroke-width="3"/>`;
+
+  html += `<line x1="${startX}" y1="${yTop - 8}" x2="${startX}" y2="${yBottom + 8}" stroke="#657dff" stroke-width="2.5"/>`;
+  html += `<text x="${startX}" y="${yTop - 14}" fill="#f5f7fa" font-size="15" font-weight="700" text-anchor="middle">0</text>`;
+  html += `<text x="${startX}" y="${yBottom + 26}" fill="#f5f7fa" font-size="15" font-weight="700" text-anchor="middle">0</text>`;
+
+  for (let i = 0; i < 3; i++) {
+    const x = positions[i + 1];
+    const top = topItems[i];
+    const bottom = bottomItems[i];
+
+    html += `<line x1="${x}" y1="${yTop}" x2="${x}" y2="${yBottom}" stroke="#394252" stroke-width="2" stroke-dasharray="4 3"/>`;
+    html += `<line x1="${x}" y1="${yTop - 6}" x2="${x}" y2="${yTop + 6}" stroke="#8096ff" stroke-width="2.5"/>`;
+
+    if (top.isInput) {
+      html += `
+        <foreignObject x="${x - 40}" y="${yTop - 38}" width="80" height="42">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="display:flex; justify-content:center; align-items:center;">
+            <div id="box-${top.index}" class="answer-box" data-index="${top.index}"></div>
+          </div>
+        </foreignObject>
+      `;
+    } else {
+      html += `<text x="${x}" y="${yTop - 14}" fill="#ffffff" font-size="17" font-weight="800" text-anchor="middle">${top.value}</text>`;
+    }
+
+    html += `<line x1="${x}" y1="${yBottom - 6}" x2="${x}" y2="${yBottom + 6}" stroke="#8096ff" stroke-width="2.5"/>`;
+
+    if (bottom.isInput) {
+      html += `
+        <foreignObject x="${x - 40}" y="${yBottom + 10}" width="80" height="42">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="display:flex; justify-content:center; align-items:center;">
+            <div id="box-${bottom.index}" class="answer-box" data-index="${bottom.index}"></div>
+          </div>
+        </foreignObject>
+      `;
+    } else {
+      html += `<text x="${x}" y="${yBottom + 26}" fill="#ffffff" font-size="17" font-weight="800" text-anchor="middle">${bottom.value}</text>`;
+    }
+  }
+
+  html += `</svg>`;
+  return { html, boxes };
+}
+
+/* ひっ算メモキャンバス */
+class Scratchpad {
+  constructor(canvasEl) {
+    this.canvas = canvasEl;
+    this.ctx = canvasEl.getContext("2d");
+    this.isDrawing = false;
+    this.mode = "pen";
+    this.lastX = 0;
+    this.lastY = 0;
+    this.initCanvas();
+    this.bindEvents();
+  }
+
+  initCanvas() {
+    const rect = this.canvas.parentElement.getBoundingClientRect();
+    this.canvas.width = rect.width;
+    this.canvas.height = rect.height;
+    this.ctx.lineCap = "round";
+    this.ctx.lineJoin = "round";
+    this.clear();
+  }
+
+  clear() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+
+  setMode(mode) {
+    this.mode = mode;
+  }
+
+  getPos(e) {
+    const rect = this.canvas.getBoundingClientRect();
+    let clientX = e.clientX;
+    let clientY = e.clientY;
+    if (e.touches && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    }
+    return { x: clientX - rect.left, y: clientY - rect.top };
+  }
+
+  startDrawing(e) {
+    e.preventDefault();
+    this.isDrawing = true;
+    const pos = this.getPos(e);
+    this.lastX = pos.x;
+    this.lastY = pos.y;
+  }
+
+  draw(e) {
+    if (!this.isDrawing) return;
+    e.preventDefault();
+    const pos = this.getPos(e);
+    this.ctx.beginPath();
+    this.ctx.moveTo(this.lastX, this.lastY);
+    this.ctx.lineTo(pos.x, pos.y);
+
+    if (this.mode === "pen") {
+      this.ctx.globalCompositeOperation = "source-over";
+      this.ctx.strokeStyle = "#111827";
+      this.ctx.lineWidth = 3;
+    } else {
+      this.ctx.globalCompositeOperation = "destination-out";
+      this.ctx.lineWidth = 20;
+    }
+
+    this.ctx.stroke();
+    this.lastX = pos.x;
+    this.lastY = pos.y;
+  }
+
+  stopDrawing() {
+    this.isDrawing = false;
+  }
+
+  bindEvents() {
+    this.canvas.addEventListener("pointerdown", (e) => this.startDrawing(e));
+    this.canvas.addEventListener("pointermove", (e) => this.draw(e));
+    this.canvas.addEventListener("pointerup", () => this.stopDrawing());
+    this.canvas.addEventListener("pointerleave", () => this.stopDrawing());
+  }
+}
+
+let scratchpadInstance = null;
+
 function makeQuestions() {
   const q = [];
 
@@ -832,7 +1237,6 @@ function makeQuestions() {
       const a = rand(3, 9);
       const b = rand(2, 9);
 
-      // 引き算の答えが 0 または 1 になる場合は除外
       const diff = a - b;
       if (diff <= 1) continue;
 
@@ -847,9 +1251,9 @@ function makeQuestions() {
   }
   q.push(...shuffle(b1));
 
-  // 2. 掛け算（5問：1の段を除外するためにrand(2,9)を使用）
+  // 2. 掛け算（要望1：5問→4問へ変更）
   const b2 = [];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 4; i++) {
     const a = rand(2, 9);
     const b = rand(2, 9);
 
@@ -863,9 +1267,9 @@ function makeQuestions() {
   }
   q.push(...shuffle(b2));
 
-  // 3. 2桁と1桁の足し算・引き算（5問）
+  // 3. 2桁と1桁の足し算・引き算（要望2：5問→4問へ変更）
   const b3 = [];
-  while (b3.length < 5) {
+  while (b3.length < 4) {
     const isPlus = Math.random() < 0.5;
 
     if (isPlus) {
@@ -1048,6 +1452,11 @@ function makeQuestions() {
   }
   q.push(...b7);
 
+  // 8. 数直線文章題トレーニング（要望3：最後の方に2問追加）
+  const b8 = [makeWordProblem(), makeWordProblem()];
+  q.push(...b8);
+
+  TOTAL = q.length;
   return q;
 }
 
@@ -1065,12 +1474,13 @@ function showStart() {
       <p>
         段階的に難易度が上がります：<br>
         1. 1桁の足し算・引き算 (2問)<br>
-        2. 掛け算 (5問)<br>
-        3. 2桁と1桁の計算 (5問)<br>
+        2. 掛け算 (4問)<br>
+        3. 2桁と1桁の計算 (4問)<br>
         4. 2桁同士の計算 (3問)<br>
         5. 約分 (2問)<br>
         6. 通分（共通の分母） (2問)<br>
-        7. 通分（通分後の分子） (1問)
+        7. 通分（通分後の分子） (1問)<br>
+        8. 数直線文章題 (2問)
       </p>
       <button id="btn-start" class="btn-primary">
         スタート
@@ -1111,98 +1521,196 @@ function renderQuestion() {
 
   const q = questions[current];
   activeBoxIndex = 0;
-  userInputs = new Array(q.answers.length).fill("");
 
-  const qTextClass = (q.kind === "common_numerators") ? "q-text full-width" : "q-text";
+  if (q.kind === "word_problem") {
+    const { html: svgHtml, boxes: boxInfo } = renderNumberLineSVG(q);
+    userInputs = new Array(boxInfo.length).fill("");
+    q.answers = boxInfo.map(b => b.answer);
 
-  let inputHtml = "";
-  if (q.kind === "standard") {
-    inputHtml = `<div id="box-0" class="answer-box active" data-index="0" style="min-width:100px;"></div>`;
-  } else if (q.kind === "reduction") {
-    inputHtml = `
-      <div class="fraction">
-        <div class="numerator">
-          <div id="box-0" class="answer-box active" data-index="0"></div>
+    document.getElementById("screen").innerHTML = `
+      <h1>計算トレーニング</h1>
+      <div class="quiz-layout">
+        <div class="pane-left">
+          <div class="progress-wrap">
+            <div class="progress-info">
+              <span>第 ${current + 1} 問 / ${TOTAL} 問</span>
+              <span>正解 ${score} 問</span>
+            </div>
+            <div class="bar">
+              <span style="width:${(current / TOTAL) * 100}%"></span>
+            </div>
+          </div>
+
+          <div class="category-wrap">
+            <span class="category">${q.type}</span>
+          </div>
+
+          <div class="problem-box">
+            ${q.text}
+          </div>
+
+          <div class="number-line-card">
+            ${svgHtml}
+          </div>
+
+          <!-- ひっ算手書きメモエリア -->
+          <div class="scratchpad-card">
+            <div class="scratchpad-header">
+              <div class="scratchpad-title">
+                ✍️ ひっ算・計算メモスペース
+              </div>
+              <div class="scratchpad-tools">
+                <button class="tool-btn active" id="tool-pen">ペン</button>
+                <button class="tool-btn" id="tool-eraser">消しゴム</button>
+                <button class="tool-btn" id="tool-clear">全消去</button>
+              </div>
+            </div>
+            <div class="scratchpad-container">
+              <canvas id="scratch-canvas" class="scratchpad-canvas"></canvas>
+            </div>
+          </div>
+
+          <div id="feedback" class="feedback"></div>
         </div>
-        <div class="denominator">
-          <div id="box-1" class="answer-box" data-index="1"></div>
+
+        <div class="pane-right">
+          <div class="keypad" id="keypad">
+            <button class="key" data-key="1">1</button>
+            <button class="key" data-key="2">2</button>
+            <button class="key" data-key="3">3</button>
+
+            <button class="key" data-key="4">4</button>
+            <button class="key" data-key="5">5</button>
+            <button class="key" data-key="6">6</button>
+
+            <button class="key" data-key="7">7</button>
+            <button class="key" data-key="8">8</button>
+            <button class="key" data-key="9">9</button>
+
+            <button class="key action zero" data-key="0">0</button>
+            <button class="key action" data-key="back">⌫</button>
+          </div>
+
+          <button class="decide" id="submit">決定</button>
         </div>
       </div>
     `;
-  } else if (q.kind === "common_denominator") {
-    inputHtml = `
-      <div id="box-0" class="answer-box active" data-index="0" style="min-width:90px;"></div>
-    `;
-  } else if (q.kind === "common_numerators") {
-    inputHtml = `
-      <div class="fraction">
-        <div class="numerator">
-          <div id="box-0" class="answer-box active" data-index="0"></div>
+
+    const canvasEl = document.getElementById("scratch-canvas");
+    scratchpadInstance = new Scratchpad(canvasEl);
+
+    const penBtn = document.getElementById("tool-pen");
+    const eraserBtn = document.getElementById("tool-eraser");
+    const clearBtn = document.getElementById("tool-clear");
+
+    penBtn.addEventListener("click", () => {
+      scratchpadInstance.setMode("pen");
+      penBtn.classList.add("active");
+      eraserBtn.classList.remove("active");
+    });
+
+    eraserBtn.addEventListener("click", () => {
+      scratchpadInstance.setMode("eraser");
+      eraserBtn.classList.add("active");
+      penBtn.classList.remove("active");
+    });
+
+    clearBtn.addEventListener("click", () => {
+      scratchpadInstance.clear();
+    });
+  } else {
+    userInputs = new Array(q.answers.length).fill("");
+    const qTextClass = (q.kind === "common_numerators") ? "q-text full-width" : "q-text";
+
+    let inputHtml = "";
+    if (q.kind === "standard") {
+      inputHtml = `<div id="box-0" class="answer-box active" data-index="0" style="min-width:100px;"></div>`;
+    } else if (q.kind === "reduction") {
+      inputHtml = `
+        <div class="fraction">
+          <div class="numerator">
+            <div id="box-0" class="answer-box active" data-index="0"></div>
+          </div>
+          <div class="denominator">
+            <div id="box-1" class="answer-box" data-index="1"></div>
+          </div>
         </div>
-        <div class="denominator" style="color:#aeb7c6; font-size:28px;">
-          ${q.commonDen}
+      `;
+    } else if (q.kind === "common_denominator") {
+      inputHtml = `
+        <div id="box-0" class="answer-box active" data-index="0" style="min-width:90px;"></div>
+      `;
+    } else if (q.kind === "common_numerators") {
+      inputHtml = `
+        <div class="fraction">
+          <div class="numerator">
+            <div id="box-0" class="answer-box active" data-index="0"></div>
+          </div>
+          <div class="denominator" style="color:#aeb7c6; font-size:28px;">
+            ${q.commonDen}
+          </div>
         </div>
-      </div>
-      <span style="font-size:20px; color:#9da6b6; margin:0 2px;">と</span>
-      <div class="fraction">
-        <div class="numerator">
-          <div id="box-1" class="answer-box" data-index="1"></div>
+        <span style="font-size:20px; color:#9da6b6; margin:0 2px;">と</span>
+        <div class="fraction">
+          <div class="numerator">
+            <div id="box-1" class="answer-box" data-index="1"></div>
+          </div>
+          <div class="denominator" style="color:#aeb7c6; font-size:28px;">
+            ${q.commonDen}
+          </div>
         </div>
-        <div class="denominator" style="color:#aeb7c6; font-size:28px;">
-          ${q.commonDen}
+      `;
+    }
+
+    document.getElementById("screen").innerHTML = `
+      <h1>計算トレーニング</h1>
+      <div class="quiz-layout">
+        <div class="pane-left">
+          <div class="progress-wrap">
+            <div class="progress-info">
+              <span>第 ${current + 1} 問 / ${TOTAL} 問</span>
+              <span>正解 ${score} 問</span>
+            </div>
+            <div class="bar">
+              <span style="width:${(current / TOTAL) * 100}%"></span>
+            </div>
+          </div>
+
+          <div class="category-wrap">
+            <span class="category">${q.type}</span>
+          </div>
+
+          <div class="question-container">
+            <span class="${qTextClass}">${q.promptHtml}</span>
+            ${inputHtml}
+          </div>
+
+          <div id="feedback" class="feedback"></div>
+        </div>
+
+        <div class="pane-right">
+          <div class="keypad" id="keypad">
+            <button class="key" data-key="1">1</button>
+            <button class="key" data-key="2">2</button>
+            <button class="key" data-key="3">3</button>
+
+            <button class="key" data-key="4">4</button>
+            <button class="key" data-key="5">5</button>
+            <button class="key" data-key="6">6</button>
+
+            <button class="key" data-key="7">7</button>
+            <button class="key" data-key="8">8</button>
+            <button class="key" data-key="9">9</button>
+
+            <button class="key action zero" data-key="0">0</button>
+            <button class="key action" data-key="back">⌫</button>
+          </div>
+
+          <button class="decide" id="submit">決定</button>
         </div>
       </div>
     `;
   }
-
-  document.getElementById("screen").innerHTML = `
-    <h1>計算トレーニング</h1>
-    <div class="quiz-layout">
-      <div class="pane-left">
-        <div class="progress-wrap">
-          <div class="progress-info">
-            <span>第 ${current + 1} 問 / ${TOTAL} 問</span>
-            <span>正解 ${score} 問</span>
-          </div>
-          <div class="bar">
-            <span style="width:${(current / TOTAL) * 100}%"></span>
-          </div>
-        </div>
-
-        <div class="category-wrap">
-          <span class="category">${q.type}</span>
-        </div>
-
-        <div class="question-container">
-          <span class="${qTextClass}">${q.promptHtml}</span>
-          ${inputHtml}
-        </div>
-
-        <div id="feedback" class="feedback"></div>
-      </div>
-
-      <div class="pane-right">
-        <div class="keypad" id="keypad">
-          <button class="key" data-key="1">1</button>
-          <button class="key" data-key="2">2</button>
-          <button class="key" data-key="3">3</button>
-
-          <button class="key" data-key="4">4</button>
-          <button class="key" data-key="5">5</button>
-          <button class="key" data-key="6">6</button>
-
-          <button class="key" data-key="7">7</button>
-          <button class="key" data-key="8">8</button>
-          <button class="key" data-key="9">9</button>
-
-          <button class="key action zero" data-key="0">0</button>
-          <button class="key action" data-key="back">⌫</button>
-        </div>
-
-        <button class="decide" id="submit">決定</button>
-      </div>
-    </div>
-  `;
 
   const boxes = document.querySelectorAll(".answer-box");
   boxes.forEach(box => {
@@ -1237,10 +1745,9 @@ function renderQuestion() {
         updateBoxHighlights();
       }
     } else {
-      if (currentVal.length >= 4) return;
+      if (currentVal.length >= 5) return;
       userInputs[activeBoxIndex] += k;
 
-      // 複数入力がある場合、目標桁数に達したら自動で次の枠へ
       if (userInputs.length > 1 && activeBoxIndex === 0) {
         const expectedLen = String(q.answers[0]).length;
         if (userInputs[0].length >= expectedLen) {
@@ -1251,6 +1758,9 @@ function renderQuestion() {
 
     boxes.forEach((b, idx) => {
       b.textContent = userInputs[idx];
+      if (q.kind === "word_problem") {
+        b.classList.toggle("filled", userInputs[idx] !== "");
+      }
     });
     updateBoxHighlights();
   };
@@ -1366,15 +1876,36 @@ function showWrongModal() {
   const overlay = document.createElement("div");
   overlay.className = "modal-overlay";
 
-  overlay.innerHTML = `
-    <div class="modal" role="dialog" aria-modal="true">
-      <div class="modal-title">❌ 不正解</div>
-      <div class="modal-question">${q.promptHtml}</div>
-      <div class="modal-label">正しい答え</div>
-      <div class="modal-answer">${q.answerHtml}</div>
-      <button class="modal-button" id="modal-next">次の問題へ (Enter)</button>
-    </div>
-  `;
+  if (q.kind === "word_problem") {
+    let answersHtml = q.answers.map((ans, idx) => `
+      <div class="modal-answer-item">
+        □ (${idx + 1}つ目) ＝ ${ans}
+      </div>
+    `).join("");
+
+    overlay.innerHTML = `
+      <div class="modal" role="dialog" aria-modal="true">
+        <div class="modal-title">❌ 不正解</div>
+        <div class="modal-problem">${q.text}</div>
+        <div style="color:#adb5c4; font-size:14px; text-align:left; margin-bottom:12px; background:#141821; padding:10px 14px; border-radius:10px;">
+          💡 <strong>解き方のコツ:</strong><br>${q.explanation}
+        </div>
+        <div class="modal-label">正解の数値</div>
+        <div class="modal-answer-list">${answersHtml}</div>
+        <button class="modal-button" id="modal-next">次の問題へ (Enter)</button>
+      </div>
+    `;
+  } else {
+    overlay.innerHTML = `
+      <div class="modal" role="dialog" aria-modal="true">
+        <div class="modal-title">❌ 不正解</div>
+        <div class="modal-question">${q.promptHtml}</div>
+        <div class="modal-label">正しい答え</div>
+        <div class="modal-answer">${q.answerHtml}</div>
+        <button class="modal-button" id="modal-next">次の問題へ (Enter)</button>
+      </div>
+    `;
+  }
 
   document.body.appendChild(overlay);
 
@@ -1417,7 +1948,7 @@ function showCompletionModal() {
       <div style="color:#adb5c4; font-size:15px; line-height:1.6; margin-bottom:20px;">
         全 ${TOTAL} 問のトレーニングを完走しました！<br>
         最終結果:
-        <strong style="color:#657dff; font-size:24px;">
+        <strong style="color:#657dff; font-size:26px;">
           ${score} / ${TOTAL}
         </strong>
         問正解
