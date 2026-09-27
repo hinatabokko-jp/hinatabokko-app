@@ -399,10 +399,10 @@ h1 {
   color: #fff;
 }
 
-/* 白に近い背景、十分な高さ設定 */
+/* 白に近い背景、十分な高さ設定（ご要望に応じ縦幅を拡大） */
 .scratchpad-container {
   width: 100%;
-  height: 320px;
+  height: 440px; /* 320pxから440pxへ縦幅を拡大 */
   background: #f8f9fa;
   border: 2px dashed #cbd5e1;
   border-radius: 12px;
@@ -675,7 +675,7 @@ h1 {
   }
 
   .scratchpad-container {
-    height: 240px;
+    height: 320px; /* モバイル用も240pxから320pxへ縦幅を拡大 */
   }
 
   .modal {
@@ -815,7 +815,8 @@ function playCorrectSound() {
   } catch (e) {}
 }
 
-const TOTAL = 20;
+/* ご要望に応じ問題数を20問から5問へ変更 */
+const TOTAL = 5;
 
 let questions = [];
 let current = 0;
