@@ -644,23 +644,36 @@ h1 {
 </button>
 
 <!-- サイドバー -->
-<nav id="sidebar" class="sidebar" aria-label="サイトメニュー">
-  <div class="sidebar-title">メニュー</div>
-  <div class="sidebar-menu">
-    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/">
-      漢字テスト
-    </a>
-    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/page2">
-      計算トレーニング
-    </a>
-    <a class="sidebar-link current" href="#">
-      社会科トレーニング
-    </a>
-    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/page4">
-      百人一首
-    </a>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-title">
+      <span>📚 学習アプリメニュー</span>
+    </div>
+    <button class="sidebar-close" id="sidebarCloseBtn" aria-label="閉じる">✕</button>
   </div>
-</nav>
+  <nav class="sidebar-nav">
+    <a href="https://hinatabokko-jp.github.io/hinatabokko-app/" class="sidebar-link">
+      <span class="sidebar-link-icon">📝</span>
+      <span>漢字テスト</span>
+    </a>
+    <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page2" class="sidebar-link">
+      <span class="sidebar-link-icon">🧮</span>
+      <span>計算トレーニング</span>
+    </a>
+    <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page3.html" class="sidebar-link">
+      <span class="sidebar-link-icon">🧪</span>
+      <span>理科トレーニング</span>
+    </a>
+    <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page1.html" class="sidebar-link">
+      <span class="sidebar-link-icon">🗾</span>
+      <span>社会科トレーニング</span>
+    </a>
+    <a href="https://hinatabokko-jp.github.io/hinatabokko-app/page4" class="sidebar-link">
+      <span class="sidebar-link-icon">🎴</span>
+      <span>百人一首</span>
+    </a>
+  </nav>
+</aside>
 
 <!-- サイドバーの背景 -->
 <div id="menu-overlay" class="menu-overlay"></div>
