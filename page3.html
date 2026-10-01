@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>理科トレーニング</title>
+  
+<!-- confetti.js for celebration effects -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+<style>
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Segoe UI", "Noto Sans JP", -apple-system, sans-serif;
+  background: #10131a;
+  color: #f2f4f8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  touch-action: manipulation;
+}
+
+/* ========================================
+   ハンバーガーメニュー
+======================================== */
+
+.menu-button {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  z-index: 1200;
+
+  width: 48px;
+  height: 48px;
+
+  border: 1px solid #394252;
+  border-radius: 14px;
+  background: #191e27;
+  color: #f2f4f8;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+
+  transition: background .15s ease, transform .15s ease;
+}
+
+.menu-button:hover {
+  background: #252c37;
+}
+
+.menu-button:active {
+  transform: scale(.95);
+}
+
+.menu-button span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  border-radius: 2px;
+  background: #f2f4f8;
+  transition: transform .2s ease, opacity .2s ease;
+}
+
+/* メニューが開いているとき */
+.menu-button.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.menu-button.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-button.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* サイドバー */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1100;
+
+  width: min(320px, 85vw);
+  height: 100vh;
+
+  background: #191e27;
+  border-right: 1px solid #2d3442;
+
+  padding: 84px 18px 24px;
+
+  transform: translateX(-100%);
+  transition: transform .25s ease;
+
+  box-shadow: 18px 0 50px rgba(0,0,0,.45);
+}
+
+.sidebar.open {
+  transform: translateX(0);
+}
+
+.sidebar-title {
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0 8px 18px;
+  color: #ffffff;
+}
+
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar-link {
+  display: block;
+
+  padding: 14px 16px;
+
+  border: 1px solid #303847;
+  border-radius: 12px;
+
+  background: #252c37;
+  color: #e8ebf2;
+
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 700;
+
+  transition:
+    background .15s ease,
+    border-color .15s ease,
+    transform .15s ease;
+}
+
+.sidebar-link:hover {
+  background: #303846;
+  border-color: #4a566d;
+}
+
+.sidebar-link:active {
+  transform: scale(.98);
+}
+
+.sidebar-link.current {
+  background: #2b3450;
+  border-color: rgba(101,125,255,.5);
+  color: #b9c5ff;
+}
+
+/* サイドバー展開時の背景 */
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(2px);
+
+  opacity: 0;
+  visibility: hidden;
+
+  transition: opacity .25s ease, visibility .25s ease;
+}
+
+.menu-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ========================================
+   メインアプリ
+======================================== */
+
+.app {
+  width: min(800px, 100%);
+  background: #191e27;
+  border: 1px solid #2d3442;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.4);
+  position: relative;
+  overflow: hidden;
+}
+
+h1 {
+  margin: 0 0 8px;
+  text-align: center;
+  font-size: clamp(24px, 5vw, 32px);
+  letter-spacing: .04em;
+}
+
+.subtitle {
+  text-align: center;
+  color: #9da6b6;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.progress-wrap {
+  margin-bottom: 18px;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  color: #aeb7c6;
+  font-size: 14px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.bar {
+  height: 10px;
+  background: #292f3a;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #10b981, #06b6d4);
+  transition: width .3s ease;
+}
+
+.category-wrap {
+  text-align: center;
+}
+
+.category {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #1e3a34;
+  color: #6ee7b7;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  border: 1px solid rgba(110,231,183,0.25);
+}
+
+/* 問題文ボックス（複数行問題対応） */
+.problem-box {
+  background: #212836;
+  border: 1px solid #343e52;
+  border-radius: 16px;
+  padding: 20px;
+  font-size: clamp(17px, 3.8vw, 21px);
+  line-height: 1.6;
+  font-weight: 700;
+  color: #f5f7fa;
+  margin-bottom: 16px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+/* 手書き回答（キャンバス）エリア (目・身体にやさしいダーク仕様) */
+.scratchpad-card {
+  background: #141821;
+  border: 1px solid #2e3648;
+  border-radius: 18px;
+  padding: 14px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.scratchpad-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+.scratchpad-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffca58;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.scratchpad-tools {
+  display: flex;
+  gap: 8px;
+}
+
+.tool-btn {
+  background: #252c37;
+  border: 1px solid #3a4454;
+  color: #d0d7e5;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+.tool-btn:hover {
+  background: #303846;
+}
+
+.tool-btn.active {
+  background: #059669;
+  border-color: #34d399;
+  color: #fff;
+}
+
+/* 目にやさしい暗めの背景色 */
+.scratchpad-container {
+  width: 100%;
+  height: 240px;
+  background: #1c222e;
+  border: 2px dashed #3a465c;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+  cursor: crosshair;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.25);
+}
+
+.scratchpad-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* 答えを見るボタン */
+.show-answer-btn {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(16,185,129,0.35);
+  transition: filter .15s, transform .1s ease;
+}
+
+.show-answer-btn:hover {
+  filter: brightness(1.1);
+}
+
+.show-answer-btn:active {
+  transform: translateY(2px);
+}
+
+/* モーダル */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+  backdrop-filter: blur(6px);
+}
+
+.modal {
+  width: min(520px, 100%);
+  background: #1b212c;
+  border: 1px solid #414b5d;
+  border-radius: 24px;
+  padding: 28px 22px;
+  text-align: center;
+  box-shadow: 0 25px 80px rgba(0,0,0,.6);
+  animation: modalIn .22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(.88) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #9da6b6;
+  margin-bottom: 8px;
+}
+
+.modal-title.celebrate {
+  color: #ffd15c;
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.modal-problem {
+  font-size: 15px;
+  color: #c0c7d3;
+  margin: 12px 0;
+  line-height: 1.5;
+  text-align: left;
+  background: #222938;
+  padding: 12px 16px;
+  border-radius: 12px;
+  white-space: pre-wrap;
+}
+
+.modal-label {
+  font-size: 14px;
+  color: #8f99aa;
+  margin-top: 14px;
+}
+
+.modal-answer {
+  font-size: clamp(24px, 6vw, 36px);
+  font-weight: 900;
+  line-height: 1.3;
+  color: #34d399;
+  margin: 10px 0 24px;
+  letter-spacing: .02em;
+  word-break: break-all;
+}
+
+.modal-choices {
+  display: flex;
+  gap: 12px;
+}
+
+.modal-button {
+  flex: 1;
+  padding: 15px;
+  border: 0;
+  border-radius: 14px;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: filter .15s, transform .1s ease;
+}
+
+.modal-button:active {
+  transform: translateY(2px);
+}
+
+.btn-correct {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(16,185,129,0.3);
+}
+
+.btn-wrong {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(239,68,68,0.3);
+}
+
+.start,
+.result {
+  text-align: center;
+  padding: 10px 0;
+}
+
+.start p,
+.result p {
+  color: #adb5c4;
+  line-height: 1.7;
+  font-size: 15px;
+  margin-bottom: 20px;
+}
+
+/* セット選択グリッド */
+.set-selection-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #34d399;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.set-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.set-card {
+  background: #212836;
+  border: 1px solid #343e52;
+  border-radius: 16px;
+  padding: 18px 16px;
+  text-align: left;
+  cursor: pointer;
+  transition: all .2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.set-card:hover {
+  background: #283143;
+  border-color: #059669;
+  transform: translateY(-2px);
+}
+
+.set-card:active {
+  transform: translateY(0);
+}
+
+.set-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.set-card-badge {
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #059669;
+  color: #fff;
+  font-weight: 700;
+}
+
+.set-card-name {
+  font-size: 17px;
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.set-card-desc {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.start button,
+.result button {
+  display: block;
+  width: 100%;
+  max-width: 380px;
+  margin: 16px auto 0;
+  padding: 16px;
+  border: 0;
+  border-radius: 14px;
+  font-size: 19px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: filter .15s;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(16,185,129,0.3);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.1);
+}
+
+.btn-secondary {
+  background: #2e3646;
+  color: #d0d7e5;
+  border: 1px solid #414b5d !important;
+}
+
+.btn-secondary:hover {
+  background: #384255;
+}
+
+.score {
+  font-size: 58px;
+  font-weight: 900;
+  color: #34d399;
+  margin: 12px 0;
+}
+
+@media(max-width:480px) {
+  body {
+    padding: 10px;
+  }
+
+  .app {
+    padding: 18px 14px;
+    border-radius: 20px;
+  }
+
+  .scratchpad-container {
+    height: 200px;
+  }
+
+  .modal {
+    padding: 24px 18px;
+  }
+
+  .menu-button {
+    top: 12px;
+    left: 12px;
+  }
+
+  .set-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ハンバーガーメニュー -->
+<button
+  id="menu-button"
+  class="menu-button"
+  aria-label="メニューを開く"
+  aria-expanded="false"
+  type="button"
+>
+  <span></span>
+  <span></span>
+  <span></span>
+</button>
+
+<!-- サイドバー -->
+<nav id="sidebar" class="sidebar" aria-label="サイトメニュー">
+  <div class="sidebar-title">メニュー</div>
+  <div class="sidebar-menu">
+    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/">
+      漢字テスト
+    </a>
+    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/page2">
+      計算トレーニング
+    </a>
+    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/page3">
+      社会科トレーニング
+    </a>
+    <a class="sidebar-link current" href="#">
+      理科トレーニング
+    </a>
+    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/page4">
+      百人一首
+    </a>
+  </div>
+</nav>
+
+<!-- サイドバーの背景 -->
+<div id="menu-overlay" class="menu-overlay"></div>
+
+<!-- メインアプリ -->
+<div class="app">
+  <div id="screen"></div>
+</div>
+
+<script>
+let audioCtx = null;
+
+/* ハンバーガーメニューの操作 */
+const menuButton = document.getElementById("menu-button");
+const sidebar = document.getElementById("sidebar");
+const menuOverlay = document.getElementById("menu-overlay");
+
+function toggleMenu() {
+  const isOpen = sidebar.classList.toggle("open");
+  menuOverlay.classList.toggle("open", isOpen);
+  menuButton.classList.toggle("open", isOpen);
+  menuButton.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  menuButton.setAttribute("aria-label", isOpen ? "メニューを閉じる" : "メニューを開く");
+}
+
+function closeMenu() {
+  sidebar.classList.remove("open");
+  menuOverlay.classList.remove("open");
+  menuButton.classList.remove("open");
+  menuButton.setAttribute("aria-expanded", "false");
+  menuButton.setAttribute("aria-label", "メニューを開く");
+}
+
+menuButton.addEventListener("click", toggleMenu);
+menuOverlay.addEventListener("click", closeMenu);
+
+/* オーディオ処理 */
+function initAudio() {
+  if (!audioCtx) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) {
+      audioCtx = new AudioContextClass();
+    }
+  }
+  if (audioCtx && audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
+}
+
+function playCorrectSound() {
+  try {
+    initAudio();
+    if (!audioCtx) return;
+
+    const now = audioCtx.currentTime;
+    const notes = [
+      [523.25, 0.00, 0.12, 0.22],
+      [659.25, 0.08, 0.12, 0.22],
+      [783.99, 0.16, 0.14, 0.25],
+      [1046.50, 0.26, 0.50, 0.30],
+      [1318.51, 0.26, 0.50, 0.20]
+    ];
+
+    notes.forEach(([freq, startOffset, duration, vol]) => {
+      const startTime = now + startOffset;
+      const stopTime = startTime + duration;
+
+      const osc1 = audioCtx.createOscillator();
+      const gain1 = audioCtx.createGain();
+      osc1.type = "sine";
+      osc1.frequency.setValueAtTime(freq, startTime);
+      gain1.gain.setValueAtTime(vol, startTime);
+      gain1.gain.exponentialRampToValueAtTime(0.001, stopTime);
+      osc1.connect(gain1);
+      gain1.connect(audioCtx.destination);
+      osc1.start(startTime);
+      osc1.stop(stopTime);
+
+      const osc2 = audioCtx.createOscillator();
+      const gain2 = audioCtx.createGain();
+      osc2.type = "triangle";
+      osc2.frequency.setValueAtTime(freq, startTime);
+      gain2.gain.setValueAtTime(vol * 0.4, startTime);
+      gain2.gain.exponentialRampToValueAtTime(0.001, stopTime);
+      osc2.connect(gain2);
+      gain2.connect(audioCtx.destination);
+      osc2.start(startTime);
+      osc2.stop(stopTime);
+    });
+  } catch (e) {}
+}
+
+/* 理科問題データの定義（アップロードされたテキストから全11問） */
+const rawQuestions = [
+  { mondai: "０℃よりも低い気温の言い表し方", kotae: "マイナス, 零下, 氷点下" },
+  { mondai: "夏の大三角形は、以下の３つの１等星を結んでできる。\n・こと座の（　　　）←織姫(おりひめ)星\n・わし座の（　　　）←彦星(ひこぼし)\n・はくちょう座の（　　　）", kotae: "ベガ、アルタイル、デネブ" },
+  { mondai: "冬の大三角形は、以下の３つの１等星を結んでできる。\n・オリオン座の（　　　）\n・こいぬ座の（　　　）\n・おおいぬ座の（　　　）", kotae: "ペテルギウス, プロキオン, シリウス" },
+  { mondai: "（　　　）は、水が姿を変えたもので、空気のように目に見えない。", kotae: "水蒸気（すいじょうき）" },
+  { mondai: "水が水蒸気に姿を変えることを、（　　　）という。", kotae: "蒸発（じょうはつ）" },
+  { mondai: "水を熱して沸き立つことを（　　　）という。", kotae: "沸騰（ふっとう）" },
+  { mondai: "空気中の水蒸気が、冷たい物にふれて、水のつぶとなって物につくことを（　　　）という。", kotae: "結露（けつろ）" },
+  { mondai: "水を熱する実験のとき、水が急に沸き立ってふき出すことを防ぐために、水の中に（　　　）を入れる。", kotae: "ふっとう石（ふっとうせき）" },
+  { mondai: "水を冷やしたとき、凍り始めてから全部が氷になるまで、温度は（　　　　　）。", kotae: "０℃のまま変わらない" },
+  { mondai: "空全体を１０としたときに占める雲の量が、０～（　　）のときは晴れと決めている。", kotae: "８" },
+  { mondai: "空全体を１０としたときに占める雲の量が、（　　）～１０のときは曇り（くもり）と決めている。", kotae: "９" }
+];
+
+const QUESTIONS_PER_SET = 8;
+
+// 8問ごとにセット番号（1, 2...）を動的に割り当て
+const questionData = rawQuestions.map((q, idx) => ({
+  id: idx + 1,
+  set: Math.floor(idx / QUESTIONS_PER_SET) + 1,
+  mondai: q.mondai,
+  kotae: q.kotae
+}));
+
+let currentSetIndex = 1;
+let questions = [];
+let TOTAL = 8;
+let current = 0;
+let score = 0;
+let scratchpadInstance = null;
+
+function shuffle(array) {
+  const result = [...array];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+/* 手書きキャンバス (Scratchpad) クラス */
+class Scratchpad {
+  constructor(canvasEl) {
+    this.canvas = canvasEl;
+    this.ctx = canvasEl.getContext("2d");
+    this.isDrawing = false;
+    this.mode = "pen";
+    this.lastX = 0;
+    this.lastY = 0;
+    this.initCanvas();
+    this.bindEvents();
+  }
+
+  initCanvas() {
+    const rect = this.canvas.parentElement.getBoundingClientRect();
+    this.canvas.width = rect.width;
+    this.canvas.height = rect.height;
+    this.ctx.lineCap = "round";
+    this.ctx.lineJoin = "round";
+    this.clear();
+  }
+
+  clear() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+
+  setMode(mode) {
+    this.mode = mode;
+  }
+
+  getPos(e) {
+    const rect = this.canvas.getBoundingClientRect();
+    let clientX = e.clientX;
+    let clientY = e.clientY;
+    if (e.touches && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    }
+    return { x: clientX - rect.left, y: clientY - rect.top };
+  }
+
+  startDrawing(e) {
+    e.preventDefault();
+    this.isDrawing = true;
+    const pos = this.getPos(e);
+    this.lastX = pos.x;
+    this.lastY = pos.y;
+  }
+
+  draw(e) {
+    if (!this.isDrawing) return;
+    e.preventDefault();
+    const pos = this.getPos(e);
+    this.ctx.beginPath();
+    this.ctx.moveTo(this.lastX, this.lastY);
+    this.ctx.lineTo(pos.x, pos.y);
+
+    if (this.mode === "pen") {
+      this.ctx.globalCompositeOperation = "source-over";
+      // 暗めの背景で見やすい白・明色ペンの指定
+      this.ctx.strokeStyle = "#f8fafc";
+      this.ctx.lineWidth = 4;
+    } else {
+      this.ctx.globalCompositeOperation = "destination-out";
+      this.ctx.lineWidth = 26;
+    }
+
+    this.ctx.stroke();
+    this.lastX = pos.x;
+    this.lastY = pos.y;
+  }
+
+  stopDrawing() {
+    this.isDrawing = false;
+  }
+
+  bindEvents() {
+    this.canvas.addEventListener("pointerdown", (e) => this.startDrawing(e));
+    this.canvas.addEventListener("pointermove", (e) => this.draw(e));
+    this.canvas.addEventListener("pointerup", () => this.stopDrawing());
+    this.canvas.addEventListener("pointerleave", () => this.stopDrawing());
+  }
+}
+
+/* スタート画面（8問ずつのセット選択） */
+function showStart() {
+  const totalSets = Math.ceil(questionData.length / QUESTIONS_PER_SET);
+  
+  let setCardsHtml = "";
+  for (let s = 1; s <= totalSets; s++) {
+    const setQuestions = questionData.filter(q => q.set === s);
+    setCardsHtml += `
+      <div class="set-card" data-set="${s}">
+        <div class="set-card-header">
+          <span class="set-card-badge">全 ${setQuestions.length} 問</span>
+        </div>
+        <div class="set-card-name">🧪 セット ${s}</div>
+        <div class="set-card-desc">第 ${(s - 1) * QUESTIONS_PER_SET + 1} 問 〜 第 ${Math.min(s * QUESTIONS_PER_SET, questionData.length)} 問のトレーニング</div>
+      </div>
+    `;
+  }
+
+  document.getElementById("screen").innerHTML = `
+    <div class="start">
+      <h1>理科トレーニング</h1>
+      <p>
+        問題文を読んで、手書き欄に回答を書こう！<br>
+        「答えを見る」ボタンを押して自分で答え合わせができます。
+      </p>
+
+      <div class="set-selection-title">学習するセットを選択してください：</div>
+      <div class="set-grid">
+        ${setCardsHtml}
+      </div>
+    </div>
+  `;
+
+  // セットカードのクリックイベントを設定
+  document.querySelectorAll(".set-card").forEach(card => {
+    card.addEventListener("click", () => {
+      const selectedSet = parseInt(card.getAttribute("data-set"), 10);
+      initAudio();
+      startGame(selectedSet);
+    });
+  });
+}
+
+/* ゲーム開始 */
+function startGame(setNum = 1) {
+  currentSetIndex = setNum;
+  const filteredQuestions = questionData.filter(q => q.set === setNum);
+  questions = shuffle(filteredQuestions);
+  TOTAL = questions.length;
+  current = 0;
+  score = 0;
+  renderQuestion();
+}
+
+/* 問題表示 */
+function renderQuestion() {
+  const q = questions[current];
+
+  document.getElementById("screen").innerHTML = `
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span>【セット ${currentSetIndex}】第 ${current + 1} 問 / ${TOTAL} 問</span>
+        <span>正解 ${score} 問</span>
+      </div>
+      <div class="bar">
+        <span style="width:${(current / TOTAL) * 100}%"></span>
+      </div>
+    </div>
+
+    <div class="category-wrap">
+      <span class="category">理科用語・知識</span>
+    </div>
+
+    <div class="problem-box">${q.mondai}</div>
+
+    <!-- 手書き回答エリア (ダーク背景) -->
+    <div class="scratchpad-card">
+      <div class="scratchpad-header">
+        <div class="scratchpad-title">
+          ✍️ ここに手書きで答えを書こう
+        </div>
+        <div class="scratchpad-tools">
+          <button class="tool-btn active" id="tool-pen">ペン</button>
+          <button class="tool-btn" id="tool-eraser">消しゴム</button>
+          <button class="tool-btn" id="tool-clear">全消去</button>
+        </div>
+      </div>
+      <div class="scratchpad-container">
+        <canvas id="scratch-canvas" class="scratchpad-canvas"></canvas>
+      </div>
+    </div>
+
+    <button id="btn-show-answer" class="show-answer-btn">
+      答えを見る
+    </button>
+  `;
+
+  const canvasEl = document.getElementById("scratch-canvas");
+  scratchpadInstance = new Scratchpad(canvasEl);
+
+  const penBtn = document.getElementById("tool-pen");
+  const eraserBtn = document.getElementById("tool-eraser");
+  const clearBtn = document.getElementById("tool-clear");
+
+  penBtn.addEventListener("click", () => {
+    scratchpadInstance.setMode("pen");
+    penBtn.classList.add("active");
+    eraserBtn.classList.remove("active");
+  });
+
+  eraserBtn.addEventListener("click", () => {
+    scratchpadInstance.setMode("eraser");
+    eraserBtn.classList.add("active");
+    penBtn.classList.remove("active");
+  });
+
+  clearBtn.addEventListener("click", () => {
+    scratchpadInstance.clear();
+  });
+
+  document.getElementById("btn-show-answer").addEventListener("click", () => {
+    initAudio();
+    showAnswerModal();
+  });
+}
+
+/* 正解の紙吹雪演出 */
+function celebrate(isLarge = false) {
+  if (typeof confetti === "function") {
+    try {
+      const count = isLarge ? 160 : 100;
+      confetti({
+        particleCount: count,
+        spread: 80,
+        startVelocity: 35,
+        origin: { y: .65 }
+      });
+
+      setTimeout(() => {
+        confetti({
+          particleCount: Math.round(count * 0.7),
+          spread: 120,
+          startVelocity: 28,
+          origin: { x: .15, y: .7 }
+        });
+      }, 120);
+
+      setTimeout(() => {
+        confetti({
+          particleCount: Math.round(count * 0.7),
+          spread: 120,
+          startVelocity: 28,
+          origin: { x: .85, y: .7 }
+        });
+      }, 220);
+    } catch(e) {}
+  }
+}
+
+/* 答え合わせモーダル表示 */
+function showAnswerModal() {
+  const q = questions[current];
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+
+  overlay.innerHTML = `
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-title">正解の確認</div>
+      <div class="modal-problem">${q.mondai}</div>
+      <div class="modal-label">正しい答え</div>
+      <div class="modal-answer">${q.kotae}</div>
+      
+      <div style="font-size:14px; color:#adb5c4; margin-bottom:14px;">
+        書いた答えは合っていましたか？
+      </div>
+
+      <div class="modal-choices">
+        <button class="modal-button btn-wrong" id="btn-self-wrong">❌ 違っていた</button>
+        <button class="modal-button btn-correct" id="btn-self-correct">⭕ 合っていた！</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  const handleChoice = (isCorrect) => {
+    overlay.remove();
+    if (isCorrect) {
+      score++;
+      playCorrectSound();
+      celebrate(false);
+    }
+    nextQuestion();
+  };
+
+  overlay.querySelector("#btn-self-correct").addEventListener("click", () => handleChoice(true));
+  overlay.querySelector("#btn-self-wrong").addEventListener("click", () => handleChoice(false));
+}
+
+/* 完走モーダル */
+function showCompletionModal() {
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+
+  overlay.innerHTML = `
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-title celebrate">🎉 おつかれさまでした！</div>
+      <div style="font-size:20px; font-weight:800; color:#f2f4f8; margin:14px 0 8px;">
+        セット ${currentSetIndex} 完了！
+      </div>
+      <div style="color:#adb5c4; font-size:15px; line-height:1.6; margin-bottom:20px;">
+        トレー二ングを完走しました！<br>
+        最終結果:
+        <strong style="color:#34d399; font-size:26px;">
+          ${score} / ${TOTAL}
+        </strong>
+        問正解
+      </div>
+      <button class="modal-button btn-primary" id="modal-result-btn" style="width:100%;">結果画面へ</button>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  playCorrectSound();
+  celebrate(true);
+
+  overlay.querySelector("#modal-result-btn").addEventListener("click", () => {
+    overlay.remove();
+    showResult();
+  });
+}
+
+/* 次の問題へ */
+function nextQuestion() {
+  current++;
+  if (current >= TOTAL) {
+    showCompletionModal();
+  } else {
+    renderQuestion();
+  }
+}
+
+/* 結果画面 */
+function showResult() {
+  const percent = Math.round((score / TOTAL) * 100);
+
+  const message =
+    percent === 100
+      ? "🏆 パーフェクト！理科マスターだね！"
+      : percent >= 80
+      ? "🌟 よくできました！素晴らしい知識！"
+      : percent >= 50
+      ? "👏 がんばったね！繰り返し復習しよう！"
+      : "💪 何度もチャレンジして覚えよう！";
+
+  document.getElementById("screen").innerHTML = `
+    <div class="result">
+      <h1>セット ${currentSetIndex} 終了！</h1>
+      <div class="score">${score} / ${TOTAL}</div>
+      <div class="subtitle">正解率 ${percent}%</div>
+      <p>${message}</p>
+      <button id="btn-restart" class="btn-primary">もう一度同じセットを挑戦</button>
+      <button id="btn-end" class="btn-secondary">セット選択にもどる</button>
+    </div>
+  `;
+
+  document.getElementById("btn-restart").addEventListener("click", () => {
+    initAudio();
+    startGame(currentSetIndex);
+  });
+
+  document.getElementById("btn-end").addEventListener("click", () => {
+    initAudio();
+    showStart();
+  });
+}
+
+/* 初期表示 */
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", showStart);
+} else {
+  showStart();
+}
+</script>
+
+</body>
+</html>
