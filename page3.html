@@ -29,159 +29,116 @@ body {
   touch-action: manipulation;
 }
 
-/* ========================================
-   ハンバーガーメニュー
-======================================== */
-
-.menu-button {
+/* ハンバーガーボタン & サイドバー用スタイル */
+.hamburger-btn {
   position: fixed;
-  top: 18px;
-  left: 18px;
-  z-index: 1200;
-
-  width: 48px;
-  height: 48px;
-
-  border: 1px solid #394252;
-  border-radius: 14px;
-  background: #191e27;
-  color: #f2f4f8;
-
+  top: 12px;
+  left: 12px;
+  z-index: 1000;
+  width: 44px;
+  height: 44px;
+  background: rgba(24, 29, 40, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 5px;
-
   cursor: pointer;
-  box-shadow: 0 6px 20px rgba(0,0,0,.35);
-
-  transition: background .15s ease, transform .15s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: transform 0.2s, background-color 0.2s;
 }
-
-.menu-button:hover {
-  background: #252c37;
-}
-
-.menu-button:active {
-  transform: scale(.95);
-}
-
-.menu-button span {
-  display: block;
-  width: 22px;
+.hamburger-btn:active { transform: scale(0.95); }
+.hamburger-bar {
+  width: 20px;
   height: 2px;
+  background-color: var(--text);
   border-radius: 2px;
-  background: #f2f4f8;
-  transition: transform .2s ease, opacity .2s ease;
+  transition: all 0.3s ease;
 }
 
-/* メニューが開いているとき */
-.menu-button.open span:nth-child(1) {
-  transform: translateY(7px) rotate(45deg);
-}
-
-.menu-button.open span:nth-child(2) {
+/* サイドバー オーバーレイ */
+.sidebar-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1001;
   opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
+.sidebar-overlay.active { opacity: 1; visibility: visible; }
 
-.menu-button.open span:nth-child(3) {
-  transform: translateY(-7px) rotate(-45deg);
-}
-
-/* サイドバー */
+/* サイドバー本体 */
 .sidebar {
   position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 1100;
-
-  width: min(320px, 85vw);
+  top: 0; left: 0;
+  width: min(280px, 80vw);
   height: 100vh;
-
-  background: #191e27;
-  border-right: 1px solid #2d3442;
-
-  padding: 84px 18px 24px;
-
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  z-index: 1002;
   transform: translateX(-100%);
-  transition: transform .25s ease;
-
-  box-shadow: 18px 0 50px rgba(0,0,0,.45);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+  overflow-y: auto;
 }
-
-.sidebar.open {
-  transform: translateX(0);
+.sidebar.active { transform: translateX(0); }
+.sidebar-header {
+  padding: 20px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
-
 .sidebar-title {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 800;
-  margin: 0 8px 18px;
-  color: #ffffff;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-
-.sidebar-menu {
+.sidebar-close {
+  background: transparent;
+  border: none;
+  color: var(--sub);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+}
+.sidebar-nav {
+  padding: 16px 12px;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
-
 .sidebar-link {
-  display: block;
-
-  padding: 14px 16px;
-
-  border: 1px solid #303847;
-  border-radius: 12px;
-
-  background: #252c37;
-  color: #e8ebf2;
-
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  color: var(--text);
   text-decoration: none;
-  font-size: 15px;
-  font-weight: 700;
-
-  transition:
-    background .15s ease,
-    border-color .15s ease,
-    transform .15s ease;
+  border-radius: 10px;
+  background: var(--panel-light);
+  border: 1px solid var(--border);
+  font-weight: 600;
+  font-size: 14px;
+  transition: background-color 0.2s, transform 0.1s, border-color 0.2s;
 }
-
 .sidebar-link:hover {
-  background: #303846;
-  border-color: #4a566d;
+  border-color: var(--accent);
+  background: rgba(101, 125, 255, 0.15);
 }
-
-.sidebar-link:active {
-  transform: scale(.98);
-}
-
-.sidebar-link.current {
-  background: #2b3450;
-  border-color: rgba(101,125,255,.5);
-  color: #b9c5ff;
-}
-
-/* サイドバー展開時の背景 */
-.menu-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1050;
-
-  background: rgba(0,0,0,.55);
-  backdrop-filter: blur(2px);
-
-  opacity: 0;
-  visibility: hidden;
-
-  transition: opacity .25s ease, visibility .25s ease;
-}
-
-.menu-overlay.open {
-  opacity: 1;
-  visibility: visible;
-}
+.sidebar-link:active { transform: scale(0.98); }
+.sidebar-link-icon { font-size: 18px; }
 
 /* ========================================
    メインアプリ
