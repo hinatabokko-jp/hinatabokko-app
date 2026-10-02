@@ -2,7 +2,6 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<!-- STREAMING_CHUNK:Configuring viewport and document head... -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>社会科トレーニング</title>
   
@@ -10,7 +9,6 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
 <style>
-/* STREAMING_CHUNK:Styling base and layout elements... */
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -79,7 +77,6 @@ body {
   transition: transform .2s ease, opacity .2s ease;
 }
 
-/* メニューが開いているとき */
 .menu-button.open span:nth-child(1) {
   transform: translateY(7px) rotate(45deg);
 }
@@ -92,7 +89,6 @@ body {
   transform: translateY(-7px) rotate(-45deg);
 }
 
-/* サイドバー */
 .sidebar {
   position: fixed;
   top: 0;
@@ -166,7 +162,6 @@ body {
   color: #b9c5ff;
 }
 
-/* サイドバー展開時の背景 */
 .menu-overlay {
   position: fixed;
   inset: 0;
@@ -190,7 +185,6 @@ body {
    メインアプリ
 ======================================== */
 
-/* STREAMING_CHUNK:Styling main app container and problem display... */
 .app {
   width: min(800px, 100%);
   background: #191e27;
@@ -260,7 +254,6 @@ h1 {
   border: 1px solid rgba(147,197,253,0.2);
 }
 
-/* 問題文ボックス */
 .problem-box {
   background: #212836;
   border: 1px solid #343e52;
@@ -273,10 +266,9 @@ h1 {
   margin-bottom: 16px;
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
   text-align: center;
+  white-space: pre-wrap;
 }
 
-/* 手書き回答（キャンバス）エリア (iPad手書き最適化仕様) */
-/* STREAMING_CHUNK:Styling iPad-optimized handwriting canvas card... */
 .scratchpad-card {
   background: #141821;
   border: 1px solid #2e3648;
@@ -332,7 +324,6 @@ h1 {
   color: #fff;
 }
 
-/* iPadでの虫眼鏡・ズーム・スクロール防止スタイルの完全強化 */
 .scratchpad-container {
   width: 100%;
   height: 240px;
@@ -359,8 +350,6 @@ h1 {
   -webkit-touch-callout: none !important;
 }
 
-/* 答えを見るボタン */
-/* STREAMING_CHUNK:Styling action buttons and modals... */
 .show-answer-btn {
   display: block;
   width: 100%;
@@ -384,7 +373,6 @@ h1 {
   transform: translateY(2px);
 }
 
-/* モーダル */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -441,6 +429,7 @@ h1 {
   background: #222938;
   padding: 12px 16px;
   border-radius: 12px;
+  white-space: pre-wrap;
 }
 
 .modal-label {
@@ -450,7 +439,7 @@ h1 {
 }
 
 .modal-answer {
-  font-size: clamp(32px, 8vw, 44px);
+  font-size: clamp(24px, 6vw, 36px);
   font-weight: 900;
   line-height: 1.3;
   color: #60a5fa;
@@ -505,7 +494,6 @@ h1 {
   margin-bottom: 20px;
 }
 
-/* セット選択グリッド */
 .set-selection-title {
   font-size: 16px;
   font-weight: 700;
@@ -676,19 +664,15 @@ h1 {
   </div>
 </nav>
 
-<!-- サイドバーの背景 -->
 <div id="menu-overlay" class="menu-overlay"></div>
 
-<!-- メインアプリ -->
 <div class="app">
   <div id="screen"></div>
 </div>
 
 <script>
-/* STREAMING_CHUNK:Initializing global state and audio functions... */
 let audioCtx = null;
 
-/* ハンバーガーメニューの操作 */
 const menuButton = document.getElementById("menu-button");
 const sidebar = document.getElementById("sidebar");
 const menuOverlay = document.getElementById("menu-overlay");
@@ -712,7 +696,6 @@ function closeMenu() {
 menuButton.addEventListener("click", toggleMenu);
 menuOverlay.addEventListener("click", closeMenu);
 
-/* オーディオ処理 */
 function initAudio() {
   if (!audioCtx) {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -768,11 +751,10 @@ function playCorrectSound() {
   } catch (e) {}
 }
 
-/* 問題データの定義（全16問 / 8問ずつ2セット構成） */
-/* STREAMING_CHUNK:Defining questions and dataset... */
+/* アップロードされたテキストファイルから読み込んだ問題データ（1セット10問ずつ構成） */
 const questionData = [
   // --- セット 1 ---
-  { id: 1, set: 1, mondai: "地球上で、北の方角のいちばん端にある地点を何というでしょう。", kotae: "北極" },
+  { id: 1, set: 1, mondai: "地球上で、北の方角のいちばん端にある地点を何といいますか。", kotae: "北極" },
   { id: 2, set: 1, mondai: "地球上で、南の方角の端にある地点を何というでしょう。", kotae: "南極" },
   { id: 3, set: 1, mondai: "地球を北半球と南半球に分ける、地球の真ん中を一周する線を何といいますか。", kotae: "赤道" },
   { id: 4, set: 1, mondai: "赤道と平行に、地球を東西に一周する線を何といいますか。", kotae: "緯線" },
@@ -780,22 +762,48 @@ const questionData = [
   { id: 6, set: 1, mondai: "季節によって、決まった方向からふく風を何といいますか。", kotae: "季節風" },
   { id: 7, set: 1, mondai: "ヨーロッパとアジアにまたがる、世界で最も大きな大陸を何といいますか。", kotae: "ユーラシア大陸" },
   { id: 8, set: 1, mondai: "北海道の北東にあり、日本で最も北に位置する島を何といいますか。", kotae: "択捉島（えとろふとう）" },
+  { id: 9, set: 1, mondai: "日本の最も西に位置する島を何といいますか。", kotae: "与那国島（よなぐにじま）" },
+  { id: 10, set: 1, mondai: "日本の最も東に位置する島を何といいますか。", kotae: "南鳥島（みなみとりしま）" },
 
   // --- セット 2 ---
-  { id: 9, set: 2, mondai: "日本の最も西に位置する島を何といいますか。", kotae: "与那国島" },
-  { id: 10, set: 2, mondai: "日本の最も東に位置する島を何といいますか。", kotae: "南鳥島（みなみとりしま）" },
-  { id: 11, set: 2, mondai: "日本の最も南に位置する島を何といいますか。", kotae: "沖ノ鳥島" },
-  { id: 12, set: 2, mondai: "イギリスのロンドンを通る本初子午線を基準とした経度を何といいますか。", kotae: "経度0度" },
-  { id: 13, set: 2, mondai: "日本が標準時（日本の基準となる時間）の基準としている兵庫県明石市を通る経線は東経何度ですか。", kotae: "東経135度" },
-  { id: 14, set: 2, mondai: "周囲を太平洋や日本海などの海に囲まれている日本のような国を何といいますか。", kotae: "島国（海洋国）" },
-  { id: 15, set: 2, mondai: "陸地が海に突き出た部分のことを何といいますか。", kotae: "半島" },
-  { id: 16, set: 2, mondai: "川が山から平野に出るところにできる、扇の形をした地形を何といいますか。", kotae: "扇状地" }
+  { id: 11, set: 2, mondai: "日本の最も南に位置する島を何といいますか。", kotae: "沖ノ鳥島（おきのとりしま）" },
+  { id: 12, set: 2, mondai: "日本は国土の（  分の  ）が山地である。", kotae: "４分の３" },
+  { id: 13, set: 2, mondai: "川の下流や海沿いには（   ）が広がっている。", kotae: "平野（へいや）" },
+  { id: 14, set: 2, mondai: "季節によって決まった方向から吹く季節風の影響で、太平洋側では（ ① ）に雨が多く、日本海側では（ ② ）に雪が多く降る。", kotae: "①夏、②冬" },
+  { id: 15, set: 2, mondai: "日本の気候は、大きく６つの気候に分けられる。\n・北海道の気候：冬の寒さが厳しい。\n・太平洋側の気候：夏は蒸し暑く、冬は雨が少ない。\n・日本海側の気候：冬に雪が多い。\n・（ ① ）の気候：１年を通して雨が少なく、夏と冬の気温の差が大きい。\n・（ ② ）の気候：１年を通して雨が少なく、晴れた日が多い。\n・南西諸島の気候：１年中あたたかく、夏に（ ③ ）が多い。", kotae: "①中央高地,②瀬戸内,③台風" },
+  { id: 16, set: 2, mondai: "周りを堤防（ていぼう）で囲まれた低い土地を（   ）という。", kotae: "輪中（わじゅう）" },
+  { id: 17, set: 2, mondai: "輪中の地域では、昔から土地を高くして家を建てたり、（   ）をつくったりするなど、水害に備えた工夫をしてきた。", kotae: "水屋（みずや）" },
+  { id: 18, set: 2, mondai: "家や水屋の軒下（のきした）などには、家が水につかったときに使えるように小舟を用意していた。これを（   ）という。", kotae: "上げ舟（あげぶね）" },
+  { id: 19, set: 2, mondai: "海津市には、水害に備えて（ ① ）などの施設や設備がある。また、人々は協力して（ ② ）などを行っている。", kotae: "①排水機場,②水防演習" },
+  { id: 20, set: 2, mondai: "沖縄県では、厚さや（   ）に備えて家の作りを工夫している。", kotae: "台風" },
+
+  // --- セット 3 ---
+  { id: 21, set: 3, mondai: "沖縄県では、地形の特徴から（ ① ）になりやすいので、屋根の上に（ ② ）を置いて備えている家がある。", kotae: "①水不足,②貯水タンク" },
+  { id: 22, set: 3, mondai: "沖縄県で一番 作付面積（さくつけめんせき）の広い農産物は（   ）。", kotae: "さとうきび" },
+  { id: 23, set: 3, mondai: "沖縄県には、アメリカ軍の（   ）が多くある。", kotae: "軍用地" },
+  { id: 24, set: 3, mondai: "北海道では、冬のきびしい寒さに備えて、家の窓を（ ① ）にしたり、家の外に（ ② ）を置いたりなどの工夫をしている。", kotae: "①二重窓（にじゅうまど）,②灯油タンク" },
+  { id: 25, set: 3, mondai: "新潟県では、雪に備えて、道路には（ ① ）や（ ② ）などの工夫をしている。", kotae: "①消雪パイプ,②流雪溝（りゅうせつこう）" },
+  { id: 26, set: 3, mondai: "長野県野辺山原（のべやまはら）では、夏の涼しい気候を生かして、（   ）づくりが盛んに行われている。", kotae: "レタス" },
+  { id: 27, set: 3, mondai: "高く売るために、ふつうにとれる時期より成長を遅らせ、遅く出荷する栽培の仕方を（ 0 ）という。", kotae: "抑制栽培（よくせいさいばい）" },
+  { id: 28, set: 3, mondai: "高く売るために、成長を早めて、早く出荷する栽培のしかたを（    ）という。", kotae: "促成栽培（そくせいさいばい）" },
+  { id: 29, set: 3, mondai: "田の区画を広くして形を整え、用水路や排水路を整備することを（   ）という。", kotae: "耕地整理、もしくは、圃場整備(ほじょうせいび）" },
+  { id: 30, set: 3, mondai: "品種とは、米などの種類のこと。良い性質をもった品種と品種をかけあわせて、新しい品種を作りだすことを（    ）という。", kotae: "品種改良（ひんしゅかいりょう）" },
+
+  // --- セット 4 ---
+  { id: 31, set: 4, mondai: "地域で収穫された米の多くは、（     ）とよばれる倉庫に集められ、乾燥させて低温でおいしいまま保管される。そこから全国へ出荷され、わたしたちのもとへ届けられる。", kotae: "カントリーエレベーター" },
+  { id: 32, set: 4, mondai: "化学肥料のかわりに（   ）を使うと、土が固くなりにくい。", kotae: "堆肥（たいひ）" },
+  { id: 33, set: 4, mondai: "米作りについて。春になると（ ① ）を使って田の土を耕す（ ② ）と、他に水を入れて土を砕いてならす（ ③ ）がおこなわれる。", kotae: "①トラクター,②田おこし,代かき（しろかき）" },
+  { id: 34, set: 4, mondai: "米作りの作業をしやすくするために、田の区画を広くし、形を整える（ ① ）を行っている。その結果、以前より大型で性能のよい（ ② ）を使えるようになったり、（ ③ ）の管理がしやすくなったりした。", kotae: "①耕地整理(ほ場整備）,②機械,③水" },
+  { id: 35, set: 4, mondai: "寒さや病気に強く、味の良い品質の稲を作るために、農業試験場では（   ）を行っている。", kotae: "品種改良" },
+  { id: 36, set: 4, mondai: "稲を病気や害虫から守り生長を助けるために、（_① ）や（ ② ）が使われている。", kotae: "①農薬,②化学肥料" },
+  { id: 37, set: 4, mondai: "農薬や化学肥料を使い過ぎないように、（ ① ）を使ったり、（ ② ）を田に放したりする工夫がおこなわれている。また、米袋に農薬や化学肥料の量をおさえて生産したことを表示して、消費者に伝える工夫をしている。", kotae: "①堆肥（たいひ）,②アイガモ" },
+  { id: 38, set: 4, mondai: "食生活が変わって、米の消費量が減り、米が余るようになった。米を余らせないようにするために、国は田を減らし、米以外の作物をつくる（   ）を進めるなど、米の生産調整を行ってきた。", kotae: "転作" }
 ];
 
-const QUESTIONS_PER_SET = 8;
+const QUESTIONS_PER_SET = 10;
 let currentSetIndex = 1;
 let questions = [];
-let TOTAL = 8;
+let TOTAL = 10;
 let current = 0;
 let score = 0;
 let scratchpadInstance = null;
@@ -809,8 +817,7 @@ function shuffle(array) {
   return result;
 }
 
-/* 手書きキャンバス (Scratchpad) クラス：iPadの虫眼鏡・ルーペ防止策を強化 */
-/* STREAMING_CHUNK:Implementing Scratchpad class with iPad magnify prevention... */
+/* 手書きキャンバス (Scratchpad) クラス */
 class Scratchpad {
   constructor(canvasEl) {
     this.canvas = canvasEl;
@@ -912,33 +919,28 @@ class Scratchpad {
   }
 
   bindEvents() {
-    // iPad Safariでの長押し・虫眼鏡モードを完璧に阻止するため touchstart/touchmove を非パッシブ登録
     const opts = { passive: false };
 
     const preventAll = (e) => {
       if (e.cancelable) e.preventDefault();
     };
 
-    // タッチイベントのダイレクトハンドリング
     this.canvas.addEventListener("touchstart", (e) => this.startDrawing(e), opts);
     this.canvas.addEventListener("touchmove", (e) => this.draw(e), opts);
     this.canvas.addEventListener("touchend", (e) => this.stopDrawing(e), opts);
     this.canvas.addEventListener("touchcancel", (e) => this.stopDrawing(e), opts);
 
-    // ポインターイベントのフォールバック
     this.canvas.addEventListener("pointerdown", (e) => this.startDrawing(e), opts);
     this.canvas.addEventListener("pointermove", (e) => this.draw(e), opts);
     this.canvas.addEventListener("pointerup", (e) => this.stopDrawing(e), opts);
     this.canvas.addEventListener("pointercancel", (e) => this.stopDrawing(e), opts);
 
-    // テキスト選択・コンテキストメニュー等（虫眼鏡トリガー）を強制停止
     this.canvas.addEventListener("contextmenu", preventAll);
     this.canvas.addEventListener("selectstart", preventAll);
   }
 }
 
-/* スタート画面（8問ずつのセット選択） */
-/* STREAMING_CHUNK:Rendering start screen... */
+/* スタート画面 */
 function showStart() {
   const totalSets = Math.ceil(questionData.length / QUESTIONS_PER_SET);
   
@@ -971,7 +973,6 @@ function showStart() {
     </div>
   `;
 
-  // セットカードのクリックイベントを設定
   document.querySelectorAll(".set-card").forEach(card => {
     card.addEventListener("click", () => {
       const selectedSet = parseInt(card.getAttribute("data-set"), 10);
@@ -993,7 +994,6 @@ function startGame(setNum = 1) {
 }
 
 /* 問題表示 */
-/* STREAMING_CHUNK:Rendering problem screen with scratchpad... */
 function renderQuestion() {
   const q = questions[current];
 
@@ -1012,11 +1012,9 @@ function renderQuestion() {
       <span class="category">地理・社会用語</span>
     </div>
 
-    <div class="problem-box">
-      ${q.mondai}
-    </div>
+    <div class="problem-box">${q.mondai}</div>
 
-    <!-- 手書き回答エリア (iPad最適化) -->
+    <!-- 手書き回答エリア -->
     <div class="scratchpad-card">
       <div class="scratchpad-header">
         <div class="scratchpad-title">
@@ -1067,7 +1065,6 @@ function renderQuestion() {
   });
 }
 
-/* 正解の紙吹雪演出 */
 function celebrate(isLarge = false) {
   if (typeof confetti === "function") {
     try {
@@ -1101,7 +1098,6 @@ function celebrate(isLarge = false) {
 }
 
 /* 答え合わせモーダル表示 */
-/* STREAMING_CHUNK:Handling modals and game state progression... */
 function showAnswerModal() {
   const q = questions[current];
   const overlay = document.createElement("div");
@@ -1175,7 +1171,6 @@ function showCompletionModal() {
   });
 }
 
-/* 次の問題へ */
 function nextQuestion() {
   current++;
   if (current >= TOTAL) {
@@ -1220,7 +1215,6 @@ function showResult() {
   });
 }
 
-/* 初期表示 */
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", showStart);
 } else {
@@ -1230,4 +1224,3 @@ if (document.readyState === "loading") {
 
 </body>
 </html>
-```eof
