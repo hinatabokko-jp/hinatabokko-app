@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+<!-- STREAMING_CHUNK:Configuring viewport and document head... -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>社会科トレーニング</title>
   
@@ -9,11 +10,13 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
 <style>
+/* STREAMING_CHUNK:Styling base and layout elements... */
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 body {
@@ -187,6 +190,7 @@ body {
    メインアプリ
 ======================================== */
 
+/* STREAMING_CHUNK:Styling main app container and problem display... */
 .app {
   width: min(800px, 100%);
   background: #191e27;
@@ -271,7 +275,8 @@ h1 {
   text-align: center;
 }
 
-/* 手書き回答（キャンバス）エリア (目・身体にやさしいダーク仕様) */
+/* 手書き回答（キャンバス）エリア (iPad手書き最適化仕様) */
+/* STREAMING_CHUNK:Styling iPad-optimized handwriting canvas card... */
 .scratchpad-card {
   background: #141821;
   border: 1px solid #2e3648;
@@ -281,6 +286,7 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  touch-action: none;
 }
 
 .scratchpad-header {
@@ -326,7 +332,7 @@ h1 {
   color: #fff;
 }
 
-/* 目にやさしい暗めの背景色に更新 */
+/* iPadでの虫眼鏡・ズーム・スクロール防止スタイルの完全強化 */
 .scratchpad-container {
   width: 100%;
   height: 240px;
@@ -335,18 +341,26 @@ h1 {
   border-radius: 12px;
   position: relative;
   overflow: hidden;
-  touch-action: none;
+  touch-action: none !important;
   cursor: crosshair;
   box-shadow: inset 0 2px 6px rgba(0,0,0,0.25);
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
 }
 
 .scratchpad-canvas {
   width: 100%;
   height: 100%;
   display: block;
+  touch-action: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
 }
 
 /* 答えを見るボタン */
+/* STREAMING_CHUNK:Styling action buttons and modals... */
 .show-answer-btn {
   display: block;
   width: 100%;
@@ -653,10 +667,7 @@ h1 {
     <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/page2">
       計算トレーニング
     </a>
-    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/page3">
-      理科トレーニング
-    </a>
-    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/page1">
+    <a class="sidebar-link current" href="#">
       社会科トレーニング
     </a>
     <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/page4">
@@ -674,6 +685,7 @@ h1 {
 </div>
 
 <script>
+/* STREAMING_CHUNK:Initializing global state and audio functions... */
 let audioCtx = null;
 
 /* ハンバーガーメニューの操作 */
@@ -757,6 +769,7 @@ function playCorrectSound() {
 }
 
 /* 問題データの定義（全16問 / 8問ずつ2セット構成） */
+/* STREAMING_CHUNK:Defining questions and dataset... */
 const questionData = [
   // --- セット 1 ---
   { id: 1, set: 1, mondai: "地球上で、北の方角のいちばん端にある地点を何というでしょう。", kotae: "北極" },
@@ -796,7 +809,8 @@ function shuffle(array) {
   return result;
 }
 
-/* 手書きキャンバス (Scratchpad) クラス */
+/* 手書きキャンバス (Scratchpad) クラス：iPadの虫眼鏡・ルーペ防止策を強化 */
+/* STREAMING_CHUNK:Implementing Scratchpad class with iPad magnify prevention... */
 class Scratchpad {
   constructor(canvasEl) {
     this.canvas = canvasEl;
@@ -805,6 +819,7 @@ class Scratchpad {
     this.mode = "pen";
     this.lastX = 0;
     this.lastY = 0;
+    this.activePointerId = null;
     this.initCanvas();
     this.bindEvents();
   }
@@ -830,16 +845,30 @@ class Scratchpad {
     const rect = this.canvas.getBoundingClientRect();
     let clientX = e.clientX;
     let clientY = e.clientY;
+
     if (e.touches && e.touches.length > 0) {
       clientX = e.touches[0].clientX;
       clientY = e.touches[0].clientY;
+    } else if (e.changedTouches && e.changedTouches.length > 0) {
+      clientX = e.changedTouches[0].clientX;
+      clientY = e.changedTouches[0].clientY;
     }
+
     return { x: clientX - rect.left, y: clientY - rect.top };
   }
 
   startDrawing(e) {
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
+    if (e.stopPropagation) e.stopPropagation();
+
     this.isDrawing = true;
+    if (e.pointerId !== undefined && this.canvas.setPointerCapture) {
+      try {
+        this.canvas.setPointerCapture(e.pointerId);
+        this.activePointerId = e.pointerId;
+      } catch (err) {}
+    }
+
     const pos = this.getPos(e);
     this.lastX = pos.x;
     this.lastY = pos.y;
@@ -847,7 +876,9 @@ class Scratchpad {
 
   draw(e) {
     if (!this.isDrawing) return;
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
+    if (e.stopPropagation) e.stopPropagation();
+
     const pos = this.getPos(e);
     this.ctx.beginPath();
     this.ctx.moveTo(this.lastX, this.lastY);
@@ -855,7 +886,6 @@ class Scratchpad {
 
     if (this.mode === "pen") {
       this.ctx.globalCompositeOperation = "source-over";
-      // 暗めの背景で見やすい白・明色ペンの指定
       this.ctx.strokeStyle = "#f8fafc";
       this.ctx.lineWidth = 4;
     } else {
@@ -868,19 +898,47 @@ class Scratchpad {
     this.lastY = pos.y;
   }
 
-  stopDrawing() {
+  stopDrawing(e) {
+    if (!this.isDrawing) return;
+    if (e && e.cancelable) e.preventDefault();
+    
     this.isDrawing = false;
+    if (this.activePointerId !== null && this.canvas.releasePointerCapture) {
+      try {
+        this.canvas.releasePointerCapture(this.activePointerId);
+      } catch (err) {}
+      this.activePointerId = null;
+    }
   }
 
   bindEvents() {
-    this.canvas.addEventListener("pointerdown", (e) => this.startDrawing(e));
-    this.canvas.addEventListener("pointermove", (e) => this.draw(e));
-    this.canvas.addEventListener("pointerup", () => this.stopDrawing());
-    this.canvas.addEventListener("pointerleave", () => this.stopDrawing());
+    // iPad Safariでの長押し・虫眼鏡モードを完璧に阻止するため touchstart/touchmove を非パッシブ登録
+    const opts = { passive: false };
+
+    const preventAll = (e) => {
+      if (e.cancelable) e.preventDefault();
+    };
+
+    // タッチイベントのダイレクトハンドリング
+    this.canvas.addEventListener("touchstart", (e) => this.startDrawing(e), opts);
+    this.canvas.addEventListener("touchmove", (e) => this.draw(e), opts);
+    this.canvas.addEventListener("touchend", (e) => this.stopDrawing(e), opts);
+    this.canvas.addEventListener("touchcancel", (e) => this.stopDrawing(e), opts);
+
+    // ポインターイベントのフォールバック
+    this.canvas.addEventListener("pointerdown", (e) => this.startDrawing(e), opts);
+    this.canvas.addEventListener("pointermove", (e) => this.draw(e), opts);
+    this.canvas.addEventListener("pointerup", (e) => this.stopDrawing(e), opts);
+    this.canvas.addEventListener("pointercancel", (e) => this.stopDrawing(e), opts);
+
+    // テキスト選択・コンテキストメニュー等（虫眼鏡トリガー）を強制停止
+    this.canvas.addEventListener("contextmenu", preventAll);
+    this.canvas.addEventListener("selectstart", preventAll);
   }
 }
 
 /* スタート画面（8問ずつのセット選択） */
+/* STREAMING_CHUNK:Rendering start screen... */
 function showStart() {
   const totalSets = Math.ceil(questionData.length / QUESTIONS_PER_SET);
   
@@ -935,6 +993,7 @@ function startGame(setNum = 1) {
 }
 
 /* 問題表示 */
+/* STREAMING_CHUNK:Rendering problem screen with scratchpad... */
 function renderQuestion() {
   const q = questions[current];
 
@@ -957,7 +1016,7 @@ function renderQuestion() {
       ${q.mondai}
     </div>
 
-    <!-- 手書き回答エリア (ダーク背景) -->
+    <!-- 手書き回答エリア (iPad最適化) -->
     <div class="scratchpad-card">
       <div class="scratchpad-header">
         <div class="scratchpad-title">
@@ -1042,6 +1101,7 @@ function celebrate(isLarge = false) {
 }
 
 /* 答え合わせモーダル表示 */
+/* STREAMING_CHUNK:Handling modals and game state progression... */
 function showAnswerModal() {
   const q = questions[current];
   const overlay = document.createElement("div");
@@ -1093,7 +1153,7 @@ function showCompletionModal() {
         セット ${currentSetIndex} 完了！
       </div>
       <div style="color:#adb5c4; font-size:15px; line-height:1.6; margin-bottom:20px;">
-        トレー二ングを完走しました！<br>
+        トレーニングを完走しました！<br>
         最終結果:
         <strong style="color:#60a5fa; font-size:26px;">
           ${score} / ${TOTAL}
@@ -1170,3 +1230,4 @@ if (document.readyState === "loading") {
 
 </body>
 </html>
+```eof
