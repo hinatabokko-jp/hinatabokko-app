@@ -30,33 +30,25 @@ body {
   touch-action: manipulation;
 }
 
-/* ========================================
-   ハンバーガーメニュー
-======================================== */
-
+/* ハンバーガーメニュー */
 .menu-button {
   position: fixed;
   top: 18px;
   left: 18px;
   z-index: 1200;
-
   width: 48px;
   height: 48px;
-
   border: 1px solid #394252;
   border-radius: 14px;
   background: #191e27;
   color: #f2f4f8;
-
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 5px;
-
   cursor: pointer;
   box-shadow: 0 6px 20px rgba(0,0,0,.35);
-
   transition: background .15s ease, transform .15s ease;
 }
 
@@ -94,18 +86,13 @@ body {
   top: 0;
   left: 0;
   z-index: 1100;
-
   width: min(320px, 85vw);
   height: 100vh;
-
   background: #191e27;
   border-right: 1px solid #2d3442;
-
   padding: 84px 18px 24px;
-
   transform: translateX(-100%);
   transition: transform .25s ease;
-
   box-shadow: 18px 0 50px rgba(0,0,0,.45);
 }
 
@@ -128,23 +115,15 @@ body {
 
 .sidebar-link {
   display: block;
-
   padding: 14px 16px;
-
   border: 1px solid #303847;
   border-radius: 12px;
-
   background: #252c37;
   color: #e8ebf2;
-
   text-decoration: none;
   font-size: 15px;
   font-weight: 700;
-
-  transition:
-    background .15s ease,
-    border-color .15s ease,
-    transform .15s ease;
+  transition: background .15s ease, border-color .15s ease, transform .15s ease;
 }
 
 .sidebar-link:hover {
@@ -166,13 +145,10 @@ body {
   position: fixed;
   inset: 0;
   z-index: 1050;
-
   background: rgba(0,0,0,.55);
   backdrop-filter: blur(2px);
-
   opacity: 0;
   visibility: hidden;
-
   transition: opacity .25s ease, visibility .25s ease;
 }
 
@@ -181,10 +157,7 @@ body {
   visibility: visible;
 }
 
-/* ========================================
-   メインアプリ
-======================================== */
-
+/* メインアプリ */
 .app {
   width: min(800px, 100%);
   background: #191e27;
@@ -439,13 +412,14 @@ h1 {
 }
 
 .modal-answer {
-  font-size: clamp(24px, 6vw, 36px);
+  font-size: clamp(22px, 5vw, 32px);
   font-weight: 900;
-  line-height: 1.3;
+  line-height: 1.4;
   color: #60a5fa;
   margin: 10px 0 24px;
   letter-spacing: .04em;
   word-break: break-all;
+  white-space: pre-wrap;
 }
 
 .modal-choices {
@@ -751,17 +725,17 @@ function playCorrectSound() {
   } catch (e) {}
 }
 
-/* アップロードされたテキストファイルから読み込んだ問題データ（1セット10問ずつ構成） */
+/* アップロードされたテキストファイルに基づく問題データ（全38問／1セット10問ずつ構成） */
 const questionData = [
   // --- セット 1 ---
-  { id: 1, set: 1, mondai: "地球上で、北の方角のいちばん端にある地点を何といいますか。", kotae: "北極" },
-  { id: 2, set: 1, mondai: "地球上で、南の方角の端にある地点を何というでしょう。", kotae: "南極" },
-  { id: 3, set: 1, mondai: "地球を北半球と南半球に分ける、地球の真ん中を一周する線を何といいますか。", kotae: "赤道" },
-  { id: 4, set: 1, mondai: "赤道と平行に、地球を東西に一周する線を何といいますか。", kotae: "緯線" },
-  { id: 5, set: 1, mondai: "北極と南極を結ぶように、地球を南北に一周する線を何といいますか。", kotae: "経線" },
+  { id: 1, set: 1, mondai: "地球上で、\n北の方角のいちばん端にある地点を何といいますか。", kotae: "北極" },
+  { id: 2, set: 1, mondai: "地球上で、\n南の方角の端にある地点を何というでしょう。", kotae: "南極" },
+  { id: 3, set: 1, mondai: "地球を北半球と南半球に分ける、\n地球の真ん中を一周する線を何といいますか。", kotae: "赤道" },
+  { id: 4, set: 1, mondai: "赤道と平行に、\n地球を東西に一周する線を何といいますか。", kotae: "緯線" },
+  { id: 5, set: 1, mondai: "北極と南極を結ぶように、\n地球を南北に一周する線を何といいますか。", kotae: "経線" },
   { id: 6, set: 1, mondai: "季節によって、決まった方向からふく風を何といいますか。", kotae: "季節風" },
-  { id: 7, set: 1, mondai: "ヨーロッパとアジアにまたがる、世界で最も大きな大陸を何といいますか。", kotae: "ユーラシア大陸" },
-  { id: 8, set: 1, mondai: "北海道の北東にあり、日本で最も北に位置する島を何といいますか。", kotae: "択捉島（えとろふとう）" },
+  { id: 7, set: 1, mondai: "ヨーロッパとアジアにまたがる、\n世界で最も大きな大陸を何といいますか。", kotae: "ユーラシア大陸" },
+  { id: 8, set: 1, mondai: "北海道の北東にあり、\n日本で最も北に位置する島を何といいますか。", kotae: "択捉島（えとろふとう）" },
   { id: 9, set: 1, mondai: "日本の最も西に位置する島を何といいますか。", kotae: "与那国島（よなぐにじま）" },
   { id: 10, set: 1, mondai: "日本の最も東に位置する島を何といいますか。", kotae: "南鳥島（みなみとりしま）" },
 
@@ -769,12 +743,12 @@ const questionData = [
   { id: 11, set: 2, mondai: "日本の最も南に位置する島を何といいますか。", kotae: "沖ノ鳥島（おきのとりしま）" },
   { id: 12, set: 2, mondai: "日本は国土の（  分の  ）が山地である。", kotae: "４分の３" },
   { id: 13, set: 2, mondai: "川の下流や海沿いには（   ）が広がっている。", kotae: "平野（へいや）" },
-  { id: 14, set: 2, mondai: "季節によって決まった方向から吹く季節風の影響で、太平洋側では（ ① ）に雨が多く、日本海側では（ ② ）に雪が多く降る。", kotae: "①夏、②冬" },
+  { id: 14, set: 2, mondai: "季節によって決まった方向から吹く季節風の影響で、\n太平洋側では（ ① ）に雨が多く、\n日本海側では（ ② ）に雪が多く降る。", kotae: "①夏、②冬" },
   { id: 15, set: 2, mondai: "日本の気候は、大きく６つの気候に分けられる。\n・北海道の気候：冬の寒さが厳しい。\n・太平洋側の気候：夏は蒸し暑く、冬は雨が少ない。\n・日本海側の気候：冬に雪が多い。\n・（ ① ）の気候：１年を通して雨が少なく、夏と冬の気温の差が大きい。\n・（ ② ）の気候：１年を通して雨が少なく、晴れた日が多い。\n・南西諸島の気候：１年中あたたかく、夏に（ ③ ）が多い。", kotae: "①中央高地,②瀬戸内,③台風" },
   { id: 16, set: 2, mondai: "周りを堤防（ていぼう）で囲まれた低い土地を（   ）という。", kotae: "輪中（わじゅう）" },
-  { id: 17, set: 2, mondai: "輪中の地域では、昔から土地を高くして家を建てたり、（   ）をつくったりするなど、水害に備えた工夫をしてきた。", kotae: "水屋（みずや）" },
-  { id: 18, set: 2, mondai: "家や水屋の軒下（のきした）などには、家が水につかったときに使えるように小舟を用意していた。これを（   ）という。", kotae: "上げ舟（あげぶね）" },
-  { id: 19, set: 2, mondai: "海津市には、水害に備えて（ ① ）などの施設や設備がある。また、人々は協力して（ ② ）などを行っている。", kotae: "①排水機場,②水防演習" },
+  { id: 17, set: 2, mondai: "輪中の地域では、昔から土地を高くして家を建てたり、\n（   ）をつくったりするなど、水害に備えた工夫をしてきた。", kotae: "水屋（みずや）" },
+  { id: 18, set: 2, mondai: "家や水屋の軒下（のきした）などには、\n家が水につかったときに使えるように小舟を用意していた。\nこれを（   ）という。", kotae: "上げ舟（あげぶね）" },
+  { id: 19, set: 2, mondai: "海津市には、水害に備えて（ ① ）などの施設や設備がある。\nまた、人々は協力して（ ② ）などを行っている。", kotae: "①排水機場,②水防演習" },
   { id: 20, set: 2, mondai: "沖縄県では、厚さや（   ）に備えて家の作りを工夫している。", kotae: "台風" },
 
   // --- セット 3 ---
@@ -784,20 +758,20 @@ const questionData = [
   { id: 24, set: 3, mondai: "北海道では、冬のきびしい寒さに備えて、家の窓を（ ① ）にしたり、家の外に（ ② ）を置いたりなどの工夫をしている。", kotae: "①二重窓（にじゅうまど）,②灯油タンク" },
   { id: 25, set: 3, mondai: "新潟県では、雪に備えて、道路には（ ① ）や（ ② ）などの工夫をしている。", kotae: "①消雪パイプ,②流雪溝（りゅうせつこう）" },
   { id: 26, set: 3, mondai: "長野県野辺山原（のべやまはら）では、夏の涼しい気候を生かして、（   ）づくりが盛んに行われている。", kotae: "レタス" },
-  { id: 27, set: 3, mondai: "高く売るために、ふつうにとれる時期より成長を遅らせ、遅く出荷する栽培の仕方を（ 0 ）という。", kotae: "抑制栽培（よくせいさいばい）" },
-  { id: 28, set: 3, mondai: "高く売るために、成長を早めて、早く出荷する栽培のしかたを（    ）という。", kotae: "促成栽培（そくせいさいばい）" },
+  { id: 27, set: 3, mondai: "高く売るために、ふつうにとれる時期より成長を遅らせ、遅く出荷する栽培の仕方を（    ）という。", kotae: "抑制栽培（よくせいさいばい）" },
+  { id: 28, set: 3, mondai: "高く売るために、成長を早めて、早く出荷する栽培のしかたを（    central）という。", kotae: "促成栽培（そくせいさいばい）" },
   { id: 29, set: 3, mondai: "田の区画を広くして形を整え、用水路や排水路を整備することを（   ）という。", kotae: "耕地整理、もしくは、圃場整備(ほじょうせいび）" },
   { id: 30, set: 3, mondai: "品種とは、米などの種類のこと。良い性質をもった品種と品種をかけあわせて、新しい品種を作りだすことを（    ）という。", kotae: "品種改良（ひんしゅかいりょう）" },
 
   // --- セット 4 ---
-  { id: 31, set: 4, mondai: "地域で収穫された米の多くは、（     ）とよばれる倉庫に集められ、乾燥させて低温でおいしいまま保管される。そこから全国へ出荷され、わたしたちのもとへ届けられる。", kotae: "カントリーエレベーター" },
+  { id: 31, set: 4, mondai: "地域で収穫された米の多くは、（     ）とよばれる倉庫に集められ、\n乾燥させて低温でおいしいまま保管される。\nそこから全国へ出荷され、わたしたちのもとへ届けられる。", kotae: "カントリーエレベーター" },
   { id: 32, set: 4, mondai: "化学肥料のかわりに（   ）を使うと、土が固くなりにくい。", kotae: "堆肥（たいひ）" },
-  { id: 33, set: 4, mondai: "米作りについて。春になると（ ① ）を使って田の土を耕す（ ② ）と、他に水を入れて土を砕いてならす（ ③ ）がおこなわれる。", kotae: "①トラクター,②田おこし,代かき（しろかき）" },
-  { id: 34, set: 4, mondai: "米作りの作業をしやすくするために、田の区画を広くし、形を整える（ ① ）を行っている。その結果、以前より大型で性能のよい（ ② ）を使えるようになったり、（ ③ ）の管理がしやすくなったりした。", kotae: "①耕地整理(ほ場整備）,②機械,③水" },
-  { id: 35, set: 4, mondai: "寒さや病気に強く、味の良い品質の稲を作るために、農業試験場では（   ）を行っている。", kotae: "品種改良" },
-  { id: 36, set: 4, mondai: "稲を病気や害虫から守り生長を助けるために、（_① ）や（ ② ）が使われている。", kotae: "①農薬,②化学肥料" },
-  { id: 37, set: 4, mondai: "農薬や化学肥料を使い過ぎないように、（ ① ）を使ったり、（ ② ）を田に放したりする工夫がおこなわれている。また、米袋に農薬や化学肥料の量をおさえて生産したことを表示して、消費者に伝える工夫をしている。", kotae: "①堆肥（たいひ）,②アイガモ" },
-  { id: 38, set: 4, mondai: "食生活が変わって、米の消費量が減り、米が余るようになった。米を余らせないようにするために、国は田を減らし、米以外の作物をつくる（   ）を進めるなど、米の生産調整を行ってきた。", kotae: "転作" }
+  { id: 33, set: 4, mondai: "米作りについて。春になると（ ① ）を使って田の土を耕す（ ②Active）と、\n他に水を入れて土を砕いてならす（ ③ ）がおこなわれる。", kotae: "①トラクター,②田おこし,③代かき（しろかき）" },
+  { id: 34, set: 4, mondai: "米作りの作業をしやすくするために、\n田の区画を広くし、形を整える（ ① ）を行っている。\nその結果、以前より大型で性能のよい（ ② ）を使えるようになったり、\n（ ③ ）の管理がしやすくなったりした。", kotae: "①耕地整理(ほ場整備）,②機械,③水" },
+  { id: 35, set: 4, mondai: "寒さや病気に強く、味の良い品質の稲を作るために、\n農業試験場では（   ）を行っている。", kotae: "品種改良" },
+  { id: 36, set: 4, mondai: "稲を病気や害虫から守り生長を助けるために、\n（ ① ）や（ ② ）が使われている。", kotae: "①農薬,②化学肥料" },
+  { id: 37, set: 4, mondai: "農薬や化学肥料を使い過ぎないように、（ ① ）を使ったり、\n（ ② ）を田に放したりする工夫がおこなわれている。\nまた、米袋に農薬や化学肥料の量をおさえて生産したことを表示して、\n消費者に伝える工夫をしている。", kotae: "①堆肥（たいひ）,②アイガモ" },
+  { id: 38, set: 4, mondai: "食生活が変わって、米の消費量が減り、米が余るようになった。\n米を余らせないようにするために、\n国は田を減らし、米以外の作物をつくる（   ）を進めるなど、米の生産調整を行ってきた。", kotae: "転作" }
 ];
 
 const QUESTIONS_PER_SET = 10;
@@ -1100,6 +1074,10 @@ function celebrate(isLarge = false) {
 /* 答え合わせモーダル表示 */
 function showAnswerModal() {
   const q = questions[current];
+  
+  // コンマ（,および，）の直後に改行を挿入して整形
+  const formattedAnswer = q.kotae.replace(/([,，])/g, "$1\n");
+
   const overlay = document.createElement("div");
   overlay.className = "modal-overlay";
 
@@ -1108,7 +1086,7 @@ function showAnswerModal() {
       <div class="modal-title">正解の確認</div>
       <div class="modal-problem">${q.mondai}</div>
       <div class="modal-label">正しい答え</div>
-      <div class="modal-answer">${q.kotae}</div>
+      <div class="modal-answer">${formattedAnswer}</div>
       
       <div style="font-size:14px; color:#adb5c4; margin-bottom:14px;">
         書いた答えは合っていましたか？
