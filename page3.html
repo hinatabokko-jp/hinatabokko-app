@@ -345,6 +345,7 @@ h1 {
   width: 100%;
   height: 100%;
   display: block;
+  touch-action: none;
 }
 
 /* 答えを見るボタン */
@@ -658,7 +659,7 @@ h1 {
     <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/page1">
       社会科トレーニング
     </a>
-    <a class="sidebar-link"  href="https://hinatabokko-jp.github.io/hinatabokko-app/page3">
+    <a class="sidebar-link current" href="https://hinatabokko-jp.github.io/hinatabokko-app/page3">
       理科トレーニング
     </a>
     <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/page4">
@@ -758,11 +759,11 @@ function playCorrectSound() {
   } catch (e) {}
 }
 
-/* 理科問題データの定義（アップロードされたテキストから全11問） */
+/* 理科問題データの定義（全11問） */
 const rawQuestions = [
-  { mondai: "０℃よりも低い気温の言い表し方", kotae: "マイナス, 零下, 氷点下" },
+  { mondai: "０℃よりも低い気温の言い表し方（３種類）", kotae: "マイナス, 零下, 氷点下" },
   { mondai: "夏の大三角形は、以下の３つの１等星を結んでできる。\n・こと座の（　　　）←織姫(おりひめ)星\n・わし座の（　　　）←彦星(ひこぼし)\n・はくちょう座の（　　　）", kotae: "ベガ、アルタイル、デネブ" },
-  { mondai: "冬の大三角形は、以下の３つの１等星を結んでできる。\n・オリオン座の（　　　）\n・こいぬ座の（　　　）\n・おおいぬ座の（　　　）", kotae: "ペテルギウス, プロキオン, シリウス" },
+  { mondai: "冬の大三角形は、以下の３つの１等星を結んでできる。\n・オリオン座の（　　　）\n・こいぬ座の（　　 construct　）\n・おおいぬ座の（　　　）", kotae: "ベテルギウス, プロキオン, シリウス" },
   { mondai: "（　　　）は、水が姿を変えたもので、空気のように目に見えない。", kotae: "水蒸気（すいじょうき）" },
   { mondai: "水が水蒸気に姿を変えることを、（　　　）という。", kotae: "蒸発（じょうはつ）" },
   { mondai: "水を熱して沸き立つことを（　　　）という。", kotae: "沸騰（ふっとう）" },
@@ -799,30 +800,74 @@ function shuffle(array) {
   return result;
 }
 
-/* 手書きキャンバス (Scratchpad) クラス */
+/* 手書きキャンバス (Scratchpad) クラス - 高画質・高精度改善版 */
 class Scratchpad {
   constructor(canvasEl) {
     this.canvas = canvasEl;
     this.ctx = canvasEl.getContext("2d");
     this.isDrawing = false;
     this.mode = "pen";
-    this.lastX = 0;
-    this.lastY = 0;
+    this.points = [];
+    this.dpr = window.devicePixelRatio || 1;
+
     this.initCanvas();
     this.bindEvents();
+    this.setupResizeObserver();
   }
 
   initCanvas() {
-    const rect = this.canvas.parentElement.getBoundingClientRect();
-    this.canvas.width = rect.width;
-    this.canvas.height = rect.height;
+    const parent = this.canvas.parentElement;
+    if (!parent) return;
+
+    const rect = parent.getBoundingClientRect();
+    this.dpr = window.devicePixelRatio || 1;
+
+    // 既存の描画内容を退避
+    let tempCanvas = null;
+    if (this.canvas.width > 0 && this.canvas.height > 0) {
+      tempCanvas = document.createElement("canvas");
+      tempCanvas.width = this.canvas.width;
+      tempCanvas.height = this.canvas.height;
+      const tempCtx = tempCanvas.getContext("2d");
+      tempCtx.drawImage(this.canvas, 0, 0);
+    }
+
+    // ディスプレイ解像度 (DPR) を適用して高精細化
+    this.canvas.width = Math.floor(rect.width * this.dpr);
+    this.canvas.height = Math.floor(rect.height * this.dpr);
+
+    // Contextの変換行列を初期化・設定
+    this.ctx.resetTransform();
+    this.ctx.scale(this.dpr, this.dpr);
+
     this.ctx.lineCap = "round";
     this.ctx.lineJoin = "round";
-    this.clear();
+
+    // 内容の復元
+    if (tempCanvas) {
+      this.ctx.drawImage(
+        tempCanvas,
+        0, 0, tempCanvas.width, tempCanvas.height,
+        0, 0, rect.width, rect.height
+      );
+    }
+  }
+
+  setupResizeObserver() {
+    if ("ResizeObserver" in window) {
+      this.resizeObserver = new ResizeObserver(() => {
+        this.initCanvas();
+      });
+      this.resizeObserver.observe(this.canvas.parentElement);
+    }
   }
 
   clear() {
+    this.ctx.save();
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.restore();
+    this.points = [];
   }
 
   setMode(mode) {
@@ -831,60 +876,115 @@ class Scratchpad {
 
   getPos(e) {
     const rect = this.canvas.getBoundingClientRect();
-    let clientX = e.clientX;
-    let clientY = e.clientY;
-    if (e.touches && e.touches.length > 0) {
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    }
-    return { x: clientX - rect.left, y: clientY - rect.top };
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    };
   }
 
   startDrawing(e) {
     e.preventDefault();
     this.isDrawing = true;
+
+    // キャプチャによりキャンバス枠外へ移動しても指・ペンを追従
+    if (e.pointerId !== undefined && typeof this.canvas.setPointerCapture === "function") {
+      try {
+        this.canvas.setPointerCapture(e.pointerId);
+      } catch (err) {}
+    }
+
     const pos = this.getPos(e);
-    this.lastX = pos.x;
-    this.lastY = pos.y;
+    this.points = [pos, pos];
+    this.drawPoint(pos);
+  }
+
+  drawPoint(pos) {
+    this.ctx.beginPath();
+    if (this.mode === "pen") {
+      this.ctx.globalCompositeOperation = "source-over";
+      this.ctx.fillStyle = "#f8fafc";
+      this.ctx.arc(pos.x, pos.y, 2.5, 0, Math.PI * 2);
+      this.ctx.fill();
+    } else {
+      this.ctx.globalCompositeOperation = "destination-out";
+      this.ctx.arc(pos.x, pos.y, 14, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
   }
 
   draw(e) {
     if (!this.isDrawing) return;
     e.preventDefault();
-    const pos = this.getPos(e);
-    this.ctx.beginPath();
-    this.ctx.moveTo(this.lastX, this.lastY);
-    this.ctx.lineTo(pos.x, pos.y);
 
+    const pos = this.getPos(e);
+    this.points.push(pos);
+
+    if (this.points.length < 2) return;
+
+    this.ctx.beginPath();
     if (this.mode === "pen") {
       this.ctx.globalCompositeOperation = "source-over";
-      // 暗めの背景で見やすい白・明色ペンの指定
       this.ctx.strokeStyle = "#f8fafc";
-      this.ctx.lineWidth = 4;
+      this.ctx.lineWidth = 4.5;
     } else {
       this.ctx.globalCompositeOperation = "destination-out";
-      this.ctx.lineWidth = 26;
+      this.ctx.lineWidth = 28;
     }
 
+    // 中点（Midpoint）を用いたベジェ曲線補間によるスムーズ描画
+    const p1 = this.points[this.points.length - 2];
+    const p2 = this.points[this.points.length - 1];
+
+    const midPoint = {
+      x: p1.x + (p2.x - p1.x) / 2,
+      y: p1.y + (p2.y - p1.y) / 2
+    };
+
+    const prevP = this.points[this.points.length - 3] || p1;
+    const prevMidPoint = {
+      x: prevP.x + (p1.x - prevP.x) / 2,
+      y: prevP.y + (p1.y - prevP.y) / 2
+    };
+
+    this.ctx.moveTo(prevMidPoint.x, prevMidPoint.y);
+    this.ctx.quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y);
     this.ctx.stroke();
-    this.lastX = pos.x;
-    this.lastY = pos.y;
   }
 
-  stopDrawing() {
+  stopDrawing(e) {
+    if (!this.isDrawing) return;
     this.isDrawing = false;
+    this.points = [];
+
+    if (e && e.pointerId !== undefined && typeof this.canvas.releasePointerCapture === "function") {
+      try {
+        this.canvas.releasePointerCapture(e.pointerId);
+      } catch (err) {}
+    }
   }
 
   bindEvents() {
     this.canvas.addEventListener("pointerdown", (e) => this.startDrawing(e));
     this.canvas.addEventListener("pointermove", (e) => this.draw(e));
-    this.canvas.addEventListener("pointerup", () => this.stopDrawing());
-    this.canvas.addEventListener("pointerleave", () => this.stopDrawing());
+    this.canvas.addEventListener("pointerup", (e) => this.stopDrawing(e));
+    this.canvas.addEventListener("pointercancel", (e) => this.stopDrawing(e));
+    this.canvas.addEventListener("pointerleave", (e) => this.stopDrawing(e));
+  }
+
+  destroy() {
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+    }
   }
 }
 
 /* スタート画面（8問ずつのセット選択） */
 function showStart() {
+  if (scratchpadInstance) {
+    scratchpadInstance.destroy();
+    scratchpadInstance = null;
+  }
+
   const totalSets = Math.ceil(questionData.length / QUESTIONS_PER_SET);
   
   let setCardsHtml = "";
@@ -939,6 +1039,11 @@ function startGame(setNum = 1) {
 
 /* 問題表示 */
 function renderQuestion() {
+  if (scratchpadInstance) {
+    scratchpadInstance.destroy();
+    scratchpadInstance = null;
+  }
+
   const q = questions[current];
 
   document.getElementById("screen").innerHTML = `
@@ -1128,6 +1233,11 @@ function nextQuestion() {
 
 /* 結果画面 */
 function showResult() {
+  if (scratchpadInstance) {
+    scratchpadInstance.destroy();
+    scratchpadInstance = null;
+  }
+
   const percent = Math.round((score / TOTAL) * 100);
 
   const message =
