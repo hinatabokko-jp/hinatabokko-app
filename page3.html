@@ -256,7 +256,7 @@ h1 {
   border: 1px solid rgba(110,231,183,0.25);
 }
 
-/* 問題文ボックス（複数行問題対応） */
+/* 問題文ボックス（複数行問題・スペース保持対応） */
 .problem-box {
   background: #212836;
   border: 1px solid #343e52;
@@ -270,9 +270,10 @@ h1 {
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
   text-align: left;
   white-space: pre-wrap;
+  word-break: break-word;
 }
 
-/* 手書き回答（キャンバス）エリア (目・身体にやさしいダーク仕様) */
+/* 手書き回答（キャンバス）エリア */
 .scratchpad-card {
   background: #141821;
   border: 1px solid #2e3648;
@@ -327,7 +328,6 @@ h1 {
   color: #fff;
 }
 
-/* 目にやさしい暗めの背景色 */
 .scratchpad-container {
   width: 100%;
   height: 240px;
@@ -430,6 +430,7 @@ h1 {
   padding: 12px 16px;
   border-radius: 12px;
   white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .modal-label {
@@ -439,13 +440,20 @@ h1 {
 }
 
 .modal-answer {
-  font-size: clamp(24px, 6vw, 36px);
+  font-size: clamp(20px, 5vw, 28px);
   font-weight: 900;
-  line-height: 1.3;
+  line-height: 1.5;
   color: #34d399;
   margin: 10px 0 24px;
   letter-spacing: .02em;
   word-break: break-all;
+}
+
+/* ふりがな用フォントスタイル */
+.ruby {
+  font-size: 0.78em;
+  font-weight: 600;
+  color: #a7f3d0;
 }
 
 .modal-choices {
@@ -759,24 +767,38 @@ function playCorrectSound() {
   } catch (e) {}
 }
 
-/* 理科問題データの定義（全11問） */
+/* リセットされた理科問題データ */
 const rawQuestions = [
-  { mondai: "０℃よりも低い気温の言い表し方（３種類）", kotae: "マイナス, 零下, 氷点下" },
-  { mondai: "夏の大三角形は、以下の３つの１等星を結んでできる。\n・こと座の（　　　）←織姫(おりひめ)星\n・わし座の（　　　）←彦星(ひこぼし)\n・はくちょう座の（　　　）", kotae: "ベガ、アルタイル、デネブ" },
-  { mondai: "冬の大三角形は、以下の３つの１等星を結んでできる。\n・オリオン座の（　　　）\n・こいぬ座の（　　 construct　）\n・おおいぬ座の（　　　）", kotae: "ベテルギウス, プロキオン, シリウス" },
-  { mondai: "（　　　）は、水が姿を変えたもので、空気のように目に見えない。", kotae: "水蒸気（すいじょうき）" },
-  { mondai: "水が水蒸気に姿を変えることを、（　　　）という。", kotae: "蒸発（じょうはつ）" },
-  { mondai: "水を熱して沸き立つことを（　　　）という。", kotae: "沸騰（ふっとう）" },
-  { mondai: "空気中の水蒸気が、冷たい物にふれて、水のつぶとなって物につくことを（　　　）という。", kotae: "結露（けつろ）" },
-  { mondai: "水を熱する実験のとき、水が急に沸き立ってふき出すことを防ぐために、水の中に（　　　）を入れる。", kotae: "ふっとう石（ふっとうせき）" },
-  { mondai: "水を冷やしたとき、凍り始めてから全部が氷になるまで、温度は（　　　　　）。", kotae: "０℃のまま変わらない" },
-  { mondai: "空全体を１０としたときに占める雲の量が、０～（　　）のときは晴れと決めている。", kotae: "８" },
-  { mondai: "空全体を１０としたときに占める雲の量が、（　　）～１０のときは曇り（くもり）と決めている。", kotae: "９" }
+  { mondai: "０℃よりも低い気温の言い表し方（３種類）", kotae: "マイナス,零下(れいか),氷点下" },
+  { mondai: "夏の大三角形は、以下の３つの１等星を結んでできる。\n・こと座の（   ）←織姫(おりひめ)星\n・わし座の（   ）←彦星(ひこぼし)\n・はくちょう座の（   ）", kotae: "ベガ、アルタイル、デネブ" },
+  { mondai: "冬の大三角形は、以下の３つの１等星を結んでできる。\n・オリオン座の（   ）\n・こいぬ座の（   ）\n・おおいぬ座の（   ）", kotae: "ペテルギウス,プロキオン,シリウス" },
+  { mondai: "（   ）は、水が姿を変えたもので、空気のように目に見えない。", kotae: "水蒸気（すいじょうき）" },
+  { mondai: "水が水蒸気に姿を変えることを、（   ）という。", kotae: "蒸発（じょうはつ）" },
+  { mondai: "水を熱して沸き立つことを（   ）という。", kotae: "沸騰（ふっとう）" },
+  { mondai: "空気中の水蒸気が、冷たい物にふれて、\n水のつぶとなって物につくことを（   ）という。", kotae: "結露（けつろ）" },
+  { mondai: "水を熱する実験のとき、\n水が急に沸き立ってふき出すことを防ぐために、\n水の中に（   ）を入れる。", kotae: "ふっとう石（ふっとうせき）" },
+  { mondai: "水を冷やしたとき、\n凍り始めてから全部が氷になるまで、\n温度は（     ）。", kotae: "０℃のまま変わらない" },
+  { mondai: "空全体を１０としたときに占める雲の量が、\n０～（  ）のときは晴れと決めている。", kotae: "８" },
+  { mondai: "空全体を１０としたときに占める雲の量が、\n（  ）～１０のときは曇り（くもり）と決めている。", kotae: "９" },
+  { mondai: "種子から芽や根が出ることを（   ）という。", kotae: "発芽" },
+  { mondai: "必要な条件を調べる実験では、\n調べたい条件を（    ）変えて、\n他の条件は全て同じにする。", kotae: "１つだけ" },
+  { mondai: "種子の発芽には、（ ① ）、（ ② ）、\n発芽に適した（ ③ ）の３つの条件が必要である。", kotae: "①水,②空気,③温度" },
+  { mondai: "でんぷんという養分があるかどうかを調べることができる、\n薄茶色の液体を（   ）という。", kotae: "ヨウ素液" },
+  { mondai: "ヨウ素液は、でんぷんがあると（ ① 色）に変わる。\nこれを（ ② 反応）という。", kotae: "青むらさき色、ヨウ素デンプン反応" },
+  { mondai: "肥料を含まない土には、\n（    ）、赤玉土、パーライトがある。", kotae: "バーミキュライト" },
+  { mondai: "糸や紐(ひも）、棒(ぼう）などに\nおもりをつけて振れるようにしたものを（   ）という。", kotae: "ふりこ" },
+  { mondai: "ふりこの、糸をつるす点（支点）から、\nおもりの中心までの長さを（   ）という。", kotae: "ふりこの長さ" },
+  { mondai: "ふりこが１往復する時間は、\nふりはばやおもりの重さに関係なく、\n（   ）によって変わる。", kotae: "ふりこの長さ" },
+  { mondai: "ふりこの長さを長くすると、\n１往復する時間は（   なる）。", kotae: "長くなる" },
+  { mondai: "ふりこの\n（ ① ）や （ ② ）を変えても\n１往復する時間は変わらない。", kotae: "①ふれはば,②おもりの重さ" },
+  { mondai: "ふりこを利用したものに、ふりこ時計がある。\nおもりの位置を（   に動かし）、\nふりこの長さを変えることで、１往復する時間を変えることができる。", kotae: "上下に動かし" },
+  { mondai: "振り子時計は、\n気温が変わると振り子の長さが少し変わり、時計がずれることがあります。\nそこで、種類の違う金属を組み合わせ、\nそれぞれの金属の伸び縮みする大きさの違いを利用して、\n振り子の長さができるだけ変わらないようにした仕組みが考えられました。\nこの、温度が変わっても時計がずれにくくなるよう工夫された振り子を、\n何というでしょう？", kotae: "グリッドアイアン振り子" }
 ];
 
-const QUESTIONS_PER_SET = 8;
+/* 1セットの問数を10問に変更 */
+const QUESTIONS_PER_SET = 10;
 
-// 8問ごとにセット番号（1, 2...）を動的に割り当て
+// 10問ごとにセット番号を動的に割り当て
 const questionData = rawQuestions.map((q, idx) => ({
   id: idx + 1,
   set: Math.floor(idx / QUESTIONS_PER_SET) + 1,
@@ -786,10 +808,34 @@ const questionData = rawQuestions.map((q, idx) => ({
 
 let currentSetIndex = 1;
 let questions = [];
-let TOTAL = 8;
+let TOTAL = 10;
 let current = 0;
 let score = 0;
 let scratchpadInstance = null;
+
+/* （ひらがな）または (ひらがな) をふりがな用タグで小さくラッパーする関数 */
+function formatTextWithRuby(text) {
+  if (!text) return "";
+  const escaped = escapeHtml(text);
+  // 全角かっこ（ひらがな）および 半角かっこ(ひらがな) に対応
+  return escaped.replace(/(?:（|\()([\u3040-\u309F]+)(?:）|\))/g, '<span class="ruby">（$1）</span>');
+}
+
+/* kotaeのカンマ(,)および全角カンマ(、)で改行しふりがなを適用 */
+function formatAnswer(kotaeText) {
+  if (!kotaeText) return "";
+  // カンマ(,)または全角(、)で分割して改行
+  return kotaeText.split(/[,、]/).map(item => formatTextWithRuby(item.trim())).join('<br>');
+}
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
 function shuffle(array) {
   const result = [...array];
@@ -800,7 +846,7 @@ function shuffle(array) {
   return result;
 }
 
-/* 手書きキャンバス (Scratchpad) クラス - 高画質・高精度改善版 */
+/* 手書きキャンバス (Scratchpad) クラス */
 class Scratchpad {
   constructor(canvasEl) {
     this.canvas = canvasEl;
@@ -822,7 +868,6 @@ class Scratchpad {
     const rect = parent.getBoundingClientRect();
     this.dpr = window.devicePixelRatio || 1;
 
-    // 既存の描画内容を退避
     let tempCanvas = null;
     if (this.canvas.width > 0 && this.canvas.height > 0) {
       tempCanvas = document.createElement("canvas");
@@ -832,18 +877,15 @@ class Scratchpad {
       tempCtx.drawImage(this.canvas, 0, 0);
     }
 
-    // ディスプレイ解像度 (DPR) を適用して高精細化
     this.canvas.width = Math.floor(rect.width * this.dpr);
     this.canvas.height = Math.floor(rect.height * this.dpr);
 
-    // Contextの変換行列を初期化・設定
     this.ctx.resetTransform();
     this.ctx.scale(this.dpr, this.dpr);
 
     this.ctx.lineCap = "round";
     this.ctx.lineJoin = "round";
 
-    // 内容の復元
     if (tempCanvas) {
       this.ctx.drawImage(
         tempCanvas,
@@ -886,7 +928,6 @@ class Scratchpad {
     e.preventDefault();
     this.isDrawing = true;
 
-    // キャプチャによりキャンバス枠外へ移動しても指・ペンを追従
     if (e.pointerId !== undefined && typeof this.canvas.setPointerCapture === "function") {
       try {
         this.canvas.setPointerCapture(e.pointerId);
@@ -931,7 +972,6 @@ class Scratchpad {
       this.ctx.lineWidth = 28;
     }
 
-    // 中点（Midpoint）を用いたベジェ曲線補間によるスムーズ描画
     const p1 = this.points[this.points.length - 2];
     const p2 = this.points[this.points.length - 1];
 
@@ -978,7 +1018,7 @@ class Scratchpad {
   }
 }
 
-/* スタート画面（8問ずつのセット選択） */
+/* スタート画面 */
 function showStart() {
   if (scratchpadInstance) {
     scratchpadInstance.destroy();
@@ -1016,7 +1056,6 @@ function showStart() {
     </div>
   `;
 
-  // セットカードのクリックイベントを設定
   document.querySelectorAll(".set-card").forEach(card => {
     card.addEventListener("click", () => {
       const selectedSet = parseInt(card.getAttribute("data-set"), 10);
@@ -1045,6 +1084,7 @@ function renderQuestion() {
   }
 
   const q = questions[current];
+  const formattedMondai = formatTextWithRuby(q.mondai);
 
   document.getElementById("screen").innerHTML = `
     <div class="progress-wrap">
@@ -1061,9 +1101,9 @@ function renderQuestion() {
       <span class="category">理科用語・知識</span>
     </div>
 
-    <div class="problem-box">${q.mondai}</div>
+    <div class="problem-box">${formattedMondai}</div>
 
-    <!-- 手書き回答エリア (ダーク背景) -->
+    <!-- 手書き回答エリア -->
     <div class="scratchpad-card">
       <div class="scratchpad-header">
         <div class="scratchpad-title">
@@ -1114,7 +1154,7 @@ function renderQuestion() {
   });
 }
 
-/* 正解の紙吹雪演出 */
+/* 紙吹雪演出 */
 function celebrate(isLarge = false) {
   if (typeof confetti === "function") {
     try {
@@ -1150,15 +1190,18 @@ function celebrate(isLarge = false) {
 /* 答え合わせモーダル表示 */
 function showAnswerModal() {
   const q = questions[current];
+  const formattedMondai = formatTextWithRuby(q.mondai);
+  const formattedKotae = formatAnswer(q.kotae);
+
   const overlay = document.createElement("div");
   overlay.className = "modal-overlay";
 
   overlay.innerHTML = `
     <div class="modal" role="dialog" aria-modal="true">
       <div class="modal-title">正解の確認</div>
-      <div class="modal-problem">${q.mondai}</div>
+      <div class="modal-problem">${formattedMondai}</div>
       <div class="modal-label">正しい答え</div>
-      <div class="modal-answer">${q.kotae}</div>
+      <div class="modal-answer">${formattedKotae}</div>
       
       <div style="font-size:14px; color:#adb5c4; margin-bottom:14px;">
         書いた答えは合っていましたか？
@@ -1199,7 +1242,7 @@ function showCompletionModal() {
         セット ${currentSetIndex} 完了！
       </div>
       <div style="color:#adb5c4; font-size:15px; line-height:1.6; margin-bottom:20px;">
-        トレー二ングを完走しました！<br>
+        トレーニングを完走しました！<br>
         最終結果:
         <strong style="color:#34d399; font-size:26px;">
           ${score} / ${TOTAL}
