@@ -242,6 +242,13 @@ h1 {
   white-space: pre-wrap;
 }
 
+/* ふりがな用スタイル */
+.furigana {
+  font-size: 0.82em;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
 .scratchpad-card {
   background: #141821;
   border: 1px solid #2e3648;
@@ -412,9 +419,9 @@ h1 {
 }
 
 .modal-answer {
-  font-size: clamp(22px, 5vw, 32px);
+  font-size: clamp(20px, 5vw, 28px);
   font-weight: 900;
-  line-height: 1.4;
+  line-height: 1.5;
   color: #60a5fa;
   margin: 10px 0 24px;
   letter-spacing: .04em;
@@ -628,6 +635,9 @@ h1 {
     </a>
     <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/page2">
       計算トレーニング
+    </a> 
+   <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/page3">
+      理科トレーニング
     </a>
     <a class="sidebar-link current" href="#">
       社会科トレーニング
@@ -725,54 +735,74 @@ function playCorrectSound() {
   } catch (e) {}
 }
 
-/* アップロードされたテキストファイルに基づく問題データ（全38問／1セット10問ずつ構成） */
-const questionData = [
+/* （ひらがな）を判定してフォントサイズを少し小さく整形する関数 */
+function formatFurigana(text) {
+  if (!text) return "";
+  // （ひらがな）または (ひらがな) を検出して span タグで囲む
+  return text.replace(/([（\(])([\u3040-\u309F]+)([）\)])/g, '<span class="furigana">$1$2$3</span>');
+}
+
+/* アップロードされたテキストファイルに基づく問題データ（全41問／1セット10問ずつ構成） */
+const rawQuestionData = [
   // --- セット 1 ---
-  { id: 1, set: 1, mondai: "地球上で、\n北の方角のいちばん端にある地点を何といいますか。", kotae: "北極" },
-  { id: 2, set: 1, mondai: "地球上で、\n南の方角の端にある地点を何というでしょう。", kotae: "南極" },
-  { id: 3, set: 1, mondai: "地球を北半球と南半球に分ける、\n地球の真ん中を一周する線を何といいますか。", kotae: "赤道" },
-  { id: 4, set: 1, mondai: "赤道と平行に、\n地球を東西に一周する線を何といいますか。", kotae: "緯線" },
-  { id: 5, set: 1, mondai: "北極と南極を結ぶように、\n地球を南北に一周する線を何といいますか。", kotae: "経線" },
-  { id: 6, set: 1, mondai: "季節によって、決まった方向からふく風を何といいますか。", kotae: "季節風" },
-  { id: 7, set: 1, mondai: "ヨーロッパとアジアにまたがる、\n世界で最も大きな大陸を何といいますか。", kotae: "ユーラシア大陸" },
-  { id: 8, set: 1, mondai: "北海道の北東にあり、\n日本で最も北に位置する島を何といいますか。", kotae: "択捉島（えとろふとう）" },
-  { id: 9, set: 1, mondai: "日本の最も西に位置する島を何といいますか。", kotae: "与那国島（よなぐにじま）" },
-  { id: 10, set: 1, mondai: "日本の最も東に位置する島を何といいますか。", kotae: "南鳥島（みなみとりしま）" },
+  { set: 1, mondai: "地球上で、\n北の方角のいちばん端にある地点を何といいますか。", kotae: "北極" },
+  { set: 1, mondai: "地球上で、\n南の方角の端にある地点を何というでしょう。", kotae: "南極" },
+  { set: 1, mondai: "地球を北半球と南半球に分ける、\n地球の真ん中を一周する線を何といいますか。", kotae: "赤道" },
+  { set: 1, mondai: "赤道と平行に、\n地球を東西に一周する線を何といいますか。", kotae: "緯線" },
+  { set: 1, mondai: "北極と南極を結ぶように、\n地球を南北に一周する線を何といいますか。", kotae: "経線" },
+  { set: 1, mondai: "季節によって、決まった方向からふく風を何といいますか。", kotae: "季節風" },
+  { set: 1, mondai: "ヨーロッパとアジアにまたがる、\n世界で最も大きな大陸を何といいますか。", kotae: "ユーラシア大陸" },
+  { set: 1, mondai: "北海道の北東にあり、\n日本で最も北に位置する島を何といいますか。", kotae: "択捉島（えとろふとう）" },
+  { set: 1, mondai: "日本の最も西に位置する島を何といいますか。", kotae: "与那国島（よなぐにじま）" },
+  { set: 1, mondai: "日本の最も東に位置する島を何といいますか。", kotae: "南鳥島（みなみとりしま）" },
 
   // --- セット 2 ---
-  { id: 11, set: 2, mondai: "日本の最も南に位置する島を何といいますか。", kotae: "沖ノ鳥島（おきのとりしま）" },
-  { id: 12, set: 2, mondai: "日本は国土の（  分の  ）が山地である。", kotae: "４分の３" },
-  { id: 13, set: 2, mondai: "川の下流や海沿いには（   ）が広がっている。", kotae: "平野（へいや）" },
-  { id: 14, set: 2, mondai: "季節によって決まった方向から吹く季節風の影響で、\n太平洋側では（ ① ）に雨が多く、\n日本海側では（ ② ）に雪が多く降る。", kotae: "①夏、②冬" },
-  { id: 15, set: 2, mondai: "日本の気候は、大きく６つの気候に分けられる。\n・北海道の気候：冬の寒さが厳しい。\n・太平洋側の気候：夏は蒸し暑く、冬は雨が少ない。\n・日本海側の気候：冬に雪が多い。\n・（ ① ）の気候：１年を通して雨が少なく、夏と冬の気温の差が大きい。\n・（ ② ）の気候：１年を通して雨が少なく、晴れた日が多い。\n・南西諸島の気候：１年中あたたかく、夏に（ ③ ）が多い。", kotae: "①中央高地,②瀬戸内,③台風" },
-  { id: 16, set: 2, mondai: "周りを堤防（ていぼう）で囲まれた低い土地を（   ）という。", kotae: "輪中（わじゅう）" },
-  { id: 17, set: 2, mondai: "輪中の地域では、昔から土地を高くして家を建てたり、\n（   ）をつくったりするなど、水害に備えた工夫をしてきた。", kotae: "水屋（みずや）" },
-  { id: 18, set: 2, mondai: "家や水屋の軒下（のきした）などには、\n家が水につかったときに使えるように小舟を用意していた。\nこれを（   ）という。", kotae: "上げ舟（あげぶね）" },
-  { id: 19, set: 2, mondai: "海津市には、水害に備えて（ ① ）などの施設や設備がある。\nまた、人々は協力して（ ② ）などを行っている。", kotae: "①排水機場,②水防演習" },
-  { id: 20, set: 2, mondai: "沖縄県では、厚さや（   ）に備えて家の作りを工夫している。", kotae: "台風" },
+  { set: 2, mondai: "日本の最も南に位置する島を何といいますか。", kotae: "沖ノ鳥島（おきのとりしま）" },
+  { set: 2, mondai: "日本は国土の（  分の  ）が山地である。", kotae: "４分の３" },
+  { set: 2, mondai: "川の下流や海沿いには（   ）が広がっている。", kotae: "平野（へいや）" },
+  { set: 2, mondai: "季節によって決まった方向から吹く季節風の影響で、\n太平洋側では（ ① ）に雨が多く、\n日本海側では（ ② ）に雪が多く降る。", kotae: "①夏、②冬" },
+  { set: 2, mondai: "日本の気候は、大きく６つの気候に分けられる。\n・北海道の気候：冬の寒さが厳しい。\n・太平洋側の気候：夏は蒸し暑く、冬は雨が少ない。\n・日本海側の気候：冬に雪が多い。\n・（ ① ）の気候：１年を通して雨が少なく、夏と冬の気温の差が大きい。\n・（ ② ）の気候：１年を通して雨が少なく、晴れた日が多い。\n・南西諸島の気候：１年中あたたかく、夏に（ ③ ）が多い。", kotae: "①中央高地,②瀬戸内,③台風" },
+  { set: 2, mondai: "周りを堤防（ていぼう）で囲まれた低い土地を（   ）という。", kotae: "輪中（わじゅう）" },
+  { set: 2, mondai: "輪中の地域では、昔から土地を高くして家を建てたり、\n（   ）をつくったりするなど、水害に備えた工夫をしてきた。", kotae: "水屋（みずや）" },
+  { set: 2, mondai: "家や水屋の軒下（のきした）などには、\n家が水につかったときに使えるように小舟を用意していた。\nこれを（   ）という。", kotae: "上げ舟（あげぶね）" },
+  { set: 2, mondai: "海津市には、水害に備えて（ ① ）などの施設や設備がある。\nまた、人々は協力して（ ② ）などを行っている。", kotae: "①排水機場,②水防演習" },
+  { set: 2, mondai: "沖縄県では、厚さや（   ）に備えて家の作りを工夫している。", kotae: "台風" },
 
   // --- セット 3 ---
-  { id: 21, set: 3, mondai: "沖縄県では、地形の特徴から（ ① ）になりやすいので、屋根の上に（ ② ）を置いて備えている家がある。", kotae: "①水不足,②貯水タンク" },
-  { id: 22, set: 3, mondai: "沖縄県で一番 作付面積（さくつけめんせき）の広い農産物は（   ）。", kotae: "さとうきび" },
-  { id: 23, set: 3, mondai: "沖縄県には、アメリカ軍の（   ）が多くある。", kotae: "軍用地" },
-  { id: 24, set: 3, mondai: "北海道では、冬のきびしい寒さに備えて、家の窓を（ ① ）にしたり、家の外に（ ② ）を置いたりなどの工夫をしている。", kotae: "①二重窓（にじゅうまど）,②灯油タンク" },
-  { id: 25, set: 3, mondai: "新潟県では、雪に備えて、道路には（ ① ）や（ ② ）などの工夫をしている。", kotae: "①消雪パイプ,②流雪溝（りゅうせつこう）" },
-  { id: 26, set: 3, mondai: "長野県野辺山原（のべやまはら）では、夏の涼しい気候を生かして、（   ）づくりが盛んに行われている。", kotae: "レタス" },
-  { id: 27, set: 3, mondai: "高く売るために、ふつうにとれる時期より成長を遅らせ、遅く出荷する栽培の仕方を（    ）という。", kotae: "抑制栽培（よくせいさいばい）" },
-  { id: 28, set: 3, mondai: "高く売るために、成長を早めて、早く出荷する栽培のしかたを（    central）という。", kotae: "促成栽培（そくせいさいばい）" },
-  { id: 29, set: 3, mondai: "田の区画を広くして形を整え、用水路や排水路を整備することを（   ）という。", kotae: "耕地整理、もしくは、圃場整備(ほじょうせいび）" },
-  { id: 30, set: 3, mondai: "品種とは、米などの種類のこと。良い性質をもった品種と品種をかけあわせて、新しい品種を作りだすことを（    ）という。", kotae: "品種改良（ひんしゅかいりょう）" },
+  { set: 3, mondai: "沖縄県では、地形の特徴から（ ① ）になりやすいので、屋根の上に（ ② ）を置いて備えている家がある。", kotae: "①水不足,②貯水タンク" },
+  { set: 3, mondai: "沖縄県で一番 作付面積（さくつけめんせき）の広い農産物は（   ）。", kotae: "さとうきび" },
+  { set: 3, mondai: "沖縄県には、アメリカ軍の（   ）が多くある。", kotae: "軍用地" },
+  { set: 3, mondai: "北海道では、冬のきびしい寒さに備えて、\n家の窓を（ ① ）にしたり、\n家の外に（ ② ）を置いたりなどの工夫をしている。", kotae: "①二重窓（にじゅうまど）,②灯油タンク" },
+  { set: 3, mondai: "新潟県では、雪に備えて、\n道路には（ ① ）や（ ② ）などの工夫をしている。", kotae: "①消雪パイプ,②流雪溝（りゅうせつこう）" },
+  { set: 3, mondai: "長野県野辺山原（のべやまはら）では、\n夏の涼しい気候を生かして、（   ）づくりが盛んに行われている。", kotae: "レタス" },
+  { set: 3, mondai: "高く売るために、\nふつうにとれる時期より成長を遅らせ、\n遅く出荷する栽培の仕方を（    ）という。", kotae: "抑制栽培（よくせいさいばい）" },
+  { set: 3, mondai: "高く売るために、\n成長を早めて、早く出荷する栽培のしかたを（    ）という。", kotae: "促成栽培（そくせいさいばい）" },
+  { set: 3, mondai: "田の区画を広くして形を整え、\n用水路や排水路を整備することを（   ）という。", kotae: "耕地整理、もしくは、圃場整備(ほじょうせいび）" },
+  { set: 3, mondai: "品種とは、米などの種類のこと。\n良い性質をもった品種と品種をかけあわせて、\n新しい品種を作りだすことを（    ）という。", kotae: "品種改良（ひんしゅかいりょう）" },
 
   // --- セット 4 ---
-  { id: 31, set: 4, mondai: "地域で収穫された米の多くは、（     ）とよばれる倉庫に集められ、\n乾燥させて低温でおいしいまま保管される。\nそこから全国へ出荷され、わたしたちのもとへ届けられる。", kotae: "カントリーエレベーター" },
-  { id: 32, set: 4, mondai: "化学肥料のかわりに（   ）を使うと、土が固くなりにくい。", kotae: "堆肥（たいひ）" },
-  { id: 33, set: 4, mondai: "米作りについて。春になると（ ① ）を使って田の土を耕す（ ② ）と、\n他に水を入れて土を砕いてならす（ ③ ）がおこなわれる。", kotae: "①トラクター,②田おこし,③代かき（しろかき）" },
-  { id: 34, set: 4, mondai: "米作りの作業をしやすくするために、\n田の区画を広くし、形を整える（ ① ）を行っている。\nその結果、以前より大型で性能のよい（ ② ）を使えるようになったり、\n（ ③ ）の管理がしやすくなったりした。", kotae: "①耕地整理(ほ場整備）,②機械,③水" },
-  { id: 35, set: 4, mondai: "寒さや病気に強く、味の良い品質の稲を作るために、\n農業試験場では（   ）を行っている。", kotae: "品種改良" },
-  { id: 36, set: 4, mondai: "稲を病気や害虫から守り生長を助けるために、\n（ ① ）や（ ② ）が使われている。", kotae: "①農薬,②化学肥料" },
-  { id: 37, set: 4, mondai: "農薬や化学肥料を使い過ぎないように、（ ① ）を使ったり、\n（ ② ）を田に放したりする工夫がおこなわれている。\nまた、米袋に農薬や化学肥料の量をおさえて生産したことを表示して、\n消費者に伝える工夫をしている。", kotae: "①堆肥（たいひ）,②アイガモ" },
-  { id: 38, set: 4, mondai: "食生活が変わって、米の消費量が減り、米が余るようになった。\n米を余らせないようにするために、\n国は田を減らし、米以外の作物をつくる（   ）を進めるなど、米の生産調整を行ってきた。", kotae: "転作" }
+  { set: 4, mondai: "地域で収穫された米の多くは、\n（     ）とよばれる倉庫に集められ、\n乾燥させて低温でおいしいまま保管される。\nそこから全国へ出荷され、わたしたちのもとへ届けられる。", kotae: "カントリーエレベーター" },
+  { set: 4, mondai: "化学肥料のかわりに（   ）を使うと、\n土が固くなりにくい。", kotae: "堆肥（たいひ）" },
+  { set: 4, mondai: "米作りについて。\n春になると（ ① ）を使って田の土を耕す（ ② ）と、\n他に水を入れて土を砕いてならす（ ③ ）がおこなわれる。", kotae: "①トラクター,②田おこし,③代かき（しろかき）" },
+  { set: 4, mondai: "米作りの作業をしやすくするために、\n田の区画を広くし、形を整える（ ① ）を行っている。\nその結果、以前より大型で性能のよい（ ② ）を使えるようになったり、\n（ ③ ）の管理がしやすくなったりした。", kotae: "①耕地整理(ほ場整備）,②機械,③水" },
+  { set: 4, mondai: "寒さや病気に強く、味の良い品質の稲を作るために、\n農業試験場では（   ）を行っている。", kotae: "品種改良" },
+  { set: 4, mondai: "稲を病気や害虫から守り生長を助けるために、\n（ ① ）や（ ② ）が使われている。", kotae: "①農薬,②化学肥料" },
+  { set: 4, mondai: "農薬や化学肥料を使い過ぎないように、（ ① ）を使ったり、\n（ ② ）を田に放したりする工夫がおこなわれている。\nまた、米袋に農薬や化学肥料の量をおさえて生産したことを表示して、\n消費者に伝える工夫をしている。", kotae: "①堆肥（たいひ）,②アイガモ" },
+  { set: 4, mondai: "食生活が変わって、米の消費量が減り、米が余るようになった。\n米を余らせないようにするために、\n国は田を減らし、米以外の作物をつくる（   ）を進めるなど、\n米の生産調整を行ってきた。", kotae: "転作" },
+  { set: 4, mondai: "日本で消費されている大豆のうち、一番多く生産している国は（   ）。", kotae: "アメリカ合衆国" },
+  { set: 4, mondai: "日本の（   ）は低く、たくさんの食料を外国から輸入している。", kotae: "食料自給率（しょくりょうじきゅうりつ）" },
+
+  // --- セット 5 ---
+  { set: 5, mondai: "（   ）地方や九州地方では、\n広い土地を生かして乳牛・肉牛を多く飼育している。", kotae: "北海道" },
+  { set: 5, mondai: "群馬県嬬恋村（つまごいむら）では、\n高原の涼しい気候を生かして\n暑さに弱いキャベツを（ ① ）に生産している。\nこのように、ふつうに採れる時期より\n野菜の生長を遅らせる栽培方法を（ ② ）という。", kotae: "①夏,②抑制栽培(よくせいさいばい）" }
 ];
+
+const questionData = rawQuestionData.map((item, idx) => ({
+  id: idx + 1,
+  set: item.set,
+  mondai: item.mondai,
+  kotae: item.kotae
+}));
 
 const QUESTIONS_PER_SET = 10;
 let currentSetIndex = 1;
@@ -921,13 +951,15 @@ function showStart() {
   let setCardsHtml = "";
   for (let s = 1; s <= totalSets; s++) {
     const setQuestions = questionData.filter(q => q.set === s);
+    const startNum = (s - 1) * QUESTIONS_PER_SET + 1;
+    const endNum = Math.min(s * QUESTIONS_PER_SET, questionData.length);
     setCardsHtml += `
       <div class="set-card" data-set="${s}">
         <div class="set-card-header">
           <span class="set-card-badge">全 ${setQuestions.length} 問</span>
         </div>
         <div class="set-card-name">📌 セット ${s}</div>
-        <div class="set-card-desc">第 ${(s - 1) * QUESTIONS_PER_SET + 1} 問 〜 第 ${Math.min(s * QUESTIONS_PER_SET, questionData.length)} 問のトレーニング</div>
+        <div class="set-card-desc">第 ${startNum} 問 〜 第 ${endNum} 問のトレーニング</div>
       </div>
     `;
   }
@@ -970,6 +1002,7 @@ function startGame(setNum = 1) {
 /* 問題表示 */
 function renderQuestion() {
   const q = questions[current];
+  const formattedMondai = formatFurigana(q.mondai);
 
   document.getElementById("screen").innerHTML = `
     <div class="progress-wrap">
@@ -986,13 +1019,13 @@ function renderQuestion() {
       <span class="category">地理・社会用語</span>
     </div>
 
-    <div class="problem-box">${q.mondai}</div>
+    <div class="problem-box">${formattedMondai}</div>
 
     <!-- 手書き回答エリア -->
     <div class="scratchpad-card">
       <div class="scratchpad-header">
         <div class="scratchpad-title">
-          ✍️ ここに手書きで答えを書こう
+          ✍️️ ここに手書きで答えを書こう
         </div>
         <div class="scratchpad-tools">
           <button class="tool-btn active" id="tool-pen">ペン</button>
@@ -1075,8 +1108,12 @@ function celebrate(isLarge = false) {
 function showAnswerModal() {
   const q = questions[current];
   
-  // コンマ（,および，）の直後に改行を挿入して整形
-  const formattedAnswer = q.kotae.replace(/([,，])/g, "$1\n");
+  // 指示に従い kotae のカンマ（,および，）で改行を挿入
+  let formattedAnswer = q.kotae.replace(/([,，])/g, "$1\n");
+  // ふりがな（ひらいがなカッコ）を縮小表示
+  formattedAnswer = formatFurigana(formattedAnswer);
+  
+  const formattedMondai = formatFurigana(q.mondai);
 
   const overlay = document.createElement("div");
   overlay.className = "modal-overlay";
@@ -1084,7 +1121,7 @@ function showAnswerModal() {
   overlay.innerHTML = `
     <div class="modal" role="dialog" aria-modal="true">
       <div class="modal-title">正解の確認</div>
-      <div class="modal-problem">${q.mondai}</div>
+      <div class="modal-problem">${formattedMondai}</div>
       <div class="modal-label">正しい答え</div>
       <div class="modal-answer">${formattedAnswer}</div>
       
