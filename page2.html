@@ -648,7 +648,7 @@ h1 {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  z-index: 1000;
+  z-index: 99999; /* 最上層のレイヤーに設定 */
   backdrop-filter: blur(6px);
 }
 
@@ -1232,7 +1232,7 @@ function makeQuestions() {
       b1.push({
         type: "１桁 ＋ １桁",
         kind: "standard",
-        promptHtml: `${a} ＋ ${b} ＝`,
+        promptHtml: `${a} ＋ ${b}`,
         answers: [a + b],
         answerHtml: `${a + b}`
       });
@@ -1246,7 +1246,7 @@ function makeQuestions() {
       b1.push({
         type: "１桁 − １桁",
         kind: "standard",
-        promptHtml: `${a} − ${b} ＝`,
+        promptHtml: `${a} − ${b}`,
         answers: [diff],
         answerHtml: `${diff}`
       });
@@ -1254,48 +1254,52 @@ function makeQuestions() {
   }
   q.push(...shuffle(b1));
 
-  // 2. 掛け算（要望1：5問→4問へ変更）
+  // 2. 掛け算（3問、5以下の数字同士の掛け算を除外）
   const b2 = [];
-  for (let i = 0; i < 4; i++) {
+  while (b2.length < 3) {
     const a = rand(2, 9);
     const b = rand(2, 9);
+    if (a <= 5 && b <= 5) continue;
 
     b2.push({
       type: "１桁 × １桁",
       kind: "standard",
-      promptHtml: `${a} × ${b} ＝`,
+      promptHtml: `${a} × ${b}`,
       answers: [a * b],
       answerHtml: `${a * b}`
     });
   }
   q.push(...shuffle(b2));
 
-  // 3. 2桁と1桁の足し算・引き算（要望2：5問→4問へ変更）
+  // 3. 2桁と1桁の計算（2問、繰り上がり・繰り下がりを含む）
   const b3 = [];
-  while (b3.length < 4) {
+  while (b3.length < 2) {
     const isPlus = Math.random() < 0.5;
 
     if (isPlus) {
-      const a = rand(10, 99);
+      const a = rand(10, 98);
       const b = rand(2, 9);
+      const onesA = a % 10;
+      if (onesA + b < 10) continue;
+
       b3.push({
         type: "２桁 ＋ １桁",
         kind: "standard",
-        promptHtml: `${a} ＋ ${b} ＝`,
+        promptHtml: `${a} ＋ ${b}`,
         answers: [a + b],
         answerHtml: `${a + b}`
       });
     } else {
-      const a = rand(10, 99);
+      const a = rand(12, 99);
       const b = rand(2, 9);
+      const onesA = a % 10;
+      if (onesA >= b) continue;
 
       const diff = a - b;
-      if (diff === 0 || diff === 1) continue;
-
       b3.push({
         type: "２桁 − １桁",
         kind: "standard",
-        promptHtml: `${a} − ${b} ＝`,
+        promptHtml: `${a} − ${b}`,
         answers: [diff],
         answerHtml: `${diff}`
       });
@@ -1314,7 +1318,7 @@ function makeQuestions() {
       b4.push({
         type: "２桁 ＋ ２桁",
         kind: "standard",
-        promptHtml: `${a} ＋ ${b} ＝`,
+        promptHtml: `${a} ＋ ${b}`,
         answers: [a + b],
         answerHtml: `${a + b}`
       });
@@ -1328,7 +1332,7 @@ function makeQuestions() {
       b4.push({
         type: "２桁 − ２桁",
         kind: "standard",
-        promptHtml: `${a} − ${b} ＝`,
+        promptHtml: `${a} − ${b}`,
         answers: [diff],
         answerHtml: `${diff}`
       });
@@ -1360,7 +1364,6 @@ function makeQuestions() {
           <span class="numerator">${origNum}</span>
           <span class="denominator">${origDen}</span>
         </span>
-        <span style="font-size:32px; margin:0 4px;">＝</span>
       `,
       answerHtml: `
         <span class="fraction">
@@ -1455,9 +1458,154 @@ function makeQuestions() {
   }
   q.push(...b7);
 
-  // 8. 数直線文章題トレーニング（要望3：最後の方に2問追加）
-  const b8 = [makeWordProblem(), makeWordProblem()];
+  // 8. 分数同士の計算問題（3問、帯分数の整数が0にならないように調整）
+  const b8 = [];
+  
+  while (b8.length < 3) {
+    if (b8.length === 0) {
+      const d1 = rand(2, 5);
+      const d2 = rand(2, 5);
+      if (d1 === d2) continue;
+      const comD = lcm(d1, d2);
+      const n1 = rand(d1 + 1, d1 * 2);
+      const n2 = rand(2, d2 * 2 - 1);
+      const isPlus = Math.random() < 0.5;
+      
+      const expandedN1 = n1 * (comD / d1);
+      const expandedN2 = n2 * (comD / d2);
+      const ansN = isPlus ? (expandedN1 + expandedN2) : (expandedN1 - expandedN2);
+      if (ansN <= 0) continue;
+      
+      const g = gcd(ansN, comD);
+      const finalN = ansN / g;
+      const finalD = comD / g;
+
+      const whole = Math.floor(finalN / finalD);
+      const remN = finalN % finalD;
+
+      // 帯分数の整数が0になるケース（whole === 0）を避けるため、真分数として扱うか再試行
+      if (whole === 0) {
+        b8.push({
+          type: "分数同士の計算 (分数)",
+          kind: "fraction_calc_improper",
+          answers: [finalN, finalD],
+          isMixedAnswer: false,
+          promptHtml: `
+            <span class="fraction"><span class="numerator">${n1}</span><span class="denominator">${d1}</span></span>
+            <span style="font-size:28px; margin:0 4px;">${isPlus ? '＋' : '−'}</span>
+            <span class="fraction"><span class="numerator">${n2}</span><span class="denominator">${d2}</span></span>
+          `,
+          answerHtml: `
+            <span class="fraction"><span class="numerator">${finalN}</span><span class="denominator">${finalD}</span></span>
+          `
+        });
+      } else if (remN > 0) {
+        b8.push({
+          type: "分数同士の計算 (帯分数)",
+          kind: "fraction_calc_mixed_ans",
+          answers: [whole, remN, finalD],
+          isMixedAnswer: true,
+          promptHtml: `
+            <span class="fraction"><span class="numerator">${n1}</span><span class="denominator">${d1}</span></span>
+            <span style="font-size:28px; margin:0 4px;">${isPlus ? '＋' : '−'}</span>
+            <span class="fraction"><span class="numerator">${n2}</span><span class="denominator">${d2}</span></span>
+          `,
+          answerHtml: `
+            <span style="font-size:28px; font-weight:800; margin-right:4px;">${whole}</span>
+            <span class="fraction"><span class="numerator">${remN}</span><span class="denominator">${finalD}</span></span>
+          `
+        });
+      } else {
+        // 整数のみになる場合
+        b8.push({
+          type: "分数同士の計算 (整数)",
+          kind: "fraction_calc_improper",
+          answers: [finalN, finalD],
+          isMixedAnswer: false,
+          promptHtml: `
+            <span class="fraction"><span class="numerator">${n1}</span><span class="denominator">${d1}</span></span>
+            <span style="font-size:28px; margin:0 4px;">${isPlus ? '＋' : '−'}</span>
+            <span class="fraction"><span class="numerator">${n2}</span><span class="denominator">${d2}</span></span>
+          `,
+          answerHtml: `
+            <span class="fraction"><span class="numerator">${finalN}</span><span class="denominator">${finalD}</span></span>
+          `
+        });
+      }
+    } else {
+      // 帯分数を含む計算問題（整数が必ず1以上になるように w1, w2 を設定）
+      const isPlus = b8.length === 1;
+      const w1 = rand(1, 3);
+      const w2 = rand(1, 3);
+      const d1 = rand(2, 5);
+      const d2 = rand(2, 5);
+      if (d1 === d2) continue;
+      const n1 = rand(1, d1 - 1);
+      const n2 = rand(1, d2 - 1);
+      const comD = lcm(d1, d2);
+      
+      const totalNum1 = w1 * d1 + n1;
+      const totalNum2 = w2 * d2 + n2;
+      const expN1 = totalNum1 * (comD / d1);
+      const expN2 = totalNum2 * (comD / d2);
+      
+      if (!isPlus && expN1 <= expN2) continue;
+
+      const ansN = isPlus ? (expN1 + expN2) : (expN1 - expN2);
+      const g = gcd(ansN, comD);
+      const finalN = ansN / g;
+      const finalD = comD / g;
+
+      const whole = Math.floor(finalN / finalD);
+      const remN = finalN % finalD;
+
+      // 整数部分が0になってしまう場合はスキップしてやり直す
+      if (whole === 0) continue;
+
+      if (remN > 0) {
+        b8.push({
+          type: isPlus ? "分数同士の計算 (帯分数・足し算)" : "分数同士の計算 (帯分数・引き算)",
+          kind: "fraction_calc_mixed_ans",
+          answers: [whole, remN, finalD],
+          isMixedAnswer: true,
+          promptHtml: `
+            <span style="font-size:28px; font-weight:800; margin-right:4px;">${w1}</span>
+            <span class="fraction"><span class="numerator">${n1}</span><span class="denominator">${d1}</span></span>
+            <span style="font-size:28px; margin:0 4px;">${isPlus ? '＋' : '−'}</span>
+            <span style="font-size:28px; font-weight:800; margin-right:4px;">${w2}</span>
+            <span class="fraction"><span class="numerator">${n2}</span><span class="denominator">${d2}</span></span>
+          `,
+          answerHtml: `
+            <span style="font-size:28px; font-weight:800; margin-right:4px;">${whole}</span>
+            <span class="fraction"><span class="numerator">${remN}</span><span class="denominator">${finalD}</span></span>
+          `
+        });
+      } else {
+        // 割り切れて整数になる場合
+        b8.push({
+          type: isPlus ? "分数同士の計算 (整数・足し算)" : "分数同士の計算 (整数・引き算)",
+          kind: "fraction_calc_improper",
+          answers: [finalN, finalD],
+          isMixedAnswer: false,
+          promptHtml: `
+            <span style="font-size:28px; font-weight:800; margin-right:4px;">${w1}</span>
+            <span class="fraction"><span class="numerator">${n1}</span><span class="denominator">${d1}</span></span>
+            <span style="font-size:28px; margin:0 4px;">${isPlus ? '＋' : '−'}</span>
+            <span style="font-size:28px; font-weight:800; margin-right:4px;">${w2}</span>
+            <span class="fraction"><span class="numerator">${n2}</span><span class="denominator">${d2}</span></span>
+          `,
+          answerHtml: `
+            <span class="fraction"><span class="numerator">${finalN}</span><span class="denominator">${finalD}</span></span>
+          `
+        });
+      }
+    }
+  }
   q.push(...b8);
+
+  // 9. 数直線文章題トレーニング（2問）
+  const b9 = [makeWordProblem(), makeWordProblem()];
+  q.push(...b9);
 
   TOTAL = q.length;
   return q;
@@ -1477,13 +1625,14 @@ function showStart() {
       <p>
         段階的に難易度が上がります：<br>
         1. 1桁の足し算・引き算 (2問)<br>
-        2. 掛け算 (4問)<br>
-        3. 2桁と1桁の計算 (4問)<br>
+        2. 掛け算 (3問)<br>
+        3. 2桁と1桁の計算 (2問)<br>
         4. 2桁同士の計算 (3問)<br>
         5. 約分 (2問)<br>
         6. 通分（共通の分母） (2問)<br>
         7. 通分（通分後の分子） (1問)<br>
-        8. 数直線文章題 (2問)
+        8. 分数同士の計算 (3問)<br>
+        9. 数直線文章題 (2問)
       </p>
       <button id="btn-start" class="btn-primary">
         スタート
@@ -1626,6 +1775,8 @@ function renderQuestion() {
     const qTextClass = (q.kind === "common_numerators") ? "q-text full-width" : "q-text";
 
     let inputHtml = "";
+    let showScratchpad = false;
+
     if (q.kind === "standard") {
       inputHtml = `<div id="box-0" class="answer-box active" data-index="0" style="min-width:100px;"></div>`;
     } else if (q.kind === "reduction") {
@@ -1663,6 +1814,54 @@ function renderQuestion() {
           </div>
         </div>
       `;
+    } else if (q.kind === "fraction_calc_improper") {
+      showScratchpad = true;
+      inputHtml = `
+        <div class="fraction">
+          <div class="numerator">
+            <div id="box-0" class="answer-box active" data-index="0"></div>
+          </div>
+          <div class="denominator">
+            <div id="box-1" class="answer-box" data-index="1"></div>
+          </div>
+        </div>
+      `;
+    } else if (q.kind === "fraction_calc_mixed_ans") {
+      showScratchpad = true;
+      inputHtml = `
+        <div style="display:inline-flex; align-items:center;">
+          <div id="box-0" class="answer-box active" data-index="0" style="min-width:54px; margin-right:6px;"></div>
+          <div class="fraction">
+            <div class="numerator">
+              <div id="box-1" class="answer-box" data-index="1"></div>
+            </div>
+            <div class="denominator">
+              <div id="box-2" class="answer-box" data-index="2"></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    let scratchpadHtml = "";
+    if (showScratchpad) {
+      scratchpadHtml = `
+        <div class="scratchpad-card" style="margin-top:16px;">
+          <div class="scratchpad-header">
+            <div class="scratchpad-title">
+              ✍ ひっ算・計算メモスペース
+            </div>
+            <div class="scratchpad-tools">
+              <button class="tool-btn active" id="tool-pen">ペン</button>
+              <button class="tool-btn" id="tool-eraser">消しゴム</button>
+              <button class="tool-btn" id="tool-clear">全消去</button>
+            </div>
+          </div>
+          <div class="scratchpad-container" style="height:200px;">
+            <canvas id="scratch-canvas" class="scratchpad-canvas"></canvas>
+          </div>
+        </div>
+      `;
     }
 
     document.getElementById("screen").innerHTML = `
@@ -1685,8 +1884,11 @@ function renderQuestion() {
 
           <div class="question-container">
             <span class="${qTextClass}">${q.promptHtml}</span>
+            <span style="font-size:32px; margin:0 4px;">＝</span>
             ${inputHtml}
           </div>
+
+          ${scratchpadHtml}
 
           <div id="feedback" class="feedback"></div>
         </div>
@@ -1713,6 +1915,31 @@ function renderQuestion() {
         </div>
       </div>
     `;
+
+    if (showScratchpad) {
+      const canvasEl = document.getElementById("scratch-canvas");
+      scratchpadInstance = new Scratchpad(canvasEl);
+
+      const penBtn = document.getElementById("tool-pen");
+      const eraserBtn = document.getElementById("tool-eraser");
+      const clearBtn = document.getElementById("tool-clear");
+
+      penBtn.addEventListener("click", () => {
+        scratchpadInstance.setMode("pen");
+        penBtn.classList.add("active");
+        eraserBtn.classList.remove("active");
+      });
+
+      eraserBtn.addEventListener("click", () => {
+        scratchpadInstance.setMode("eraser");
+        eraserBtn.classList.add("active");
+        penBtn.classList.remove("active");
+      });
+
+      clearBtn.addEventListener("click", () => {
+        scratchpadInstance.clear();
+      });
+    }
   }
 
   const boxes = document.querySelectorAll(".answer-box");
@@ -1751,17 +1978,17 @@ function renderQuestion() {
       if (currentVal.length >= 5) return;
       userInputs[activeBoxIndex] += k;
 
-      if (userInputs.length > 1 && activeBoxIndex === 0) {
-        const expectedLen = String(q.answers[0]).length;
-        if (userInputs[0].length >= expectedLen) {
-          activeBoxIndex = 1;
+      if (userInputs.length > 1 && activeBoxIndex < userInputs.length - 1) {
+        const expectedLen = String(q.answers[activeBoxIndex]).length;
+        if (userInputs[activeBoxIndex].length >= expectedLen) {
+          activeBoxIndex++;
         }
       }
     }
 
     boxes.forEach((b, idx) => {
       b.textContent = userInputs[idx];
-      if (q.kind === "word_problem") {
+      if (q.kind === "word_problem" || q.kind.startsWith("fraction_calc")) {
         b.classList.toggle("filled", userInputs[idx] !== "");
       }
     });
@@ -1810,7 +2037,8 @@ function celebrate(isLarge = false) {
         particleCount: count,
         spread: 80,
         startVelocity: 35,
-        origin: { y: .65 }
+        origin: { y: .65 },
+        zIndex: 100000 // 最上層に設定
       });
 
       setTimeout(() => {
@@ -1818,7 +2046,8 @@ function celebrate(isLarge = false) {
           particleCount: Math.round(count * 0.7),
           spread: 120,
           startVelocity: 28,
-          origin: { x: .15, y: .7 }
+          origin: { x: .15, y: .7 },
+          zIndex: 100000
         });
       }, 120);
 
@@ -1827,7 +2056,8 @@ function celebrate(isLarge = false) {
           particleCount: Math.round(count * 0.7),
           spread: 120,
           startVelocity: 28,
-          origin: { x: .85, y: .7 }
+          origin: { x: .85, y: .7 },
+          zIndex: 100000
         });
       }, 220);
     } catch(e) {}
@@ -1895,17 +2125,17 @@ function showWrongModal() {
         </div>
         <div class="modal-label">正解の数値</div>
         <div class="modal-answer-list">${answersHtml}</div>
-        <button class="modal-button" id="modal-next">次の問題へ (Enter)</button>
+        <button class="modal-button" id="modal-next">もう一度挑戦する (Enter)</button>
       </div>
     `;
   } else {
     overlay.innerHTML = `
       <div class="modal" role="dialog" aria-modal="true">
         <div class="modal-title">❌ 不正解</div>
-        <div class="modal-question">${q.promptHtml}</div>
+        <div class="modal-question">${q.promptHtml} ＝</div>
         <div class="modal-label">正しい答え</div>
         <div class="modal-answer">${q.answerHtml}</div>
-        <button class="modal-button" id="modal-next">次の問題へ (Enter)</button>
+        <button class="modal-button" id="modal-next">もう一度挑戦する (Enter)</button>
       </div>
     `;
   }
@@ -1915,7 +2145,10 @@ function showWrongModal() {
   const closeModal = () => {
     removeKeyListener();
     overlay.remove();
-    nextQuestion();
+    answered = false;
+    userInputs = new Array(q.answers.length).fill("");
+    activeBoxIndex = 0;
+    renderQuestion();
   };
 
   const nextBtn = overlay.querySelector("#modal-next");
@@ -1989,7 +2222,7 @@ function showCompletionModal() {
   } catch(e) {}
 }
 
-/* 次の問題へ */
+/* 次の問題へ進む */
 function nextQuestion() {
   current++;
   if (current >= TOTAL) {
