@@ -427,7 +427,7 @@ h1 {
   color: #5ed6a0;
 }
 
-/* 手書きメモエリア (Scratchpad) */
+/* 手書きメモエリア (Scratchpad) - iPadルーペ・図形防止強化 */
 .scratchpad-card {
   background: #141821;
   border: 1px solid #2e3648;
@@ -493,12 +493,19 @@ h1 {
   touch-action: none;
   cursor: crosshair;
   box-shadow: inset 0 2px 6px rgba(0,0,0,0.06);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .scratchpad-canvas {
   width: 100%;
   height: 100%;
   display: block;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 /* テンキー・キーボード */
@@ -648,7 +655,7 @@ h1 {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  z-index: 99999; /* 最上層のレイヤーに設定 */
+  z-index: 99999;
   backdrop-filter: blur(6px);
 }
 
@@ -1184,7 +1191,7 @@ class Scratchpad {
   }
 
   startDrawing(e) {
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
     this.isDrawing = true;
     const pos = this.getPos(e);
     this.lastX = pos.x;
@@ -1193,7 +1200,7 @@ class Scratchpad {
 
   draw(e) {
     if (!this.isDrawing) return;
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
     const pos = this.getPos(e);
     this.ctx.beginPath();
     this.ctx.moveTo(this.lastX, this.lastY);
@@ -1213,15 +1220,21 @@ class Scratchpad {
     this.lastY = pos.y;
   }
 
-  stopDrawing() {
+  stopDrawing(e) {
+    if (e && e.cancelable) e.preventDefault();
     this.isDrawing = false;
   }
 
   bindEvents() {
-    this.canvas.addEventListener("pointerdown", (e) => this.startDrawing(e));
-    this.canvas.addEventListener("pointermove", (e) => this.draw(e));
-    this.canvas.addEventListener("pointerup", () => this.stopDrawing());
-    this.canvas.addEventListener("pointerleave", () => this.stopDrawing());
+    this.canvas.addEventListener("pointerdown", (e) => this.startDrawing(e), { passive: false });
+    this.canvas.addEventListener("pointermove", (e) => this.draw(e), { passive: false });
+    this.canvas.addEventListener("pointerup", (e) => this.stopDrawing(e), { passive: false });
+    this.canvas.addEventListener("pointerleave", (e) => this.stopDrawing(e), { passive: false });
+    this.canvas.addEventListener("pointercancel", (e) => this.stopDrawing(e), { passive: false });
+
+    this.canvas.addEventListener("touchstart", (e) => { if (e.cancelable) e.preventDefault(); }, { passive: false });
+    this.canvas.addEventListener("touchmove", (e) => { if (e.cancelable) e.preventDefault(); }, { passive: false });
+    this.canvas.addEventListener("touchend", (e) => { if (e.cancelable) e.preventDefault(); }, { passive: false });
   }
 }
 
@@ -1492,7 +1505,6 @@ function makeQuestions() {
       const whole = Math.floor(finalN / finalD);
       const remN = finalN % finalD;
 
-      // 帯分数の整数が0になるケース（whole === 0）を避けるため、真分数として扱うか再試行
       if (whole === 0) {
         b8.push({
           type: "分数同士の計算 (分数)",
@@ -1525,7 +1537,6 @@ function makeQuestions() {
           `
         });
       } else {
-        // 整数のみになる場合
         b8.push({
           type: "分数同士の計算 (整数)",
           kind: "fraction_calc_improper",
@@ -1542,7 +1553,6 @@ function makeQuestions() {
         });
       }
     } else {
-      // 帯分数を含む計算問題（整数が必ず1以上になるように w1, w2 を設定）
       const isPlus = b8.length === 1;
       const w1 = rand(1, 3);
       const w2 = rand(1, 3);
@@ -1568,7 +1578,6 @@ function makeQuestions() {
       const whole = Math.floor(finalN / finalD);
       const remN = finalN % finalD;
 
-      // 整数部分が0になってしまう場合はスキップしてやり直す
       if (whole === 0) continue;
 
       if (remN > 0) {
@@ -1590,7 +1599,6 @@ function makeQuestions() {
           `
         });
       } else {
-        // 割り切れて整数になる場合
         b8.push({
           type: isPlus ? "分数同士の計算 (整数・足し算)" : "分数同士の計算 (整数・引き算)",
           kind: "fraction_calc_improper",
@@ -2047,7 +2055,7 @@ function celebrate(isLarge = false) {
         spread: 80,
         startVelocity: 35,
         origin: { y: .65 },
-        zIndex: 100000 // 最上層に設定
+        zIndex: 100000
       });
 
       setTimeout(() => {
