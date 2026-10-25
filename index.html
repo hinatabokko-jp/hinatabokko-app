@@ -500,7 +500,7 @@ canvas {
 </aside>
 
 <div class="app">
-<header><h1 class="title">小学５年生 漢字</h1><div class="subtitle" id="headerSubtitle">第１章 〜 第１６章</div></header>
+<header><h1 class="title">小学５年生 漢字</h1><div class="subtitle" id="headerSubtitle">第１章 〜 第１０章</div></header>
 
 <div id="sectionSelectArea"><div class="section-grid" id="sectionGrid"></div></div>
 
@@ -584,7 +584,7 @@ canvas {
 </div>
 
 <script>
-// 既存問題データと追加問題データを統合
+// 新しい問題データに差し替え（全100問）
 const rawMondaiData = [
   {"kanji":["許","可"],"mondai":"（きょ）（か）を 得る。","yomikata":"きょかをえる"},
   {"kanji":["貿","易"],"mondai":"（ぼう）（えき）が 盛んだ。","yomikata":"ぼうえきがさかんだ"},
@@ -647,7 +647,7 @@ const rawMondaiData = [
   {"kanji":["防","止"],"mondai":"事故を （ぼう）（し）する。","yomikata":"じこを ぼうしする"},
   {"kanji":["志","望"],"mondai":"（し）（ぼう）校に 合格する。","yomikata":"しぼうこうに ごうかくする"},
   {"kanji":["飛","行","機"],"mondai":"（ひ）（こう）（き）が 飛ぶ。","yomikata":"ひこうきが とぶ"},
-  {"kanji":["险"],"mondai":"（けわ）しい 表情。","yomikata":"けんかして けんあくな むーどになる。"},
+  {"kanji":["険"],"mondai":"（けわ）しい 表情。","yomikata":"けんかして けんあくな むーどになる。"},
   {"kanji":["態","度"],"mondai":"相手への （たい）（ど）を 改める。","yomikata":"あいてへの たいどを 改める。"},
   {"kanji":["経","過"],"mondai":"時間が （けい）（か）する。","yomikata":"じかんが けいかする"},
   {"kanji":["情"],"mondai":"（なさ）けが 深い。","yomikata":"なさけが ふかい"},
@@ -724,7 +724,6 @@ const rawMondaiData = [
   {"kanji":["提","案"],"mondai":"学級会で 席替えを （てい）（あん）した。","yomikata":"がっきゅうかいで せきがえを ていあんした"},
   {"kanji":["検","証"],"mondai":"現場（けん）（しょう）が 行われる。","yomikata":"げんばけんしょうが おこなわれる"},
   {"kanji":["花","弁"],"mondai":"（か）（べん）の 数を 数える。","yomikata":"かべんのかずを かぞえる"},
-  // 以下、tsuika.json から追加したデータ
   {"kanji":["条","文"],"mondai":"憲法の（じょう）（ぶん）を読む。","yomikata":"けんぽうの じょうぶんを よむ"},
   {"kanji":["保"],"mondai":"長く人気を（たも）つ。","yomikata":"ながく にんきを たもつ"},
   {"kanji":["効"],"mondai":"（き）き目がある。","yomikata":"ききめ がある"},
@@ -746,7 +745,8 @@ const rawMondaiData = [
   {"kanji":["価","格"],"mondai":"土地の（か）（かく）が安くなる。","yomikata":"とちの かかくが やすくなる"},
   {"kanji":["禁","句"],"mondai":"（きん）（く）を口にしない。","yomikata":"きんくを くちにしない"},
   {"kanji":["雑","音"],"mondai":"ラジオに（ざつ）（おん）が入る。","yomikata":"らじおに ざつおんがはいる"},
-  {"kanji":["自","画","自","賛"],"mondai":"（じ）（が）（じ）（さん）する。","yomikata":"じがじさん する"}
+  {"kanji":["自","画","自","賛"],"mondai":"（じ）（が）（じ）（さん）する。","yomikata":"じがじさん する"},
+  {"kanji":["採"],"mondai":"明かりを（と）る窓だ。","yomikata":"あかりを とる まどだ"}
 ];
 
 function parseMondaiItem(item) {
