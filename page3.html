@@ -76,7 +76,6 @@ body {
   transition: transform .2s ease, opacity .2s ease;
 }
 
-/* メニューが開いているとき */
 .menu-button.open span:nth-child(1) {
   transform: translateY(7px) rotate(45deg);
 }
@@ -89,7 +88,6 @@ body {
   transform: translateY(-7px) rotate(-45deg);
 }
 
-/* サイドバー */
 .sidebar {
   position: fixed;
   top: 0;
@@ -163,7 +161,6 @@ body {
   color: #b9c5ff;
 }
 
-/* サイドバー展開時の背景 */
 .menu-overlay {
   position: fixed;
   inset: 0;
@@ -256,7 +253,6 @@ h1 {
   border: 1px solid rgba(110,231,183,0.25);
 }
 
-/* 問題文ボックス（複数行問題・スペース保持対応） */
 .problem-box {
   background: #212836;
   border: 1px solid #343e52;
@@ -273,7 +269,6 @@ h1 {
   word-break: break-word;
 }
 
-/* 手書き回答（キャンバス）エリア */
 .scratchpad-card {
   background: #141821;
   border: 1px solid #2e3648;
@@ -337,9 +332,6 @@ h1 {
   position: relative;
   overflow: hidden;
   touch-action: none;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
   cursor: crosshair;
   box-shadow: inset 0 2px 6px rgba(0,0,0,0.25);
 }
@@ -349,10 +341,8 @@ h1 {
   height: 100%;
   display: block;
   touch-action: none;
-  -webkit-touch-callout: none;
 }
 
-/* 答えを見るボタン */
 .show-answer-btn {
   display: block;
   width: 100%;
@@ -376,7 +366,6 @@ h1 {
   transform: translateY(2px);
 }
 
-/* モーダル */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -401,14 +390,8 @@ h1 {
 }
 
 @keyframes modalIn {
-  from {
-    opacity: 0;
-    transform: scale(.88) translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+  from { opacity: 0; transform: scale(.88) translateY(12px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .modal-title {
@@ -451,9 +434,9 @@ h1 {
   margin: 10px 0 24px;
   letter-spacing: .02em;
   word-break: break-all;
+  white-space: pre-wrap;
 }
 
-/* ふりがな用フォントスタイル */
 .ruby {
   font-size: 0.78em;
   font-weight: 600;
@@ -492,21 +475,18 @@ h1 {
   box-shadow: 0 4px 15px rgba(239,68,68,0.3);
 }
 
-.start,
-.result {
+.start, .result {
   text-align: center;
   padding: 10px 0;
 }
 
-.start p,
-.result p {
+.start p, .result p {
   color: #adb5c4;
   line-height: 1.7;
   font-size: 15px;
   margin-bottom: 20px;
 }
 
-/* セット選択グリッド */
 .set-selection-title {
   font-size: 16px;
   font-weight: 700;
@@ -541,10 +521,6 @@ h1 {
   transform: translateY(-2px);
 }
 
-.set-card:active {
-  transform: translateY(0);
-}
-
 .set-card-header {
   display: flex;
   justify-content: space-between;
@@ -571,8 +547,7 @@ h1 {
   color: #94a3b8;
 }
 
-.start button,
-.result button {
+.start button, .result button {
   display: block;
   width: 100%;
   max-width: 380px;
@@ -613,86 +588,126 @@ h1 {
   margin: 12px 0;
 }
 
+/* JSON管理画面用スタイル */
+.admin-container {
+  text-align: left;
+}
+.admin-toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.admin-list {
+  max-height: 320px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding-right: 4px;
+}
+.admin-item {
+  background: #212836;
+  border: 1px solid #343e52;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.admin-item-info {
+  flex: 1;
+  overflow: hidden;
+}
+.admin-item-q {
+  font-size: 14px;
+  font-weight: 700;
+  color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.admin-item-a {
+  font-size: 12px;
+  color: #34d399;
+  margin-top: 4px;
+}
+.admin-actions {
+  display: flex;
+  gap: 6px;
+}
+.btn-small {
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 0;
+  cursor: pointer;
+}
+.btn-edit { background: #3b82f6; color: #fff; }
+.btn-delete { background: #ef4444; color: #fff; }
+
+.form-group {
+  margin-bottom: 14px;
+}
+.form-label {
+  display: block;
+  font-size: 13px;
+  color: #9da6b6;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+.form-textarea {
+  width: 100%;
+  background: #222938;
+  border: 1px solid #343e52;
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: #f2f4f8;
+  font-size: 15px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+}
+.form-textarea:focus {
+  outline: none;
+  border-color: #10b981;
+}
+
 @media(max-width:480px) {
-  body {
-    padding: 10px;
-  }
-
-  .app {
-    padding: 18px 14px;
-    border-radius: 20px;
-  }
-
-  .scratchpad-container {
-    height: 200px;
-  }
-
-  .modal {
-    padding: 24px 18px;
-  }
-
-  .menu-button {
-    top: 12px;
-    left: 12px;
-  }
-
-  .set-grid {
-    grid-template-columns: 1fr;
-  }
+  body { padding: 10px; }
+  .app { padding: 18px 14px; border-radius: 20px; }
+  .scratchpad-container { height: 200px; }
+  .modal { padding: 24px 18px; }
+  .menu-button { top: 12px; left: 12px; }
+  .set-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 
 <body>
 
-<!-- ハンバーガーメニュー -->
-<button
-  id="menu-button"
-  class="menu-button"
-  aria-label="メニューを開く"
-  aria-expanded="false"
-  type="button"
->
-  <span></span>
-  <span></span>
-  <span></span>
+<button id="menu-button" class="menu-button" aria-label="メニューを開く" aria-expanded="false" type="button">
+  <span></span><span></span><span></span>
 </button>
 
-<!-- サイドバー -->
 <nav id="sidebar" class="sidebar" aria-label="サイトメニュー">
   <div class="sidebar-title">メニュー</div>
   <div class="sidebar-menu">
-    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/">
-      漢字テスト
-    </a>
-    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/page2">
-      計算トレーニング
-    </a>
-    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/page1">
-      社会科トレーニング
-    </a>
-    <a class="sidebar-link current" href="https://hinatabokko-jp.github.io/hinatabokko-app/page3">
-      理科トレーニング
-    </a>
-    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/page4">
-      百人一首
-    </a>
-    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app2/page21">
-      AirChat 1on1
-    </a>
-    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app2/page22">
-      AirChat Group
-    </a>
-    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app2/page26">
-      おかあさん
-    </a>
+    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/">漢字テスト</a>
+    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/page2">計算トレーニング</a>
+    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/page1">社会科トレーニング</a>
+    <a class="sidebar-link current" href="https://hinatabokko-jp.github.io/hinatabokko-app/page3">理科トレーニング</a>
+    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app/page4">百人一首</a>
+    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app2/page21">AirChat 1on1</a>
+    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app2/page22">AirChat Group</a>
+    <a class="sidebar-link" href="https://hinatabokko-jp.github.io/hinatabokko-app2/page26">おかあさん</a>
   </div>
 </nav>
 
-<!-- サイドバーの背景 -->
 <div id="menu-overlay" class="menu-overlay"></div>
 
-<!-- メインアプリ -->
 <div class="app">
   <div id="screen"></div>
 </div>
@@ -700,7 +715,6 @@ h1 {
 <script>
 let audioCtx = null;
 
-/* ハンバーガーメニューの操作 */
 const menuButton = document.getElementById("menu-button");
 const sidebar = document.getElementById("sidebar");
 const menuOverlay = document.getElementById("menu-overlay");
@@ -724,25 +738,18 @@ function closeMenu() {
 menuButton.addEventListener("click", toggleMenu);
 menuOverlay.addEventListener("click", closeMenu);
 
-/* オーディオ処理 */
 function initAudio() {
   if (!audioCtx) {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (AudioContextClass) {
-      audioCtx = new AudioContextClass();
-    }
+    if (AudioContextClass) { audioCtx = new AudioContextClass(); }
   }
-  if (audioCtx && audioCtx.state === "suspended") {
-    audioCtx.resume();
-  }
+  if (audioCtx && audioCtx.state === "suspended") { audioCtx.resume(); }
 }
 
-/* ファンファーレ音 */
 function playCorrectSound() {
   try {
     initAudio();
     if (!audioCtx) return;
-
     const now = audioCtx.currentTime;
     const notes = [
       [523.25, 0.00, 0.12, 0.22],
@@ -751,21 +758,17 @@ function playCorrectSound() {
       [1046.50, 0.26, 0.50, 0.30],
       [1318.51, 0.26, 0.50, 0.20]
     ];
-
     notes.forEach(([freq, startOffset, duration, vol]) => {
       const startTime = now + startOffset;
       const stopTime = startTime + duration;
-
       const osc1 = audioCtx.createOscillator();
       const gain1 = audioCtx.createGain();
       osc1.type = "sine";
       osc1.frequency.setValueAtTime(freq, startTime);
       gain1.gain.setValueAtTime(vol, startTime);
       gain1.gain.exponentialRampToValueAtTime(0.001, stopTime);
-      osc1.connect(gain1);
-      gain1.connect(audioCtx.destination);
-      osc1.start(startTime);
-      osc1.stop(stopTime);
+      osc1.connect(gain1); gain1.connect(audioCtx.destination);
+      osc1.start(startTime); osc1.stop(stopTime);
 
       const osc2 = audioCtx.createOscillator();
       const gain2 = audioCtx.createGain();
@@ -773,64 +776,16 @@ function playCorrectSound() {
       osc2.frequency.setValueAtTime(freq, startTime);
       gain2.gain.setValueAtTime(vol * 0.4, startTime);
       gain2.gain.exponentialRampToValueAtTime(0.001, stopTime);
-      osc2.connect(gain2);
-      gain2.connect(audioCtx.destination);
-      osc2.start(startTime);
-      osc2.stop(stopTime);
+      osc2.connect(gain2); gain2.connect(audioCtx.destination);
+      osc2.start(startTime); osc2.stop(stopTime);
     });
   } catch (e) {}
 }
 
-/* 新しい理科問題データ (全34問) */
-const rawQuestions = [
-  { mondai: "０℃よりも低い気温の言い表し方（３種類）", kotae: "マイナス,零下(れいか),氷点下" },
-  { mondai: "夏の大三角形は、以下の３つの１等星を結んでできる。\n・こと座の（   ）←織姫(おりひめ)星\n・わし座の（   ）←彦星(ひこぼし)\n・はくちょう座の（   ）", kotae: "ベガ、アルタイル、デネブ" },
-  { mondai: "冬の大三角形は、以下の３つの１等星を結んでできる。\n・オリオン座の（   ）\n・こいぬ座の（   ）\n・おおいぬ座の（   ）", kotae: "ペテルギウス,プロキオン,シリウス" },
-  { mondai: "（   ）は、水が姿を変えたもので、\n空気のように目に見えない。", kotae: "水蒸気（すいじょうき）" },
-  { mondai: "水が水蒸気に姿を変えることを、（   ）という。", kotae: "蒸発（じょうはつ）" },
-  { mondai: "水を熱して沸き立つことを（   ）という。", kotae: "沸騰（ふっとう）" },
-  { mondai: "空気中の水蒸気が、冷たい物にふれて、\n水のつぶとなって物につくことを（   ）という。", kotae: "結露（けつろ）" },
-  { mondai: "水を熱する実験のとき、\n水が急に沸き立ってふき出すことを防ぐために、\n水の中に（   ）を入れる。", kotae: "ふっとう石（ふっとうせき）" },
-  { mondai: "水を冷やしたとき、\n凍り始めてから全部が氷になるまで、\n温度は（     ）。", kotae: "０℃のまま変わらない" },
-  { mondai: "空全体を１０としたときに占める雲の量が、\n０～（  ）のときは晴れと決めている。", kotae: "８" },
-  { mondai: "空全体を１０としたときに占める雲の量が、\n（  ）～１０のときは曇り（くもり）と決めている。", kotae: "９" },
-  { mondai: "種子から芽や根が出ることを（   ）という。", kotae: "発芽" },
-  { mondai: "必要な条件を調べる実験では、\n調べたい条件を（    ）変えて、\n他の条件は全て同じにする。", kotae: "１つだけ" },
-  { mondai: "種子の発芽には、（ ① ）、（ ② ）、\n発芽に適した（ ③ ）の３つの条件が必要である。", kotae: "①水,②空気,③温度" },
-  { mondai: "植物の生長に必要な条件は、\n（   ）と（   ）", kotae: "肥料、日光" },
-  { mondai: "でんぷんという養分があるかどうかを調べることができる、\n薄茶色の液体を（   ）という。", kotae: "ヨウ素液" },
-  { mondai: "ヨウ素液は、でんぷんがあると（ ① 色）に変わる。\nこれを（ ② 反応）という。", kotae: "青むらさき色,ヨウ素デンプン反応" },
-  { mondai: "肥料を含まない土には、\n（    ）、赤玉土、パーライトがある。", kotae: "バーミキュライト" },
-  { mondai: "糸や紐(ひも）、棒(ぼう）などに\nおもりをつけて振れるようにしたものを（   ）という。", kotae: "ふりこ" },
-  { mondai: "ふりこが、糸をつるす点（支点）から、\nおもりの中心までの長さを（   ）という。", kotae: "ふりこの長さ" },
-  { mondai: "ふりこが１往復する時間は、\nふりはばやおもりの重さに関係なく、\n（   ）によって変わる。", kotae: "ふりこの長さ" },
-  { mondai: "ふりこが１往復する時間は、\nふりはばやおもりの重さに関係なく、\n（   ）によって変わる。", kotae: "ふりこの長さ" },
-  { mondai: "ふりこの長のさを長くすると、\n１往復する時間は（   なる）。", kotae: "長くなる" },
-  { mondai: "ふりこの\n（ ① ）や （ ② ）を変えても\n１往復する時間は変わらない。", kotae: "①ふれはば,②おもりの重さ" },
-  { mondai: "ふりこを利用したものに、ふりこ時計がある。\nおもりの位置を（   に動かし）、\nふりこの長さを変えることで、１往復する時間を変えることができる。", kotae: "上下に動かし" },
-  { mondai: "振り子時計は、\n気温が変わると振り子の長さが少し変わり、時計がずれることがあります。\nそこで、種類の違う金属を組み合わせ、\nそれぞれの金属の伸び縮みする大きさの違いを利用して、\n振り子の長さができるだけ変わらないようにした仕組みが考えられました。\nこの、温度が変わっても時計がずれにくくなるよう工夫された振り子を、\n何というでしょう？", kotae: "グリッドアイアン振り子" },
-  { mondai: "メダカの誕生(たんじょう)\nめすのたまご(卵(らん)）と、おすの精子が結びつくことを受精といい、\n受精した卵を（    ）という。", kotae: "受精卵（じゅせいらん）" },
-  { mondai: "メダカのおすとめすは\n（    ）や（    ）の形で見分けることができる。", kotae: "せびれ,しりびれ" },
-  { mondai: "天気の変化のきまり\n春や秋のころ、日本付近では、雲がおよそ\n（ ① ）から（ ② ）へ動くことが多い。\nそれにともなって、\n天気もおよそ（ ① ）から（ ② ）へ変化していくことが多い。", kotae: "①西,②東" },
-  { mondai: "台風が近づくと、強い（ ① ）がふいたり、\n短い時間に多くの（ ② ）がふったりする。", kotae: "①風,②雨" },
-  { mondai: "顕微鏡（けんびきょう）\n明るく見えるようにするためには、\n（    ）を動かす。", kotae: "反射鏡（はんしゃきょう）" },
-  { mondai: "顕微鏡（けんびきょう）\nプレパラートを置く部分を\n（    ）という。", kotae: "ステージ" },
-  { mondai: "流れる水が地面をけずるはたらきを（     ）という。", kotae: "浸食（しんしょく）" },
-  { mondai: "削った（けずった）土などを運ぶ働きを（     ）という。", kotae: "運搬（うんぱん）" },
-  { mondai: "運んできた土などを積もらせる働きを（     ）という。", kotae: "堆積（たいせき）" }
-];
-
-/* 1セットの問題数 = 10問 */
+/* 外部JSONファイル読み込み＆状態管理 */
 const QUESTIONS_PER_SET = 10;
-
-// 10問ごとにセット番号を動的に割り当て
-const questionData = rawQuestions.map((q, idx) => ({
-  id: idx + 1,
-  set: Math.floor(idx / QUESTIONS_PER_SET) + 1,
-  mondai: q.mondai,
-  kotae: q.kotae
-}));
-
+let rawQuestions = [];
+let questionData = [];
 let currentSetIndex = 1;
 let questions = [];
 let TOTAL = 10;
@@ -838,17 +793,43 @@ let current = 0;
 let score = 0;
 let scratchpadInstance = null;
 
-/* かっこ内がひらがなのみの場合にrubyタグで小さく表現する関数 */
+async function loadQuestions() {
+  try {
+    // 外部JSONファイルをフェッチ（同階層の questions.json を想定）
+    const response = await fetch('questions.json');
+    if (!response.ok) throw new Error('JSONの読み込みに失敗しました');
+    rawQuestions = await response.json();
+  } catch (err) {
+    console.warn('外部JSONの取得に失敗したため、デフォルトデータを使用します', err);
+    // フォールバック用初期データ
+    rawQuestions = [
+      { mondai: "０℃よりも低い気温の言い表し方（３種類）", kotae: "マイナス\n零下(れいか)\n氷点下" },
+      { mondai: "夏の大三角形は、以下の３つの１等星を結んでできる。\n・こと座の（   ）←織姫(おりひめ)星\n・わし座の（   ）←彦星(ひこぼし)\n・はくちょう座の（   ）", kotae: "ベガ\nアルタイル\nデネブ" }
+    ];
+  }
+  processQuestionData();
+}
+
+function processQuestionData() {
+  questionData = rawQuestions.map((q, idx) => ({
+    id: idx + 1,
+    set: Math.floor(idx / QUESTIONS_PER_SET) + 1,
+    mondai: q.mondai,
+    kotae: q.kotae
+  }));
+}
+
 function formatTextWithRuby(text) {
   if (!text) return "";
   const escaped = escapeHtml(text);
   return escaped.replace(/(?:（|\()([\u3040-\u309F]+)(?:）|\))/g, '<span class="ruby">（$1）</span>');
 }
 
-/* kotaeのカンマ(,)で改行しふりがなを適用 */
 function formatAnswer(kotaeText) {
   if (!kotaeText) return "";
-  return kotaeText.split(',').map(item => formatTextWithRuby(item.trim())).join('<br>');
+  // 改行またはカンマ区切りで展開して表示
+  const lines = kotaeText.split(/\r?\n|,/).map(item => item.trim()).filter(Boolean);
+  return lines.map(item => formatTextWithRuby(item)).join('<br>');
 }
 
 function escapeHtml(str) {
@@ -878,7 +859,6 @@ class Scratchpad {
     this.mode = "pen";
     this.points = [];
     this.dpr = window.devicePixelRatio || 1;
-
     this.initCanvas();
     this.bindEvents();
     this.setupResizeObserver();
@@ -887,7 +867,6 @@ class Scratchpad {
   initCanvas() {
     const parent = this.canvas.parentElement;
     if (!parent) return;
-
     const rect = parent.getBoundingClientRect();
     this.dpr = window.devicePixelRatio || 1;
 
@@ -905,24 +884,17 @@ class Scratchpad {
 
     this.ctx.resetTransform();
     this.ctx.scale(this.dpr, this.dpr);
-
     this.ctx.lineCap = "round";
     this.ctx.lineJoin = "round";
 
     if (tempCanvas) {
-      this.ctx.drawImage(
-        tempCanvas,
-        0, 0, tempCanvas.width, tempCanvas.height,
-        0, 0, rect.width, rect.height
-      );
+      this.ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, rect.width, rect.height);
     }
   }
 
   setupResizeObserver() {
     if ("ResizeObserver" in window) {
-      this.resizeObserver = new ResizeObserver(() => {
-        this.initCanvas();
-      });
+      this.resizeObserver = new ResizeObserver(() => { this.initCanvas(); });
       this.resizeObserver.observe(this.canvas.parentElement);
     }
   }
@@ -935,28 +907,19 @@ class Scratchpad {
     this.points = [];
   }
 
-  setMode(mode) {
-    this.mode = mode;
-  }
+  setMode(mode) { this.mode = mode; }
 
   getPos(e) {
     const rect = this.canvas.getBoundingClientRect();
-    return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    };
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
   }
 
   startDrawing(e) {
     e.preventDefault();
     this.isDrawing = true;
-
     if (e.pointerId !== undefined && typeof this.canvas.setPointerCapture === "function") {
-      try {
-        this.canvas.setPointerCapture(e.pointerId);
-      } catch (err) {}
+      try { this.canvas.setPointerCapture(e.pointerId); } catch (err) {}
     }
-
     const pos = this.getPos(e);
     this.points = [pos, pos];
     this.drawPoint(pos);
@@ -979,10 +942,8 @@ class Scratchpad {
   draw(e) {
     if (!this.isDrawing) return;
     e.preventDefault();
-
     const pos = this.getPos(e);
     this.points.push(pos);
-
     if (this.points.length < 2) return;
 
     this.ctx.beginPath();
@@ -997,17 +958,9 @@ class Scratchpad {
 
     const p1 = this.points[this.points.length - 2];
     const p2 = this.points[this.points.length - 1];
-
-    const midPoint = {
-      x: p1.x + (p2.x - p1.x) / 2,
-      y: p1.y + (p2.y - p1.y) / 2
-    };
-
+    const midPoint = { x: p1.x + (p2.x - p1.x) / 2, y: p1.y + (p2.y - p1.y) / 2 };
     const prevP = this.points[this.points.length - 3] || p1;
-    const prevMidPoint = {
-      x: prevP.x + (p1.x - prevP.x) / 2,
-      y: prevP.y + (p1.y - prevP.y) / 2
-    };
+    const prevMidPoint = { x: prevP.x + (p1.x - prevP.x) / 2, y: prevP.y + (p1.y - prevP.y) / 2 };
 
     this.ctx.moveTo(prevMidPoint.x, prevMidPoint.y);
     this.ctx.quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y);
@@ -1018,11 +971,8 @@ class Scratchpad {
     if (!this.isDrawing) return;
     this.isDrawing = false;
     this.points = [];
-
     if (e && e.pointerId !== undefined && typeof this.canvas.releasePointerCapture === "function") {
-      try {
-        this.canvas.releasePointerCapture(e.pointerId);
-      } catch (err) {}
+      try { this.canvas.releasePointerCapture(e.pointerId); } catch (err) {}
     }
   }
 
@@ -1035,9 +985,7 @@ class Scratchpad {
   }
 
   destroy() {
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect();
-    }
+    if (this.resizeObserver) { this.resizeObserver.disconnect(); }
   }
 }
 
@@ -1048,8 +996,7 @@ function showStart() {
     scratchpadInstance = null;
   }
 
-  const totalSets = Math.ceil(questionData.length / QUESTIONS_PER_SET);
-  
+  const totalSets = Math.ceil(questionData.length / QUESTIONS_PER_SET) || 1;
   let setCardsHtml = "";
   for (let s = 1; s <= totalSets; s++) {
     const setQuestions = questionData.filter(q => q.set === s);
@@ -1076,6 +1023,8 @@ function showStart() {
       <div class="set-grid">
         ${setCardsHtml}
       </div>
+
+      <button id="btn-admin" class="btn-secondary" style="margin-top:12px;">⚙️ 問題JSONデータ管理・編集</button>
     </div>
   `;
 
@@ -1086,6 +1035,126 @@ function showStart() {
       startGame(selectedSet);
     });
   });
+
+  document.getElementById("btn-admin").addEventListener("click", () => {
+    initAudio();
+    showAdminScreen();
+  });
+}
+
+/* JSONデータ管理・編集画面 */
+function showAdminScreen() {
+  renderAdminList();
+}
+
+function renderAdminList() {
+  let listHtml = "";
+  rawQuestions.forEach((q, idx) => {
+    listHtml += `
+      <div class="admin-item">
+        <div class="admin-item-info">
+          <div class="admin-item-q">#${idx + 1}: ${escapeHtml(q.mondai)}</div>
+          <div class="admin-item-a">答: ${escapeHtml(q.kotae).replace(/\n/g, ' / ')}</div>
+        </div>
+        <div class="admin-actions">
+          <button class="btn-small btn-edit" onclick="editQuestion(${idx})">編集</button>
+          <button class="btn-small btn-delete" onclick="deleteQuestion(${idx})">削除</button>
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById("screen").innerHTML = `
+    <div class="admin-container">
+      <h1>問題JSONデータ管理</h1>
+      <p style="color:#9da6b6; font-size:14px; margin-bottom:14px;">問題の追加・編集・削除を行い、JSONファイルとして出力できます。</p>
+      
+      <div class="admin-toolbar">
+        <button class="btn-primary" onclick="openQuestionForm(-1)" style="flex:1; margin:0; font-size:15px; padding:12px;">➕ 新規問題を追加</button>
+        <button class="btn-secondary" onclick="exportJsonFile()" style="flex:1; margin:0; font-size:15px; padding:12px;">📥 JSON出力</button>
+      </div>
+
+      <div class="admin-list">
+        ${listHtml || '<div style="color:#9da6b6; text-align:center; padding:20px;">問題がありません</div>'}
+      </div>
+
+      <button class="btn-secondary" onclick="showStart()">⬅️ トレーニング選択へもどる</button>
+    </div>
+  `;
+}
+
+window.deleteQuestion = function(idx) {
+  if (confirm(`問題 #${idx + 1} を削除しますか？`)) {
+    rawQuestions.splice(idx, 1);
+    processQuestionData();
+    renderAdminList();
+  }
+};
+
+window.editQuestion = function(idx) {
+  openQuestionForm(idx);
+};
+
+function openQuestionForm(idx) {
+  const isEdit = idx >= 0;
+  const target = isEdit ? rawQuestions[idx] : { mondai: "", kotae: "" };
+
+  document.getElementById("screen").innerHTML = `
+    <div class="admin-container">
+      <h1>${isEdit ? '問題を編集' : '新規問題の追加'}</h1>
+      
+      <div class="form-group">
+        <label class="form-label">問題文 (mondai) ※Enterで改行可能</label>
+        <textarea id="input-mondai" class="form-textarea" placeholder="問題文を入力してください">${escapeHtml(target.mondai)}</textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">答え (kotae) ※Enterで改行可能</label>
+        <textarea id="input-kotae" class="form-textarea" placeholder="答えを入力してください">${escapeHtml(target.kotae)}</textarea>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:20px;">
+        <button class="btn-primary" id="btn-save-q" style="flex:1; margin:0; padding:14px;">保存する</button>
+        <button class="btn-secondary" id="btn-cancel-q" style="flex:1; margin:0; padding:14px;">キャンセル</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("btn-save-q").addEventListener("click", () => {
+    const mondaiVal = document.getElementById("input-mondai").value;
+    const kotaeVal = document.getElementById("input-kotae").value;
+
+    if (!mondaiVal.trim() || !kotaeVal.trim()) {
+      alert("問題文と答えの両方を入力してください。");
+      return;
+    }
+
+    if (isEdit) {
+      rawQuestions[idx] = { mondai: mondaiVal, kotae: kotaeVal };
+    } else {
+      rawQuestions.push({ mondai: mondaiVal, kotae: kotaeVal });
+    }
+
+    processQuestionData();
+    renderAdminList();
+  });
+
+  document.getElementById("btn-cancel-q").addEventListener("click", () => {
+    renderAdminList();
+  });
+}
+
+function exportJsonFile() {
+  const jsonString = JSON.stringify(rawQuestions, null, 2);
+  const blob = new Blob([jsonString], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "questions.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 /* ゲーム開始 */
@@ -1099,7 +1168,6 @@ function startGame(setNum = 1) {
   renderQuestion();
 }
 
-/* 問題表示 */
 function renderQuestion() {
   if (scratchpadInstance) {
     scratchpadInstance.destroy();
@@ -1126,12 +1194,9 @@ function renderQuestion() {
 
     <div class="problem-box">${formattedMondai}</div>
 
-    <!-- 手書き回答エリア -->
     <div class="scratchpad-card">
       <div class="scratchpad-header">
-        <div class="scratchpad-title">
-          ✍️ ここに手書きで答えを書こう
-        </div>
+        <div class="scratchpad-title">✍️ ここに手書きで答えを書こう</div>
         <div class="scratchpad-tools">
           <button class="tool-btn active" id="tool-pen">ペン</button>
           <button class="tool-btn" id="tool-eraser">消しゴム</button>
@@ -1143,9 +1208,7 @@ function renderQuestion() {
       </div>
     </div>
 
-    <button id="btn-show-answer" class="show-answer-btn">
-      答えを見る
-    </button>
+    <button id="btn-show-answer" class="show-answer-btn">答えを見る</button>
   `;
 
   const canvasEl = document.getElementById("scratch-canvas");
@@ -1167,9 +1230,7 @@ function renderQuestion() {
     penBtn.classList.remove("active");
   });
 
-  clearBtn.addEventListener("click", () => {
-    scratchpadInstance.clear();
-  });
+  clearBtn.addEventListener("click", () => { scratchpadInstance.clear(); });
 
   document.getElementById("btn-show-answer").addEventListener("click", () => {
     initAudio();
@@ -1177,40 +1238,21 @@ function renderQuestion() {
   });
 }
 
-/* 紙吹雪演出 */
 function celebrate(isLarge = false) {
   if (typeof confetti === "function") {
     try {
       const count = isLarge ? 160 : 100;
-      confetti({
-        particleCount: count,
-        spread: 80,
-        startVelocity: 35,
-        origin: { y: .65 }
-      });
-
+      confetti({ particleCount: count, spread: 80, startVelocity: 35, origin: { y: .65 } });
       setTimeout(() => {
-        confetti({
-          particleCount: Math.round(count * 0.7),
-          spread: 120,
-          startVelocity: 28,
-          origin: { x: .15, y: .7 }
-        });
+        confetti({ particleCount: Math.round(count * 0.7), spread: 120, startVelocity: 28, origin: { x: .15, y: .7 } });
       }, 120);
-
       setTimeout(() => {
-        confetti({
-          particleCount: Math.round(count * 0.7),
-          spread: 120,
-          startVelocity: 28,
-          origin: { x: .85, y: .7 }
-        });
+        confetti({ particleCount: Math.round(count * 0.7), spread: 120, startVelocity: 28, origin: { x: .85, y: .7 } });
       }, 220);
     } catch(e) {}
   }
 }
 
-/* 答え合わせモーダル表示 */
 function showAnswerModal() {
   const q = questions[current];
   const formattedMondai = formatTextWithRuby(q.mondai);
@@ -1218,7 +1260,6 @@ function showAnswerModal() {
 
   const overlay = document.createElement("div");
   overlay.className = "modal-overlay";
-
   overlay.innerHTML = `
     <div class="modal" role="dialog" aria-modal="true">
       <div class="modal-title">正解の確認</div>
@@ -1226,9 +1267,7 @@ function showAnswerModal() {
       <div class="modal-label">正しい答え</div>
       <div class="modal-answer">${formattedKotae}</div>
       
-      <div style="font-size:14px; color:#adb5c4; margin-bottom:14px;">
-        書いた答えは合っていましたか？
-      </div>
+      <div style="font-size:14px; color:#adb5c4; margin-bottom:14px;">書いた答えは合っていましたか？</div>
 
       <div class="modal-choices">
         <button class="modal-button btn-wrong" id="btn-self-wrong">❌ 違っていた</button>
@@ -1253,31 +1292,22 @@ function showAnswerModal() {
   overlay.querySelector("#btn-self-wrong").addEventListener("click", () => handleChoice(false));
 }
 
-/* 完走モーダル */
 function showCompletionModal() {
   const overlay = document.createElement("div");
   overlay.className = "modal-overlay";
-
   overlay.innerHTML = `
     <div class="modal" role="dialog" aria-modal="true">
       <div class="modal-title celebrate">🎉 おつかれさまでした！</div>
-      <div style="font-size:20px; font-weight:800; color:#f2f4f8; margin:14px 0 8px;">
-        セット ${currentSetIndex} 完了！
-      </div>
+      <div style="font-size:20px; font-weight:800; color:#f2f4f8; margin:14px 0 8px;">セット ${currentSetIndex} 完了！</div>
       <div style="color:#adb5c4; font-size:15px; line-height:1.6; margin-bottom:20px;">
         トレーニングを完走しました！<br>
-        最終結果:
-        <strong style="color:#34d399; font-size:26px;">
-          ${score} / ${TOTAL}
-        </strong>
-        問正解
+        最終結果: <strong style="color:#34d399; font-size:26px;">${score} / ${TOTAL}</strong> 問正解
       </div>
       <button class="modal-button btn-primary" id="modal-result-btn" style="width:100%;">結果画面へ</button>
     </div>
   `;
 
   document.body.appendChild(overlay);
-
   playCorrectSound();
   celebrate(true);
 
@@ -1287,7 +1317,6 @@ function showCompletionModal() {
   });
 }
 
-/* 次の問題へ */
 function nextQuestion() {
   current++;
   if (current >= TOTAL) {
@@ -1297,7 +1326,6 @@ function nextQuestion() {
   }
 }
 
-/* 結果画面 */
 function showResult() {
   if (scratchpadInstance) {
     scratchpadInstance.destroy();
@@ -1305,15 +1333,10 @@ function showResult() {
   }
 
   const percent = Math.round((score / TOTAL) * 100);
-
   const message =
-    percent === 100
-      ? "🏆 パーフェクト！理科マスターだね！"
-      : percent >= 80
-      ? "🌟 よくできました！素晴らしい知識！"
-      : percent >= 50
-      ? "👏 がんばったね！繰り返し復習しよう！"
-      : "💪 何度もチャレンジして覚えよう！";
+    percent === 100 ? "🏆 パーフェクト！理科マスターだね！" :
+    percent >= 80 ? "🌟 よくできました！素晴らしい知識！" :
+    percent >= 50 ? "👏 がんばったね！繰り返し復習しよう！" : "💪 何度もチャレンジして覚えよう！";
 
   document.getElementById("screen").innerHTML = `
     <div class="result">
@@ -1337,11 +1360,17 @@ function showResult() {
   });
 }
 
-/* 初期表示 */
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", showStart);
-} else {
+/* 初期化実行 */
+async function initApp() {
+  await loadQuestions();
   showStart();
+}
+
+if (document.readyState === "loading") {
+  document.createElement("DOMContentLoaded");
+  document.addEventListener("DOMContentLoaded", initApp);
+} else {
+  initApp();
 }
 </script>
 
