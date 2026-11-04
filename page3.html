@@ -796,7 +796,7 @@ let scratchpadInstance = null;
 async function loadQuestions() {
   try {
     // 外部JSONファイルをフェッチ（同階層の questions.json を想定）
-    const response = await fetch('questions.json');
+    const response = await fetch('science-questions.json');
     if (!response.ok) throw new Error('JSONの読み込みに失敗しました');
     rawQuestions = await response.json();
   } catch (err) {
@@ -1150,7 +1150,7 @@ function exportJsonFile() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "questions.json";
+  a.download = "science-questions.json";
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
